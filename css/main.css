@@ -1087,6 +1087,15 @@ select {
     margin: 0;
 }
 
+#plexAuth {
+    background: var(--theme-accent);
+    color: var(--theme-primary);
+}
+
+.cardSub {
+    color: var(--theme-primary-50);
+}
+
 #loginTag {
     text-shadow: none !important;
 }
@@ -1365,10 +1374,12 @@ span.toggle {
 .meta {
     color: var(--theme-primary-shade2);
     direction: ltr;
+    z-index: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-var(--theme-primary) -space: pre;
-    max-width: 250px;
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
 }
 
 .ng-scope {

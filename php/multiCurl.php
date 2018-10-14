@@ -166,6 +166,8 @@ class multiCurl
 	    if (is_array($result)) {
 		    if ($log) write_log("Returning result(ARRAY): ".json_encode($result));
 	    }
+	    $contentType = explode(";",$contentType)[0] ?? $contentType;
+	    write_log("Content type is $contentType");
 	    if (is_string($result) && $contentType) {
 		    if ($contentType === 'application/json') {
 			    $result = json_decode($result,true);

@@ -459,6 +459,8 @@ function curlQuick($url) {
 }
 
 function decodeResult($result, $contentType=false, $log=true) {
+	$contentType = explode(";",$contentType)[0] ?? $contentType;
+
 	if (is_array($result)) {
 		if ($log) write_log("Returning result(ARRAY): ".json_encode($result));
 	}
@@ -2169,9 +2171,8 @@ function plexSignIn($token) {
 	$user = $token = false;
 	$headers = headerRequestArray(plexHeaders());
 	$result = curlGet($url,$headers);
-	$data = $result ? flattenXML(new SimpleXMLElement($result)) : false;
-	if ($data) {
-		$token = $data['auth_token'] ?? false;
+	if ($result) {
+		$token = $result['pin']['auth_token'][0]['_text'] ?? false;
 	}
 
 	if ($token) {
