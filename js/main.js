@@ -7,7 +7,7 @@ var firstPoll = true;
 
 var cleanLogs=true, couchEnabled=false, lidarrEnabled=false, ombiEnabled=false, sickEnabled=false, sonarrEnabled=false, radarrEnabled=false,
 	headphonesEnabled=false, watcherEnabled=false, delugeEnabled=false, downloadstationEnabled=false, sabnzbdEnabled=false, utorrentEnabled=false,
-	transmissionEnabled=false, dvrEnabled=false, hook=false, hookPlay=false, polling=false, pollcount=false,
+	transmissionEnabled=false, nzbhydraEnabled=false, dvrEnabled=false, hook=false, hookPlay=false, polling=false, pollcount=false,
 	hookPause=false, hookStop=false, hookCustom=false, hookFetch=false, hookSplit = false, autoUpdate = false, masterUser = false,
 	noNewUsers=false, notifyUpdate=false, waiting=false, broadcastDevice="all";
 
@@ -503,11 +503,18 @@ function drawerClick(element) {
                 var activeItem = $('.drawer-item.active');
                 if (typeof element.data('src') !== 'undefined') {
                     var frameSrc = element.data('src');
-                    var frameTarget = $('#' + element.data('frame'));
-                    if (frameTarget.attr('src') !== frameSrc) {
-                        frameTarget.attr('src', frameSrc);
+                    var newTabPop = (element.attr("data-newtab") == "true");
+                    console.log("Newtab is "+ newTab);
+                    if (newTabPop) {
+                        console.log("Opening link in new tab.");
+                        window.open(frameSrc, '_blank');
+                    } else {
+                        var frameTarget = $('#' + element.data('frame'));
+                        if (frameTarget.attr('src') !== frameSrc) {
+                            frameTarget.attr('src', frameSrc);
+                        }
+                        $('#refresh').show();
                     }
-                    $('#refresh').show();
                 } else {
                     $('#refresh').hide();
                 }
@@ -516,15 +523,17 @@ function drawerClick(element) {
                     color = element.data('color');
                 }
                 appColor = color;
-                colorItems(color, element);
-                activeItem.removeClass('active');
-                element.addClass("active");
-                var currentTab = $('.view-tab.active');
-                var newTab = $("#" + linkVal);
-                currentTab.addClass('fade');
-                currentTab.removeClass('active');
-                newTab.removeClass('fade');
-                newTab.addClass('active');
+                if (!newTabPop) {
+                    colorItems(color, element);
+                    activeItem.removeClass('active');
+                    element.addClass("active");
+                    var currentTab = $('.view-tab.active');
+                    var newTab = $("#" + linkVal);
+                    currentTab.addClass('fade');
+                    currentTab.removeClass('active');
+                    newTab.removeClass('fade');
+                    newTab.addClass('active');
+                }
                 // Change label if it's a setting group
                 if (!linkVal.includes("SettingsTab")) {
                     secLabel.removeClass('settingsLabel');
@@ -1853,6 +1862,12 @@ function setListeners() {
             appBtn.data('label', labelVal);
         }
 
+        if (id.indexOf('Newtab') > -1) {
+            var appLabel = id.replace("Newtab","");
+            console.log("Adjusting 'open in new tab' setting for " + appLabel);
+            var element = $('#' + appLabel + "Btn");
+            element.attr('data-newtab',value);
+        }
 
 		apiToken = $('#apiTokenData').data('token');
 		$.get('api.php?apiToken=' + apiToken, {id: id, value: value}, function (data) {
@@ -1903,6 +1918,11 @@ function addAppGroup(key) {
             }
         }
 
+        var newTab = false;
+        if (window.hasOwnProperty(key + "Newtab")) {
+            newTab = window[key + "Newtab"];
+        }
+
         if (url) {
             var btnDiv = $('<div>', {
                 class: 'drawer-item btn',
@@ -1929,11 +1949,13 @@ function addAppGroup(key) {
             btnDiv.attr('data-link', key + "Div");
             btnDiv.attr('data-label', label);
             btnDiv.attr('data-color', color);
+            btnDiv.attr("data-newtab", newTab);
+
 
             $('<div>', {
-            	class: 'view-tab fade framediv',
-				id: key + "Div"
-			}).appendTo(container);
+                class: 'view-tab fade framediv',
+                id: key + "Div"
+            }).appendTo(container);
 
             var newDiv = $(divString);
             newDiv.attr("data-uri", url);
@@ -1943,8 +1965,8 @@ function addAppGroup(key) {
 
             $('<iframe>', {
                 src: '',
-                id:  frameString,
-				class: 'appFrame',
+                id: frameString,
+                class: 'appFrame',
                 frameborder: 0,
                 scrolling: 'yes'
             }).appendTo(newDiv);
