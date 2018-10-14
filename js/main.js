@@ -245,7 +245,6 @@ function fetchData() {
                     var element = $('#' + list);
 
                     if (window.hasOwnProperty(list) && window.hasOwnProperty(profile)) {
-                        console.log("Window has props for " + list + " and " + profile);
                         list = window[list];
                         profile = window[profile];
                         if (list && profile) {

@@ -26,7 +26,7 @@ class multiCurl
         $timeout = $this->timeout;
         $files = $this->files;
         $mh = curl_multi_init();
-        $ch = $res = [];
+        $ch = $res = $types = [];
         foreach($urls as $i => $item) {
             if (is_array($item)) {
                 $url = $item[0];
@@ -85,6 +85,7 @@ class multiCurl
             $curlError = curl_error($ch[$i]);
             if($curlError == "") {
                 $res[$i] = curl_multi_getcontent($ch[$i]);
+                $types[$i] = curl_getinfo($ch[$i], CURLINFO_CONTENT_TYPE);
             } else {
                 write_log("Error handling curl '$curlError' for url: $url","ERROR");
             }
@@ -103,23 +104,7 @@ class multiCurl
                 file_put_contents($filePath, $response);
                 $results["$url"] = $filePath;
             } else {
-                $data = $json = $xml = false;
-                try {
-                    $data = json_decode($response, true);
-                    if (json_last_error()!==JSON_ERROR_NONE) {
-                        write_log("Result for url $url is not JSON.");
-                    }
-                    $xml = simplexml_load_string($response);
-                    if ($xml !== false) {
-                        $xml = new JsonXmlElement($response);
-                        $data = $xml->asArray();
-                        if (!is_array($data)) write_log("Data for url $url is not XML");
-                    }
-                } catch (\Exception $e) {
-                    //write_log("Exception: $e");
-                }
-                $response = $data ? $data : $response;
-                $results["$url"] = $response;
+            	$results[$url] = $this->decodeCurl($response,$types[$url]);
             }
         }
         unset($mh);
@@ -176,4 +161,41 @@ class multiCurl
         curl_multi_close($master);
         return false;
     }
+
+    private function decodeCurl($result, $contentType=false, $log=true) {
+	    if (is_array($result)) {
+		    if ($log) write_log("Returning result(ARRAY): ".json_encode($result));
+	    }
+	    if (is_string($result) && $contentType) {
+		    if ($contentType === 'application/json') {
+			    $result = json_decode($result,true);
+			    if ($log) write_log("Decoded by content-type: ".json_encode($result));
+			    if ($result) return $result;
+		    }
+		    if ($contentType === 'application/xml') {
+			    $result = (new JsonXmlElement($result))->asArray();
+			    if ($log) write_log("Decoded by content-type: ".json_encode($result));
+			    if (is_array($result)) return $result;
+		    }
+		    write_log("Unable to decode data with specified content type of $contentType");
+	    }
+
+	    $array = @json_decode($result, true);
+	    if ($array) {
+		    if ($log) write_log("Returning result(JSON): " . json_encode($array));
+		    return $array;
+	    }
+
+	    $array = (@new JsonXmlElement($result))->asArray();
+	    if (!empty($array)) {
+		    if ($log) write_log("Returning result(XML): " . json_encode($array));
+		    return $array;
+	    }
+
+	    if ($log) write_log("Returning result(RAW): $result");
+
+	    return $result;
+    }
+
 }
+

@@ -868,9 +868,7 @@ function scanDevices($force = false) {
 		writeSession('scanning', true);
 		$url = "https://plex.tv/api/resources?includeHttps=1&includeRelay=1&X-Plex-Token=" . $_SESSION['plexToken'];
 		$data = curlGet($url);
-		if ($data) $container2 = (new JsonXmlElement($data))->asArray();
-
-		$devices = $container2['MediaContainer']['Device'] ?? false;
+		$devices = $data['MediaContainer']['Device'] ?? false;
 		if ($devices) {
 			foreach ($devices as $device) {
 				if (($device['presence'] == "1" || $device['product'] == "Plex for Vizio") && count($device['Connection'])) {
@@ -1859,8 +1857,9 @@ function fetchPlayerStatus() {
 	$status = ['status' => $state];
 	$host = findDevice("Id", $host, "Server");
 	$url = $host['Uri'] . '/status/sessions?X-Plex-Token=' . $host['Token'];
-	$result = ($host['Owned'] ?? false) ? curlGet($url) : false;
+	$result = ($host['Owned'] ?? false) ? curlGet($url,false,4,false) : false;
 	if ($result) {
+		# TODO: REmove this
 		$jsonXML = xmlToJson($result);
 		$mc = $jsonXML['MediaContainer'] ?? false;
 		if ($mc) {
@@ -2264,7 +2263,7 @@ function fetchServerData($server = false) {
 	$url = "$uri/library/sections?includeStations=1&includeRelated=1&X-Plex-Token=$token";
 	$results = curlGet($url,['Accept: application/json']);
 	if ($results) {
-		$container = json_decode($results,true)['MediaContainer']['Directory'] ?? false;
+		$container = $results['MediaContainer']['Directory'] ?? false;
 		write_log("Dur hur hur: ".json_encode($container));
 		if ($container) {
 			foreach ($container as $section) {

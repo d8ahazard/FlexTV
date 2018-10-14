@@ -6,6 +6,8 @@ require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
 use Filebase\Database;
 use Filebase\Query\Builder;
+use Filebase\Table;
+use Filebase\Query;
 
 
 class FileConfig extends Database {
@@ -136,8 +138,20 @@ class FileConfig extends Database {
 	 * @return bool
 	 */
     public function delete($table, $selectors) {
-    	$db = new Database(($this->path));
-	    $deleted = $db->table($table)->where($selectors)->get->first()->delete();
+    	$db = new Database($this->path);
+    	$table = new Table($db);
+    	//$table = $db->table($table);
+	    $builder = new Builder($table);
+    	$stamp = $selectors['stamp'] ?? false;
+    	$apiToken = $selectors['apiToken'] ?? false;
+//    	if ($stamp) {
+//    		$selectors['stamp'] = date("Y-m-d h:i:s", strtotime($stamp));
+//    		write_log("Stamp converted to ".$selectors['stamp'],"INFO",false,false,true);
+//	    }
+		if ($stamp && $apiToken) {
+			$deleted = $builder->where(['apitoken','==',$apiToken])->where(['stamp',"==",$stamp])->get->results();
+			write_log("Results: ".json_encode($deleted),"INFO",false,false,true);
+		}
 	    return $deleted;
     }
 

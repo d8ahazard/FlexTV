@@ -134,6 +134,7 @@ function deletePrefrence($table, $selector) {
     $config = initConfig();
     write_log("Got a command to delete from $table using: " . json_encode($selector));
     $result = $config->delete($table, $selector);
+    write_log("Result is: $result");
     return $result;
 }
 
@@ -250,7 +251,7 @@ function checkDefaults() {
 }
 
 function migrateSettings($jsonFile) {
-write_log("Migrating settings.", "ALERT", false, false, true);
+	write_log("Migrating settings.", "ALERT", false, false, true);
 	$db = [
 		'path' => __DIR__ . "/../rw/db"
 	];
@@ -700,9 +701,12 @@ function logCommand($resultObject) {
         write_log("UI command, not logging.");
         return;
     }
+	$now = date("Y-m-d h:m:s");
     $resultObject = (!is_array($resultObject)) ? json_decode($resultObject,true) : $resultObject;
-    $resultObject['timecode'] = date_timestamp_get(new DateTime($resultObject['timestamp']));
-    $speech = ucwords($resultObject['speech'] ?? "");
+    $stamp = $resultObject['timeStamp'];
+	write_log("Logging command, stamp is $now: ".json_encode($resultObject));
+
+	$speech = ucwords($resultObject['speech'] ?? "");
     $initial = ucwords($resultObject['initialCommand'] ?? "");
     write_log("Final response for request of '$initial' is '$speech'","ALERT");
     $commands = $_SESSION['newCommand'] ?? [];
@@ -732,8 +736,7 @@ function logCommand($resultObject) {
                 write_log("Delete result is $result");
             }
         }
-        $now = date("Y-m-d h:m:s");
-        setPreference('commands',['stamp'=>$now,'apiToken'=>$apiToken, 'data'=>$data]);
+        setPreference('commands',['stamp'=>$stamp,'apiToken'=>$apiToken, 'data'=>$data]);
     } else {
         write_log("No token or data, skipping log.","WARNING");
     }
