@@ -65,8 +65,9 @@ function bye($msg = false, $title = false, $url = false, $log = false, $clear = 
     }
     $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     $url = parse_url($actual_link);
-    $url = $url['scheme']."://".$url['host'].$url['path'];
-    $url = "$url?device=Client&id=rescan&passive=true&apiToken=".$_SESSION['apiToken'];
+    $query = ["device"=>"Client","id"=>"rescan","passive"=>true,"apiToken"=>$_SESSION['apiToken']];
+    $url['query'] = http_build_query($query);
+    $url = http_build_url($url);
     $rescan = $_GET['pollPlayer'] ?? $_GET['passive'] ?? null;
     $executionTime = round(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"],2)."s";
 
@@ -2591,8 +2592,7 @@ function writeSession($key, $value, $unset = false) {
 	if ($unset) {
 		unset($_SESSION[$key]);
 	} else {
-		write_log("Writing session value $key to $value");
-	    $_SESSION[$key] = $value;
+		$_SESSION[$key] = $value;
     }
 }
 

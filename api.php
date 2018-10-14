@@ -1821,10 +1821,8 @@ function fetchPlayerStatus() {
 	$status = ['status' => $state];
 	$host = findDevice("Id", $host, "Server");
 	$url = $host['Uri'] . '/status/sessions?X-Plex-Token=' . $host['Token'];
-	$result = ($host['Owned'] ?? false) ? curlGet($url,false,4,false) : false;
+	$result = ($host['Owned'] ?? false) ? curlGet($url) : false;
 	if ($result) {
-		# TODO: REmove this
-		$jsonXML = xmlToJson($result);
 		$mc = $jsonXML['MediaContainer'] ?? false;
 		if ($mc) {
 			$track = $mc['Track'] ?? [];
