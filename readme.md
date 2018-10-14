@@ -1,6 +1,6 @@
 # **README**
 
-This branch of Flex TV this is in *active development*.
+This branch of Flex TV this is in *beta development*. 
 
 All code and features in this branch are subject to change, but please feel free to submit issues if you've had no luck asking for help in the Plex.TV forums:
 
