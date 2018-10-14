@@ -61,6 +61,8 @@ class FileConfig extends Database {
         if ($record) {
         	write_log("We have a valid record, appending data.","INFO",false,false,true);
 	        foreach ($data as $key => $value) {
+	        	if ($value === "true") $value = true;
+	        	if ($value === "false") $value = false;
 		        $record->$key = $value;
 	        }
 	        $record->save();
@@ -128,6 +130,10 @@ class FileConfig extends Database {
 			    	write_log("THIS IS NOT AN ARRAY, DUDE.","ERROR",false,false,true);
 			    }
 		    }
+	    }
+	    foreach($results as $key => &$value) {
+	    	if ($value === "false") $value = false;
+	    	if ($value === "true") $value = true;
 	    }
 		return $results;
     }

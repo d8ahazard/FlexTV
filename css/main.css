@@ -609,6 +609,11 @@ html {
     width: 100%;
 }
 
+#alertModal {
+    position: fixed;
+    margin-top: 25%;
+}
+
 .load-barz {
     display: none;
     position: absolute;

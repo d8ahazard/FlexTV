@@ -140,6 +140,7 @@ var APP_COLORS = {
     "sick": "#2674b2",
     "downloadstation": "#3c6daf",
     "deluge": "#304663",
+    "nzbhydra": "#219901",
     "lidarr": "#00a65b",
     "utorrent": "#76b83f",
     "radarr": "#ffc230",
@@ -851,6 +852,7 @@ function closeClientList() {
 }
 
 function toggleGroups() {
+    console.log("Group toggles fired...");
     var vars = {
         "sonarr": sonarrEnabled,
         "sick": sickEnabled,
@@ -861,6 +863,7 @@ function toggleGroups() {
         "headphones": headphonesEnabled,
         "downloadstation": downloadstationEnabled,
         "deluge": delugeEnabled,
+        "nzbhydra": nzbhydraEnabled,
         "transmission": transmissionEnabled,
         "utorrent": utorrentEnabled,
         "sabnzbd": sabnzbdEnabled,
