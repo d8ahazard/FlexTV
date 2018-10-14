@@ -234,6 +234,11 @@ a:hover:not(#executeButton) {
     color: var(--theme-accent);
 }
 
+#sectionLabel.settingsLabel  {
+    margin-top: 6px;
+}
+
+
 #clientBtn, #ClientDrawer {
     display: none;
 }

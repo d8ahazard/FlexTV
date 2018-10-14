@@ -526,12 +526,12 @@ function drawerClick(element) {
                 newTab.addClass('active');
                 // Change label if it's a setting group
                 if (!linkVal.includes("SettingsTab")) {
-                    secLabel.css("margin-top","15px");
+                    secLabel.removeClass('settingsLabel');
                     secLabel.html(label);
                 } else {
                     label = label + "<br><span class='settingLabel'>(Settings)</span>";
+                    secLabel.addClass('settingsLabel');
                     secLabel.html(label);
-                    secLabel.css("margin-top", "4px");
                 }
                 var frame = $('#logFrame');
 
