@@ -1006,9 +1006,9 @@ function scrapeServers($serverArray) {
 		$serverUri = $device['uri'];
 		$token = $device['Token'];
 		$deviceId = $device['Id'];
-		$urls["${deviceId}_cast"] =  ["$serverUri/chromecast/clients?X-Plex-Token=$token",['Accept: application/json']];
-		$urls["${deviceId}_dvr"] =  ["$serverUri/livetv/dvrs?X-Plex-Token=$token",['Accept: application/json']];
-
+		$urls["${deviceId}_cast"] = ["$serverUri/chromecast/clients?X-Plex-Token=$token", ['Accept: application/json']];
+		$urls["${deviceId}_dvr"] = ["$serverUri/livetv/dvrs?X-Plex-Token=$token", ['Accept: application/json']];
+	}
 	$results = false;
 	if (count($urls)) {
 		$results = (new multiCurl($urls))->process();
