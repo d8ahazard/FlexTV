@@ -65,6 +65,7 @@ function bye($msg = false, $title = false, $url = false, $log = false, $clear = 
     }
     $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     $url = parse_url($actual_link);
+
     $query = ["device"=>"Client","id"=>"rescan","passive"=>true,"apiToken"=>$_SESSION['apiToken']];
     $url['query'] = http_build_query($query);
     $url = http_build_url($url);

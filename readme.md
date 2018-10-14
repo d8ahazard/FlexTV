@@ -1,6 +1,6 @@
 # **README**
 
-This branch of Flex TV this is in *active development*.
+This branch of Flex TV this is in *beta development*. 
 
 All code and features in this branch are subject to change, but please feel free to submit issues if you've had no luck asking for help in the Plex.TV forums:
 
@@ -19,7 +19,7 @@ In addition to being able to host Flex TV yourself, I've taken the liberty of se
 Yes! There's now a plugin that works directly inside your Plex Media Server that helps Flex TV
 bridge the gap between PMS and your Cast Devices! And it works a LOT better than the old version.  You can find it here:
 
-https://github.com/d8ahazard/Cast.bundle
+https://github.com/d8ahazard/FlexTV.bundle
 
 ## QUESTIONS, COMMENTS, CONCERNS
 
@@ -30,7 +30,7 @@ https://forums.plex.tv/discussion/252910/phlex-google-home-plex-integration-with
 
 ## WIKI
 
-Can be found here: https://github.com/d8ahazard/Phlex/wiki
+Can be found here: https://github.com/d8ahazard/FlexTV/wiki
 
 (But it's outdated already, and could use some LOVE!)
 
