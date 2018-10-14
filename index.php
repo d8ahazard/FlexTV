@@ -2,12 +2,14 @@
 require_once dirname(__FILE__) . '/php/vendor/autoload.php';
 require_once dirname(__FILE__) . "/php/webApp.php";
 require_once dirname(__FILE__) . '/php/util.php';
+require_once dirname(__FILE__) . "/api.php";
 write_log("-------NEW REQUEST RECEIVED-------", "ALERT");
 scriptDefaults();
 $defaults = checkDefaults();
+if ($defaults['migrated'] ?? false) header("Refresh:0");
 $forceSSL = $defaults['forceSSL'] ?? false;
 if ($forceSSL === "false") $forceSSL = false;
-write_log("ForceSSL is set to $forceSSL");
+write_log("ForceSSL is ".($forceSSL ? "Enabled" : "Disabled"));
 if ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") && $forceSSL) {
 	$redirect = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	write_log("Force is on, redirecting to: $redirect","ERROR");
@@ -73,6 +75,7 @@ checkUpdate();
 	</style>
 
 		<link rel="stylesheet" href="css/loader_main.css">
+        <link rel="stylesheet" href="css/font-muximux.css">
 		<link href="./css/lib/dist/critical.css" rel="stylesheet">
 
 
@@ -146,7 +149,7 @@ checkUpdate();
 									<div class="card-block">
 										<b><h3 class="loginLabel card-title">Welcome to Flex TV!</h3></b>
 										<img class="loginLogo" src="./img/phlex-med.png" alt="Card image">
-										<h6 class="loginLabel card-subtitle text-muted">Please log in below to begin.</h6>
+										<h6 class="loginLabel card-subtitle text-muted" id="loginTag">Please log in below to begin.</h6>
 									</div>';
 		$rev = checkRevision(true);
 		if ($rev) echo "<div id='revision' class='meta'>Revision: $rev</div>";
@@ -207,16 +210,23 @@ echo '                            <div class="card-block">
 	<link href="./css/lib/dist/support.css" rel="stylesheet">
 	<link href="./css/main.css" rel="stylesheet">
 	<?php if ($_SESSION['theme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
-	<link rel="stylesheet" media="(max-width: 400px)" href="css/main_max_400.css">
-	<link rel="stylesheet" media="(max-width: 600px)" href="css/main_max_600.css">
-	<link rel="stylesheet" media="(min-width: 600px)" href="css/main_min_600.css">
-	<link rel="stylesheet" media="(min-width: 2000px)" href="css/main_min_2000.css">
+	<link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
+	<link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
+	<link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
+    <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
+	<link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
+    <link rel="stylesheet" href="./php/homeBase/assets/styles/custom.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
-	<?php
+
+    <?php
 	if ($GLOBALS['login']) {
 		echo '<script type="text/javascript" src="./js/login.js" async></script>';
 	} else {
-		echo '<script type="text/javascript" src="./js/main.js" async></script>';
+		echo '<script type="text/javascript" src="./js/homebase.js" async></script>';
+		echo '<script src="./js/utilities.js"></script>';
+        echo '<script src="./js/main.js"></script>';
+
 	}
 	?>
 
@@ -287,6 +297,7 @@ echo '                            <div class="card-block">
 			}
 		}
 	</script>
+
 
 </body>
 </html>

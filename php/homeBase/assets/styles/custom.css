@@ -1,0 +1,96 @@
+#contentRatingTabs .nav-item span,
+#genreTabs .nav-item span {
+    display: block;
+    padding: .5rem 1rem;
+    color: #495057;
+    background-color: #868C96;
+    border-top-right-radius: 0.25rem;
+    border-top-left-radius: 0.25rem;
+}
+
+#contentRatingTabs .nav-link,
+#genreTabs .nav-link {
+  color: #495057;
+  background-color: #868C96;
+  border: none;
+}
+
+#contentRatingTabs .nav-link:hover, #contentRatingTabs .nav-link:focus,
+#genreTabs .nav-link:hover, #genreTabs .nav-link:focus {
+  color: #495057;
+  background-color: #B3BAC1;
+}
+
+#contentRatingTabs .nav-link:active, #contentRatingTabs .nav-link.active,
+#genreTabs .nav-link:active, #genreTabs .nav-link.active {
+  color: #212529;
+  background-color: #ffffff;
+}
+
+#contentRatingTabContent,
+#genreTabContent {
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  border-bottom-right-radius: 0.25rem !important;
+  border-bottom-left-radius: 0.25rem !important;
+}
+
+#contentRatingTabContent ul li:last-child,
+#genreTabContent ul li:last-child {
+  border-bottom-right-radius: 0.25rem !important;
+  border-bottom-left-radius: 0.25rem !important;
+}
+
+.list-group li.loading span {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: #868C96;
+  opacity: .4;
+  overflow: hidden;
+  border-radius: 0.25rem;
+}
+
+.list-group li.loading span:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(255,255,255,0.4), rgba(0,0,0,0));
+  transform: translateX(-100%);
+  animation: loading 1.5s infinite;
+}
+
+@-moz-keyframes loading {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@-webkit-keyframes loading {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@-o-keyframes loading {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes loading {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+span.longtitle-left {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-grow: 1;
+}
+
+span.longtitle-right {
+    text-align: right;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}

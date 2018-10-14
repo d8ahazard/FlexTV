@@ -76,8 +76,8 @@ function bye($msg = false, $title = false, $url = false, $log = false, $clear = 
     if ($log) write_log("Ending session now with message '$msg'.", "INFO");
     if ($clear) clearSession();
     // TODO: Make sure this is only done when webflag is set
-
-    write_log("-------TOTAL RUN TIME: $executionTime-------","ALERT");
+	$post = $_POST['postData'] ?? false;
+    if (!$post) write_log("-------TOTAL RUN TIME: $executionTime-------","ALERT");
 	if (function_exists('fastcgi_finish_request')) {
 		fastcgi_finish_request();
 	}
@@ -103,7 +103,6 @@ function cacheImage($url) {
 	}
 	$good = ($filtered);
 	if ($good) {
-		write_log("No need to cache, this should be a valid public address.","INFO");
 		return $url;
 	}
     $path = $url;
@@ -356,9 +355,9 @@ function numberToRoman($number) {
     return $returnValue;
 }
 
-function curlGet($url, $headers = null, $timeout = 4) {
+function curlGet($url, $headers = null, $timeout = 4, $decode = true, $log=true) {
 	$cert = getCert();
-	write_log("GET url $url","INFO","curlGet");
+	if ($log) write_log("GET url $url","INFO","curlGet");
     $url = filter_var($url, FILTER_SANITIZE_URL);
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
         write_log("URL $url is not valid.","ERROR");
@@ -383,22 +382,26 @@ function curlGet($url, $headers = null, $timeout = 4) {
     }
     curl_close($ch);
     if ($result) {
-    	$decoded = false;
-    	try {
-    		$array = json_decode($result,true);
-    		if ($array) {
-    			$decoded = true;
-			    write_log("Curl result(JSON): " . json_encode($array));
-		    } else {
-    			$array = (new JsonXmlElement($result))->asArray();
-    			if (!empty($array)) {
+    	if ($decode) {
+		    $decoded = false;
+		    try {
+			    $array = json_decode($result, true);
+			    if ($array) {
 				    $decoded = true;
-				    write_log("Curl result(XML): " . json_encode($array));
+				    if ($log) write_log("Curl result(JSON): " . json_encode($array));
+			    } else {
+				    $array = (new JsonXmlElement($result))->asArray();
+				    if (!empty($array)) {
+					    $decoded = true;
+					    if ($log) write_log("Curl result(XML): " . json_encode($array));
+				    }
 			    }
-		    }
-    		if (!$decoded) write_log("Curl result(String): $result");
-	    } catch (Exception $e) {
+			    if (!$decoded && $log) write_log("Curl result(String): $result");
+		    } catch (Exception $e) {
 
+		    }
+	    } else {
+    		if ($log) write_log("Curl result(RAW): ".json_encode($result));
 	    }
     }
     return $result;
@@ -608,7 +611,7 @@ function findDevice($key=false, $value=false, $type) {
         $value = $_SESSION["plex". $type ."Id"] ?? false;
     }
     $string = "$type with a $key of $value";
-    $devices = $_SESSION['deviceList'];
+    $devices = $_SESSION['deviceList'] ?? [];
     $section = $devices["$type"] ?? false;
     if ($section) {
         if (!$key || !$value) {
@@ -709,15 +712,6 @@ function getCaller($custom = "foo") {
 }
 
 function getCert() {
-//	if (function_exists('openssl_get_cert_locations')) {
-//		$paths = openssl_get_cert_locations();
-//		foreach($paths as $key=>$path) if ($path == "") unset($paths[$key]);
-//		$sysCert = $paths['ini_cafile'] ?? $paths['default_cert_file'] ?? false;
-//		if ($sysCert) {
-//			write_log("Using system cert.");
-//			return $sysCert;
-//		}
-//	}
 	$file = file_build_path(dirname(__FILE__), "..", "rw", "cacert.pem");
 	$url = 'https://curl.haxx.se/ca/cacert.pem';
 	$current_time = time();
@@ -2152,6 +2146,7 @@ function plexSignIn($token) {
 
 function protectMessage($string) {
 	//return $string;
+	if ($_SESSION['cleanLogs'] == "false") $_SESSION['cleanLogs'] = false;
     if (($_SESSION['cleanLogs'] ?? true) && !isWebApp()) {
     	$str = $string;
 	    preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $string, $urls);// Remove tokens and host from URL's
@@ -2178,11 +2173,13 @@ function protectMessage($string) {
 
 	    // Remove any API Tokens
 	    if (session_started()) {
-		    $prefs = getPreference('userdata', false, []);
+		    $prefs = getPreference('userdata');
 		    $tokens = [];
-		    foreach ($prefs as $user) {
-			    $token = $user['apiToken'] ?? false;
-			    if ($token) array_push($tokens, $token);
+		    if (is_array($prefs)) {
+			    foreach ($prefs as $user) {
+				    $token = $user['apiToken'] ?? false;
+				    if ($token) array_push($tokens, $token);
+			    }
 		    }
 		    $str = str_replace($tokens, '[REDACTED]', $str);
 	    }
@@ -2488,7 +2485,6 @@ function toBool($var) {
 
 function transcodeImage($path, $server, $full=false) {
     if (preg_match("/library/", $path) || preg_match("/resources/", $path)) {
-        write_log("Tick");
         $token = $server['Token'];
         $size = $full ? 'width=1920&height=1920' : 'width=600&height=600';
         $serverAddress = $server['Uri'];
@@ -2512,9 +2508,9 @@ function translateControl($string, $searchArray) {
 function write_log($text, $level = false, $caller = false, $force=false, $skip=false) {
     $log = file_build_path(dirname(__FILE__), '..', 'logs', "Phlex.log.php");
     $pp = false;
-    if ($force && isset($_GET['pollPlayer'])) {
+    if ($force && isset($_GET['fetchData'])) {
         $pp = true;
-        unset($_GET['pollPlayer']);
+        unset($_GET['fetchData']);
     }
     if (!file_exists($log)) {
         touch($log);
@@ -2522,7 +2518,7 @@ function write_log($text, $level = false, $caller = false, $force=false, $skip=f
         $authString = "; <?php die('Access denied'); ?>".PHP_EOL;
         file_put_contents($log,$authString);
     }
-    if (filesize($log) > 10485760) {
+    if (filesize($log) > 1048576) {
         $oldLog = file_build_path(dirname(__FILE__),"..",'logs',"Phlex.log.php.old");
         if (file_exists($oldLog)) unlink($oldLog);
         rename($log, $oldLog);
@@ -2542,11 +2538,11 @@ function write_log($text, $level = false, $caller = false, $force=false, $skip=f
     $caller = $caller ? getCaller($caller) : getCaller();
     if (!$skip) $text = protectMessage(($text));
 
-    if ((isset($_GET['pollPlayer']) || isset($_GET['passive'])) || ($text === "") || !file_exists($log)) return;
+    if ((isset($_GET['fetchData']) || isset($_GET['passive'])) || ($text === "") || !file_exists($log)) return;
 
     $line = "[$date] [$level] ".$user."[$caller] - $text".PHP_EOL;
 
-    if ($pp) $_SESSION['pollPlayer'] = true;
+    if ($pp) $_SESSION['fetchData'] = true;
     if (!is_writable($log)) return;
     if (!$handle = fopen($log, 'a+')) return;
     if (fwrite($handle, $line) === FALSE) return;
@@ -2558,6 +2554,7 @@ function writeSession($key, $value, $unset = false) {
 	if ($unset) {
 		unset($_SESSION[$key]);
 	} else {
+		write_log("Writing session value $key to $value");
 	    $_SESSION[$key] = $value;
     }
 }

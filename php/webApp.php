@@ -5,6 +5,7 @@ require_once dirname(__FILE__) . '/git/GitUpdate.php';
 require_once dirname(__FILE__) . '/config/appConfig.php';
 checkFiles();
 use digitalhigh\GitUpdate;
+use Filebase\Database;
 $isWebapp = isWebApp();
 $_SESSION['webApp'] = $isWebapp;
 $GLOBALS['webApp'] = $isWebapp;
@@ -15,14 +16,12 @@ $_SESSION['publicAddress'] = $publicAddress;
 
 function updateUserPreference($key, $value, $section='userdata') {
     $value = scrubBools($value, $key);
-    setPreference($section, [$key=>$value],'apiToken',$_SESSION['apiToken']);
-    writeSession($key,$value);
+    setPreference($section, [$key=>$value],['apiToken'=>$_SESSION['apiToken']]);
 }
 
 function updateUserPreferenceArray($data, $section='userdata') {
     $data = scrubBools($data);
-    setPreference($section,$data,'apiToken',$_SESSION['apiToken']);
-    writeSessionArray($data);
+    setPreference($section,$data,['apiToken'=>$_SESSION['apiToken']]);
 }
 
 function scrubBools($scrub, $key=false) {
@@ -73,22 +72,19 @@ function scrubBools($scrub, $key=false) {
 }
 
 function initConfig() {
-    $config = isWebApp() ? false : ($_SESSION['configObject'] ?? false);
     $configObject = false;
     $error = false;
-    $dbFile = dirname(__FILE__) . "/../rw/db.conf.php";
-    $jsonFile = dirname(__FILE__). "/../rw/config.php";
-    $configFile = file_exists($dbFile) ? $dbFile : $jsonFile;
-    if (!$config) {
-        //write_log("Creating session config object.");
-        if (file_exists($dbFile)) checkDefaultsDb($dbFile);
-        try {
-            $config = new digitalhigh\appConfig($configFile);
-        } catch (\digitalhigh\ConfigException $e) {
-            write_log("An exception occurred creating the configuration. '$e'", "ERROR",false,false,true);
-            $error = true;
-        }
-        $_SESSION['configObject'] = $config;
+    $dbConfig = dirname(__FILE__) . "/../rw/db.conf.php";
+    $dbDir = __DIR__ . "/../rw/db";
+    $type = file_exists($dbConfig) ? 'db' : 'file';
+    $config = file_exists($dbConfig) ? $dbConfig : $dbDir;
+    //write_log("Creating session config object.");
+    if ($type === 'db') checkDefaultsDb($config);
+    try {
+        $config = new digitalhigh\appConfig($config, $type);
+    } catch (\digitalhigh\ConfigException $e) {
+        write_log("An exception occurred creating the configuration. '$e'", "ERROR",false,false,true);
+        $error = true;
     }
     if (!$error) {
         $configObject = $config->ConfigObject;
@@ -97,34 +93,48 @@ function initConfig() {
     return $configObject;
 }
 
-function setPreference($section, $data, $selector=null, $search=null, $new=false) {
+function setPreference($section, $data, $selector=false) {
     $config = initConfig();
-    $config->set($section, $data, $selector, $search, $new);
+    $config->set($section, $data, $selector);
+    if ($section === 'userdata') writeSessionArray(fetchUserData());
+    if ($section === 'general') writeSessionArray(fetchGeneralData());
 }
 
-function getPreference($section, $keys=false, $default=false, $selector=null, $search=null,$single=true) {
+/**
+ * @param $table
+ * @param bool | array $rows - An array of row names to select. Not setting returns all data
+ * @param bool | mixed $default - The default value to return if none exists
+ * @param bool | array $selector - An array of key/value pairs to match in a WHERE statement
+ * @param bool $single | Return the first row of data, or all rows (when selecting commands)
+ * @return array|bool|mixed
+ */
+function getPreference($table, $rows=false, $default=false, $selector=false, $single=true) {
     $config = initConfig();
-    $data = $config->get($section, $keys, $selector, $search);
+
+    $data = $config->get($table, $rows, $selector);
     $ignore = false;
-    if ($keys) {
-        if (is_string($keys)) {
-            $data = $data[0][$keys] ?? $default;
-            $ignore = true;
-        }
-    }
+
     if (empty($data) && !$ignore) {
         $data = $default;
     }
-    if ($single && !is_string($data))  $data = (count($data) == 1) ? $data[0] : $data;
+
+    if ($single) {
+    	if (is_array($data) && count($data) === 1) {
+		    foreach ($data as $record) {
+			    $data = $record;
+			    break;
+		    }
+	    }
+    }
+    //write_log("Filtered output: ".json_encode($data),"INFO",false,false,true);
     return $data;
 }
 
-function deleteData($section, $selector=null, $value=null) {
+function deletePrefrence($table, $selector) {
     $config = initConfig();
-    $selString = (is_array($selector)) ? json_encode($selector) : $selector;
-	$valString = (is_array($value)) ? json_encode($value) : $value;
-    write_log("Got a command to delete $section - $selString - $valString");
-    $config->delete($section, $selector, $value);
+    write_log("Got a command to delete from $table using: " . json_encode($selector));
+    $result = $config->delete($table, $selector);
+    return $result;
 }
 
 function checkUpdate() {
@@ -173,22 +183,34 @@ function installUpdate() {
 }
 
 function scriptDefaults() {
-    ini_set("log_errors", 1);
-    ini_set('max_execution_time', 300);
-    error_reporting(E_ERROR);
     $errorLogPath = file_build_path(dirname(__FILE__),'..', 'logs', 'Phlex_error.log.php');
-    ini_set("error_log", $errorLogPath);
-    date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
+	ini_set("log_errors", 1);
+	ini_set("display_errors", 0);
+	ini_set("display_startup_errors", 0);
+	ini_set('max_execution_time', 300);
+	ini_set("error_log", $errorLogPath);
+	error_reporting(E_ERROR);
+	date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
 }
 
 function checkDefaults() {
     $config = dirname(__FILE__) . "/../rw/db.conf.php";
     $useDb = file_exists($config);
+    $migrated = false;
     if ($useDb) {
         checkDefaultsDb($config);
+        upgradeDbTable($config);
+    } else {
+    	$jsonFile = dirname(__FILE__) . "/../rw/config.php";
+    	if (file_exists($jsonFile)) {
+    		migrateSettings($jsonFile);
+    		return ['migrated'=>true];
+	    }
     }
+
     // Loading from General
-    $defaults = getPreference('general',false,false);
+    $defaults = getPreference('general');
+    //write_log("Returned: ".json_encode($defaults),"INFO",false,true,true);
     if ($defaults) {
         $keys = $values = [];
         foreach($defaults as $value){
@@ -204,8 +226,8 @@ function checkDefaults() {
             }
         }
         $defaults = array_combine($keys,$values);
-
     }
+
     if (!$defaults) {
         write_log("Creating default values!","ALERT");
         $defaults = [
@@ -221,12 +243,55 @@ function checkDefaults() {
         ];
         foreach($defaults as $key=>$value) {
             $data = ['name'=>$key, 'value'=>$value];
-            setPreference('general',$data,"name",$key);
+            setPreference('general',$data,["name"=>$key]);
         }
-    } else {
-    	write_log("Fetched defaults: ".json_encode($defaults));
     }
     return $defaults;
+}
+
+function migrateSettings($jsonFile) {
+write_log("Migrating settings.", "ALERT", false, false, true);
+	$db = [
+		'path' => __DIR__ . "/../rw/db"
+	];
+	$database = $jsonArray = false;
+	$jsonData = file_get_contents($jsonFile);
+	if ($jsonData) {
+		$jsonData = str_replace("'; <?php die('Access denied'); ?>", "",$jsonData);
+		$jsonArray = json_decode($jsonData,true);
+	}
+	try {
+		$database = new Database($db);
+	} catch (Exception $e) {
+		write_log("Exception occurred loading database.","INFO",false,false,true);
+	}
+
+	if ($jsonArray && $database) {
+		write_log("Converting configs...","ALERT", false, false, true);
+		foreach($jsonArray as $section => $sectionData) {
+			$table = $database->table($section);
+			write_log("Creating $section table.", "ALERT", false, false, true);
+			foreach($sectionData as $record) {
+				switch($section) {
+					case 'userdata':
+						$rec = $table->get($record['apiToken']);
+						break;
+					case 'general':
+						$rec = $table->get($record['name']);
+						break;
+					default:
+						$rec = $table->get(uniqid());
+				}
+				foreach($record as $key=>$value) {
+					$rec->$key = $value;
+				}
+				$rec->save();
+			}
+			file_put_contents(__DIR__ . "/../rw/db/$section/index.html","SUCK IT.");
+		}
+		write_log("Conversion complete!","INFO",false,false,true);
+		rename($jsonFile, "$jsonFile.bak");
+	}
 }
 
 function checkDefaultsDb($config) {
@@ -404,13 +469,127 @@ function checkDefaultsDb($config) {
     }
 }
 
+function upgradeDbTable($config) {
+	$config = parse_ini_file($config);
+	$db = $config['dbname'];
+	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
+	if ($mysqli->select_db($db)) {
+		write_log("DB Selected.");
+		$checkQuery = "DESCRIBE userdata;";
+		$columns = [];
+		$results = $mysqli->query($checkQuery);
+		if ($results) {
+			while ($row = $results->fetch_assoc()) {
+				$columns[] = $row;
+			}
+		}
+		write_log("Columns: " . json_encode($columns));
+
+		$addStrings = [];
+		$dbStrings = [
+			'plexClientName',
+			'ombiLabel',
+			'couchLabel',
+			'sickLabel',
+			'radarrLabel',
+			'sonarrLabel',
+			'lidarrLabel',
+			'headphonesLabel',
+			'watcherLabel',
+			'delugeLabel',
+			'downloadstationLabel',
+			'nzbhydraLabel',
+			'sabnzbdLabel',
+			'transmissionLabel',
+			'utorrentLabel',
+			'delugeUri',
+			'downloadstationUri',
+			'nzbhydraUri',
+			'sabnzbdUri',
+			'transmissionUri',
+			'utorrentUri'
+		];
+		foreach ($dbStrings as $string) {
+			if (!isset($columns[$string])) {
+				write_log("String $string is missing.");
+				array_push($addStrings, $string);
+			}
+		}
+
+		$addBools = [];
+		$dbBools = [
+			'delugeEnabled',
+			'downloadstationEnabled',
+			'nzbhydraEnabled',
+			'sabnzbdEnabled',
+			'transmissionEnabled',
+			'utorrentEnabled',
+			'ombiNewtab',
+			'couchNewtab',
+			'sickNewtab',
+			'radarrNewtab',
+			'sonarrNewtab',
+			'lidarrNewtab',
+			'headphonesNewtab',
+			'watcherNewtab',
+			'delugeNewtab',
+			'downloadstationNewtab',
+			'nzbhydraNewtab',
+			'sabnzbdNewtab',
+			'transmissionNewtab',
+			'utorrentNewtab',
+			'ombiSearch',
+			'couchSearch',
+			'sickSearch',
+			'radarrSearch',
+			'sonarrSearch',
+			'lidarrSearch',
+			'headphonesSearch',
+			'watcherSearch'
+		];
+		foreach ($dbBools as $bool) {
+			if (!isset($columns[$bool])) {
+				write_log("Bool $bool is missing.");
+				array_push($addBools, $bool);
+			}
+		}
+
+		$addLong = [];
+		$dbLong = ['customCards'];
+		foreach ($dbLong as $long) {
+			if (!isset($columns[$long])) {
+				write_log("Long $long is missing.");
+				array_push($addLong, $long);
+			}
+		}
+		if (count($addStrings) || count($addBools) || count($addLong)) {
+			write_log("We've gotta add some stuff here.");
+			$query = "ALTER TABLE userdata".PHP_EOL;
+			$items = [];
+			foreach ($addStrings as $item) {
+				$items[] = "ADD COLUMN $item text NOT NULL";
+			}
+			foreach ($addBools as $item) {
+				$items[] = "ADD COLUMN $item tinyint(1) NOT NULL";
+			}
+			foreach ($addLong as $item) {
+				$items[] = "ADD COLUMN $item longtext NOT NULL";
+			}
+			$itemString = join(", ".PHP_EOL, $items);
+			$query .= $itemString . ";";
+			write_log("Final query is '$query'");
+			$mysqli->query($query);
+		}
+	}
+}
+
 function checkSetDeviceID() {
-    $deviceId = getPreference('general','value','foo','name','deviceId');
+    $deviceId = getPreference('general',['value'],'foo',['name'=>'deviceId']);
     return $deviceId;
 }
 
 function checkSSL() {
-    $forceSSL = getPreference('general', 'value',false,'name','forceSSL');
+    $forceSSL = getPreference('general', ['value'],false,['name'=>'forceSSL']);
     return $forceSSL;
 }
 
@@ -436,13 +615,13 @@ function serverAddress() {
     $selector = ($loggedIn) ? 'apiToken' : 'name';
     $search = ($loggedIn) ? $_SESSION['apiToken'] : 'publicAddress';
     //write_log("Getting sec $section key $key sel $selector sear $search");
-    $serverAddress = getPreference($section, $key, 'http://localhost', $selector, $search);
+    $serverAddress = getPreference($section, [$key], 'http://localhost', [$selector=>$search]);
     //write_log("Response: ".json_encode($serverAddress));
     return $serverAddress;
 }
 
 function fetchCommands() {
-    $commands = getPreference('commands',['data','stamp'],[],'apiToken',$_SESSION['apiToken'],false);
+    $commands = getPreference('commands',['data','stamp'],[],['apiToken'=>$_SESSION['apiToken']],false);
     $out = [];
     foreach($commands as $command) {
         if (isset($command['data'])) {
@@ -460,11 +639,10 @@ function fetchCommands() {
     return $out;
 }
 
-#TODO: Should we be writing session here?
 function fetchDeviceCache() {
     $list = [];
     $keys = ['dlist','plexServerId','plexDvrId','plexClientId'];
-    $cache = getPreference('userdata',$keys,false,'apiToken', $_SESSION['apiToken']);
+    $cache = getPreference('userdata',$keys,false,['apiToken' => $_SESSION['apiToken']]);
     if (is_array($cache) && count($cache)) {
         $list = json_decode(base64_decode($cache['dlist']),true);
         unset($cache['dlist']);
@@ -476,24 +654,46 @@ function fetchDeviceCache() {
 function fetchUser($userData) {
     $email = $userData['plexEmail'];
     $keys = ['plexUserName', 'plexEmail','apiToken','plexAvatar','plexPassUser','plexToken','apiToken','appLanguage'];
-    $data = getPreference('userdata',$keys,false,'plexEmail',$email);
-    write_log("Fetched, data: ".json_encode($data),"ALERT");
+    $data = getPreference('userdata',$keys,false,['plexEmail'=>$email]);
     return $data;
 }
 
-function fetchUserData() {
-    $temp = getPreference('userdata',false,false,'apiToken',$_SESSION['apiToken']);
+function fetchUserData($rescan=false) {
+    $temp = getPreference('userdata',false,false,['apiToken'=>$_SESSION['apiToken']]);
     $data = [];
     foreach($temp as $key => $value) {
         if (isJSON($value)) $value = json_decode($value,true);
         $value = scrubBools($value,$key);
         $data[$key] = $value;
     }
-    write_log("Fetched, data: ".json_encode($data),"ALERT");
+	$dlist = $data['dlist'] ?? false;
+	$devices = json_decode(base64_decode($dlist), true);
+	if ($rescan || !$devices) $devices = scanDevices(true);
+	if (isset($data['dlist'])) unset($data['dlist']);
+	$data['deviceList'] = $devices;
     return $data;
-
 }
 
+function fetchGeneralData() {
+	$data = getPreference('general');
+	if ($data) {
+		$keys = $values = [];
+		foreach($data as $value){
+			foreach($value as $id => $data) {
+				if ($id == 'name') {
+					array_push($keys,$data);
+				}
+				if ($id == 'value') {
+					if ($data === "true") $data = true;
+					if ($data === "false") $data = false;
+					array_push($values,$data);
+				}
+			}
+		}
+		$data = array_combine($keys,$values);
+	}
+	return $data;
+}
 
 function logCommand($resultObject) {
     if (isset($_GET['noLog'])) {
@@ -516,7 +716,7 @@ function logCommand($resultObject) {
     $data = json_encode($resultObject);
     if (trim($apiToken) && trim($data)) {
         #TODO: Verify that the commands are in the right order here
-        $rows = getPreference('commands',['data','stamp'],[],'apiToken',$_SESSION['apiToken'],false);
+        $rows = getPreference('commands',['data','stamp'],[],['apiToken',$_SESSION['apiToken']],false);
         if (is_array($rows)) $rows = array_reverse($rows);
         $i = 1;
         $stamps = [];
@@ -528,11 +728,12 @@ function logCommand($resultObject) {
         }
         if (count($stamps)) {
             foreach ($stamps as $stamp) {
-                deleteData('commands',['apiToken','stamp'],[$apiToken,$stamp]);
+                $result = deletePrefrence('commands',['apiToken'=>$apiToken,'stamp'=>$stamp]);
+                write_log("Delete result is $result");
             }
         }
         $now = date("Y-m-d h:m:s");
-        setPreference('commands',['stamp'=>$now,'apiToken'=>$apiToken, 'data'=>$data],null,null, true);
+        setPreference('commands',['stamp'=>$now,'apiToken'=>$apiToken, 'data'=>$data]);
     } else {
         write_log("No token or data, skipping log.","WARNING");
     }
@@ -575,23 +776,21 @@ function newUser($user) {
     ];
     $user = array_merge($user,$defaults);
     write_log("Creating and saving $userName as a new user: ".json_encode($defaults),"ALERT");
-    setPreference('userdata',$user,'apiToken',$apiToken);
+    setPreference('userdata',$user,['apiToken'=>$apiToken]);
     return $user;
 }
 
 function popCommand($id) {
-    $commands = getPreference('commands','stamp',[],'apiToken',$_SESSION['apiToken']);
-    if (is_array($commands) && count($commands)) foreach ($commands as $command) {
-        $stamp = $command['stamp'];
-        if ($id == $stamp) deleteData('commands','apiToken',$_SESSION['apiToken']);
-    }
+	write_log("Popping it like it's hot.");
+    $result = deletePrefrence('commands',['apiToken'=>$_SESSION['apiToken'], 'stamp'=>$id]);
+    write_log("Result of popping it like it's hot is $result");
 }
 
 function verifyApiToken($apiToken) {
     $data = false;
     if (trim($apiToken)) {
         $keys = ['plexUserName', 'plexEmail','apiToken','plexAvatar','plexPassUser','plexToken','apiToken','appLanguage'];
-        $data = getPreference('userdata',$keys,false,'apiToken',$apiToken);
+        $data = getPreference('userdata',$keys,false,['apiToken'=>$apiToken]);
     }
     if (!$data) {
         write_log("ERROR, api token $apiToken not recognized, called by ".getCaller(), "ERROR");
@@ -620,42 +819,39 @@ function checkFiles() {
     ];
 
     $logDir = file_build_path(dirname(__FILE__), "..", "logs");
-    $logPath = file_build_path($logDir, "Phlex.log.php");
-    $rwDir = file_build_path(dirname(__FILE__), "..", "rw");
+	$rwDir = file_build_path(dirname(__FILE__), "..", "rw");
+	$dbDir = file_build_path($rwDir, "db");
+	$genDir = file_build_path($dbDir,"general");
+	$userDir = file_build_path($dbDir,"userdata");
+	$cmdDir = file_build_path($dbDir,"commands");
+	$logPath = file_build_path($logDir, "Phlex.log.php");
     $errorLogPath = file_build_path($logDir, "Phlex_error.log.php");
     $updateLogPath = file_build_path($logDir, "Phlex_update.log.php");
-    $configFile = file_build_path($rwDir, "config.php");
+
+    $dirs = [$rwDir, $dbDir, $logDir, $genDir, $userDir, $cmdDir];
 
     $files = [
         $logPath,
         $errorLogPath,
-        $updateLogPath,
-        $configFile
+        $updateLogPath
     ];
 
     $secureString = "'; <?php die('Access denied'); ?>";
-    if (!file_exists($logDir)) {
-        if (!mkdir($logDir, 0777, true)) {
-            $message = "Unable to create log folder directory, please check permissions and try again.";
-            $error = [
-                'title' => 'Permission error.',
-                'message' => $message,
-                'url' => false
-            ];
-            array_push($messages, $error);
-        }
+    foreach($dirs as $dir) {
+	    if (!file_exists($dir)) {
+		    if (!mkdir($dir, 0777, true)) {
+		    	$message = "Unable to create directory at '$dir', please check permissions and try again.";
+			    $error = [
+				    'title' => 'Permission error.',
+				    'message' => $message,
+				    'url' => false
+			    ];
+			    array_push($messages, $error);
+		    }
+	    }
+	    if (!file_exists("${dir}/index.html")) file_put_contents("${dir}/index.html","ACCESS DENIED");
     }
-    if (!file_exists($rwDir)) {
-        if (!mkdir($rwDir, 0777, true)) {
-            $message = "Unable to create secure storage directory, please check permissions and try again.";
-            $error = [
-                'title' => 'Permission error.',
-                'message' => $message,
-                'url' => false
-            ];
-            array_push($messages, $error);
-        }
-    }
+
     foreach ($files as $file) {
         if (!file_exists($file)) {
         	$name = basename($file);
@@ -783,11 +979,12 @@ function webAddress() {
 
 
 function fetchBackground() {
-
-    $path = "https://img.phlexchat.com";
     $elem = '';
     $code = 'var elem = document.createElement("img");'.PHP_EOL.
-        'elem.setAttribute("src", "'.$path.'");'.PHP_EOL.
+	    'var w = window.innerWidth;'.PHP_EOL.
+		'var h = window.innerHeight;'.PHP_EOL.
+	    'var url = "https://img.phlexchat.com?new=true&height=" + h + "&width=" + w + "&v=" + (Math.floor(Math.random() * (1084)));'.PHP_EOL.
+        'elem.setAttribute("src", url);'.PHP_EOL.
         'elem.className += "fade-in bg bgLoaded";'.PHP_EOL.
         $elem .
         'document.getElementById("bgwrap").appendChild(elem);'.PHP_EOL;

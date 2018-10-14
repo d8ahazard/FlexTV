@@ -4,8 +4,8 @@ require_once dirname(__FILE__) . '/webApp.php';
 require_once dirname(__FILE__) . '/fetchers/digitalhigh/watcher/src/Watcher.php';
 require_once dirname(__FILE__) . '/fetchers/digitalhigh/lidarr/src/Lidarr.php';
 require_once dirname(__FILE__) . '/fetchers/digitalhigh/headphones/src/Headphones.php';
-
 require_once dirname(__FILE__) . '/fetchers/digitalhigh/radarr/src/Radarr.php';
+require_once dirname(__FILE__) . '/fetchers/digitalhigh/ombi/src/Ombi.php';
 require_once dirname(__FILE__) . '/util.php';
 require_once dirname(__FILE__) . '/multiCurl.php';
 use Kryptonit3\CouchPotato\CouchPotato;
@@ -39,6 +39,82 @@ function matchVideoMedia($itemA, $itemB) {
         }
     }
     return false;
+}
+
+function downloadOmbi(array $data) {
+	write_log("Incoming data: ".json_encode($data));
+	$ombiUri = $_SESSION['ombiUri'];
+	$ombiAuth = $_SESSION['ombiToken'];
+	$type = $data['type'] ?? false;
+	$ombi = new Ombi($ombiUri, $ombiAuth);
+	$imdbId = $data['imdbId'] ?? false;
+	$title = $data['title'];
+	$results = [];
+	$items = [];
+	try {
+		if (!$type) {
+			$results = $ombi->getSearchMulti($title);
+			$movies = json_decode($results['movie'], true) ?? [];
+			$shows = json_decode($results['tv'],true) ?? [];
+			$items = [];
+			foreach($movies as &$movie) {
+				$movie['type'] = 'movie';
+				array_push($items, $movie);
+
+			}
+
+			foreach($shows as &$show) {
+				$show['type'] = 'show';
+				array_push($items, $show);
+			}
+
+		} else {
+			if ($type == 'show') $results = $ombi->getSearchTv($title);
+			if ($type == 'movie') $results = $ombi->getSearchMovie($title);
+			$items = json_decode($results, true);
+		}
+		$results = [];
+		$year = $data['year'];
+		foreach($items as $result) {
+			if (compareTitles($title, $result['title'],false,true)) {
+				$result['type'] = $type;
+				$resultYear = $result['releaseDate'] ?? false;
+				if ($resultYear) {
+					write_log("We should be able to match by year...");
+					$resultYear = explode("-",$resultYear)[0];
+					write_log("Checking $resultYear against $year");
+					if ($resultYear === $year) write_log("MATCH");
+				}
+				$yearMatch = $resultYear ? ($resultYear == $year) : true;
+				if ($yearMatch) array_push($results, $result);
+			}
+		}
+		write_log("Got some results: ".json_encode($results));
+	} catch (Exception $e)  {
+		write_log("Well, this is exceptional.");
+	}
+	$items = $results;
+	write_log("Items: ".json_encode($items));
+	if (count($items) == 1) {
+		write_log("Downloading single item.");
+		if ($items[0]['type'] == 'movie') {
+			$result = json_decode($ombi->postRequestMovie($items[0]['theMovieDbId']),true);
+		} else {
+			$id = $items[0]['id'];
+			$info = json_decode($ombi->getSearchTvInfo($id),true);
+			write_log("Show info: ".json_encode($info));
+			$tvDbId = $info['theTvDbId'];
+			$result = json_decode($ombi->postRequestTv($tvDbId, $info['seasonRequests']),true);
+		}
+		if ($result['isError']) {
+			$msg = $result['errorMessage'];
+		} else {
+			$msg = $result['message'];
+		}
+		write_log("Addition result '$msg': ".json_encode($result));
+		return $result['isError'];
+	}
+	return false;
 }
 
 function downloadCouch(array $data) {
@@ -548,12 +624,16 @@ function downloadWatcher($data) {
 
 
 function fetchList($serviceName) {
+	if ($serviceName === 'device') return false;
     $list = $selected = false;
     $token = $_SESSION[$serviceName . "Token"] ?? "";
     $uri = $_SESSION[$serviceName . "Uri"] ?? "";
     if (trim($token) == "" || trim($uri) == "") {
-        updateUserPreferenceArray([$serviceName."List" => json_encode([]),$serviceName."Profile"=>""]);
-        return "";
+    	$current = fetchUserData();
+    	if (count($current[$serviceName."List"] ?? [])) {
+		    updateUserPreferenceArray([$serviceName."List" => json_encode([]),$serviceName."Profile"=>""]);
+		    return "";
+	    }
     }
     if (!$_SESSION[$serviceName . "Enabled"]) return "";
     switch ($serviceName) {
@@ -610,23 +690,12 @@ function fetchList($serviceName) {
             $selected = $_SESSION['watcherProfile'];
             break;
     }
-    $html = buildList($list,$selected);
-    return $html;
-}
 
-function buildList($list,$selected = false) {
-    $html = PHP_EOL;
-    $i = 0;
-    foreach ($list as $id => $name) {
-        $selString = ((!$selected && $i==0) || ($selected && $selected == $id)) ? ' selected' : "";
-        $html .= "<option data-index='$id' id='$name'"."$selString>$name</option>".PHP_EOL;
-        $i++;
-    }
-    return $html;
+    return $list;
 }
 
 function listFetchers() {
-    $fetchers = ['couch','sonarr','radarr','lidarr','headphones','sick','watcher'];
+    $fetchers = ['ombi','couch','sonarr','radarr','lidarr','headphones','sick','watcher'];
     $results = [];
     foreach ($fetchers as $fetcher) {
         if ($_SESSION[$fetcher."Enabled"]) array_push($results,$fetcher);
@@ -667,11 +736,35 @@ function parseFetchers(array $data) {
             case 'watcher':
                 $items = parseWatcher($library);
                 break;
+	        case 'ombi':
+	        	$items = parseOmbi($library);
+	        	break;
         }
         foreach($items as $item) array_push($media,$item);
     }
     write_log("Parsed media: ".json_encode($media));
     return $media;
+}
+
+function parseOmbi($library) {
+	write_log("Lib in: ".json_encode($library));
+	$src = 'ombi';
+	$items = [];
+	foreach($library as $secName => $section) {
+		foreach ($section as $item) {
+			$out = [
+				'title' => $item['title'],
+				'year' => $item['info']['year'],
+				'imdbId' => $item['info']['imdb'],
+				'tmdbId' => $item['info']['tmdb_id'],
+				'summary' => $item['info']['plot'],
+				'type' => $secName,
+				'source' => $src
+			];
+			array_push($items, $out);
+		}
+	}
+	return $items;
 }
 
 function parseCouch($library) {
@@ -789,12 +882,14 @@ function scanFetchers($type = false, $id=false, $noCurl=false) {
             if ($_SESSION['couchEnabled'] ?? false) $searchArray['couch'] = scanCouch();
             if ($_SESSION['radarrEnabled'] ?? false) $searchArray['radarr'] = scanRadarr();
             if ($_SESSION['watcherEnabled'] ?? false) $searchArray['watcher'] = scanWatcher();
+            if ($_SESSION['ombiEnabled'] ?? false) $searchArray['ombi'] = scanOmbi();
             break;
         case 'show':
         case 'episode':
         case 'show.episode':
             if ($_SESSION['sickEnabled'] ?? false) $searchArray['sick'] = scanSick($id);
             if ($_SESSION['sonarrEnabled'] ?? false) $searchArray['sonarr'] = scanSonarr();
+	        if ($_SESSION['ombiEnabled'] ?? false) $searchArray['ombi'] = scanOmbi();
             break;
         case 'music':
         case 'music.track':
@@ -806,6 +901,7 @@ function scanFetchers($type = false, $id=false, $noCurl=false) {
             if ($_SESSION['lidarrEnabled'] ?? false) $searchArray['lidarr'] = scanLidarr();
             break;
         default:
+	        if ($_SESSION['ombiEnabled'] ?? false) $searchArray['ombi'] = scanOmbi();
             if ($_SESSION['couchEnabled'] ?? false) $searchArray['couch'] = scanCouch();
             if ($_SESSION['radarrEnabled'] ?? false) $searchArray['radarr'] = scanRadarr();
             if ($_SESSION['watcherEnabled'] ?? false) $searchArray['watcher'] = scanWatcher();
@@ -824,6 +920,19 @@ function scanFetchers($type = false, $id=false, $noCurl=false) {
         $parsed = parseFetchers($data);
     }
     return ['items'=>$parsed,'fetchers'=>$fetchers];
+}
+
+function scanOmbi() {
+write_log("Function fired!");
+    $name = "ombi";
+    $result = true;
+    $uri = $_SESSION["$name" .'Uri'] ?? false;
+    $token = $_SESSION["$name".'Token'] ?? false;
+    if ($uri && $token) {
+
+	    //$result = "$uri/api/$token/media.list?type=movie&status=active";
+    }
+    return $result;
 }
 
 function scanCouch() {
@@ -919,6 +1028,7 @@ function scanWatcher() {
 
 // Test the specified service for connectivity
 function testConnection($serviceName,$returnList=false) {
+	$serviceName = ucfirst($serviceName);
 	write_log("Testing connection for " . $serviceName,"INFO");
     $msg = "ERROR: Connection to $serviceName failed.";
     $data = $profileList = [];
@@ -927,22 +1037,23 @@ function testConnection($serviceName,$returnList=false) {
 
 		case "Ombi":
 			$ombiUri = $_SESSION['ombiUri'];
-			$ombiAuth = $_SESSION['ombiAuth'];
-			$authString = 'apikey:' . $ombiAuth;
+			$ombiAuth = $_SESSION['ombiToken'];
 			if (($ombiUri) && ($ombiAuth)) {
-				$url = $ombiUri;
-				$headers = [$authString];
-				$result = curlPost($url, false, false, $headers);
-				$msg = ((strpos($result, '"success": true') ? 'Connection to CouchPotato Successful!' : 'ERROR: Server not available.'));
+				$ombi = new Ombi($ombiUri, $ombiAuth);
+				$result = json_decode($ombi->getIdentityUsers(),true);
+				write_log("Ombi test result: ".json_encode($result));
+				$msg = (isset($result[0]['userName']) ? "Connection to $serviceName successful!" : 'ERROR: Server not available.');
 			} else {
 			    $msg = "ERROR: Missing server parameters.";
             }
 			break;
 
 		case "Couch":
-			$couchURL = $_SESSION['couchUri'];
-			$couchToken = $_SESSION['couchToken'];
-			if (($couchURL) && ($couchToken)) {
+			$couchURL = $_SESSION['couchUri'] ?? false;
+			$couchToken = $_SESSION['couchToken'] ?? false;
+
+			if ($couchURL && $couchToken) {
+				write_log("Got both values.");
 				$url = "$couchURL/api/$couchToken/profile.list";
 				$result = checkUrl($url,true);
 				if ($result[0]) {
@@ -950,23 +1061,26 @@ function testConnection($serviceName,$returnList=false) {
 					$list = $resultJSON['list'] ?? false;
 					if ($list) {
                         write_log("Hey, we've got some profiles: " . json_encode($resultJSON));
-                        $array = [];
                         foreach ($resultJSON['list'] as $profile) {
                             $id = $profile['_id'];
                             $name = $profile['label'];
                             $profileList["$id"] = $name;
                             if (!$selected) $selected = $id;
                         }
-                        $data = ['couchProfile' => $selected, 'couchList' => $array];
                         $msg = "Connection to $serviceName successful!";
                     }
 				} else {
 				    $msg = "ERROR: " . $result[1];
+				    $selected = $profileList = false;
                 }
 
 			} else {
 			    $msg = "ERROR: Missing ". ($couchURL ? "Token." : "URL.");
+
             }
+			$data = ['couchProfile' => $selected, 'couchList' => $profileList];
+			write_log("Pushing userdata, what the fuck: ".json_encode($data));
+			updateUserPreferenceArray($data);
 			break;
 
 		case "Headphones":
@@ -1090,7 +1204,6 @@ function testConnection($serviceName,$returnList=false) {
 
 	if (count($profileList) && $selected !== false) {
         write_log("$serviceName Profile List Found!: " . json_encode($profileList),"INFO");
-        $profileList = buildList($profileList,$selected);
     } else {
 	    write_log("Unable to fetch profile list...","WARN");
     }
