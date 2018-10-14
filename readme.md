@@ -30,7 +30,7 @@ https://forums.plex.tv/discussion/252910/phlex-google-home-plex-integration-with
 
 ## WIKI
 
-Can be found here: https://github.com/d8ahazard/Phlex/wiki
+Can be found here: https://github.com/d8ahazard/FlexTV/wiki
 
 (But it's outdated already, and could use some LOVE!)
 
