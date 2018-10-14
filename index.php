@@ -76,7 +76,6 @@ checkUpdate();
 
     <link rel="stylesheet" href="css/loader_main.css">
     <link rel="stylesheet" href="css/font-muximux.css">
-    <link href="./css/main.css" rel="stylesheet">
     <link href="./css/lib/00_bootstrap.min.css" rel="stylesheet">
     <link href="./css/lib/000_fonts.css" rel="stylesheet">
     <link href="./css/lib/01_bootstrap-grid.min.css" rel="stylesheet">
@@ -88,6 +87,7 @@ checkUpdate();
     <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
     <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
     <link href="./css/lib/09_bootstrap-ie8.min.css" rel="stylesheet">
+    <link href="./css/main.css" rel="stylesheet">
     <?php if ($_SESSION['theme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
