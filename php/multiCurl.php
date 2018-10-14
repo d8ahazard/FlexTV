@@ -84,8 +84,11 @@ class multiCurl
             // Check for errors
             $curlError = curl_error($ch[$i]);
             if($curlError == "") {
-                $res[$i] = curl_multi_getcontent($ch[$i]);
+                $result = curl_multi_getcontent($ch[$i]);
+                if (preg_match("/401 Unauthorized/",$result)) $result = false;
+                $res[$i] = $result;
                 $types[$i] = curl_getinfo($ch[$i], CURLINFO_CONTENT_TYPE);
+
             } else {
                 write_log("Error handling curl '$curlError' for url: $url","ERROR");
             }
@@ -187,12 +190,17 @@ class multiCurl
 		    if ($log) write_log("Returning result(JSON): " . json_encode($array));
 		    return $array;
 	    }
+	    $array = false;
+	    try {
+		    $array = (@new JsonXmlElement($result))->asArray();
+	    } catch (\Exception $e) {
 
-	    $array = (@new JsonXmlElement($result))->asArray();
+	    }
 	    if (!empty($array)) {
 		    if ($log) write_log("Returning result(XML): " . json_encode($array));
 		    return $array;
 	    }
+
 
 	    if ($log) write_log("Returning result(RAW): $result");
 

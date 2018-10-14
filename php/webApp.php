@@ -946,7 +946,7 @@ function readUpdate() {
 function verifyPlexToken($token) {
 	$user = $userData = false;
 	$url = "https://plex.tv/users/account?X-Plex-Token=$token";
-	$data = curlGet($url);
+	$data = curlGet($url,['Accept: application/json']);
 	if ($data) {
 		write_log("Received userdata from Plex: ".json_encode($data),"INFO",false,true);
 		$userData = [

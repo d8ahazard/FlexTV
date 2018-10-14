@@ -1005,90 +1005,33 @@ function scrapeServers($serverArray) {
 	foreach ($serverArray as $device) {
 		$serverUri = $device['uri'];
 		$token = $device['Token'];
-		$url1 = [
-			'url' => "$serverUri/chromecast/clients?X-Plex-Token=$token",
-			'device' => $device
-		];
-		$url2 = [
-			'url' => "$serverUri/livetv/dvrs?X-Plex-Token=$token",
-			'device' => $device
-		];
-		array_push($urls, $url1);
-		array_push($urls, $url2);
-	}
-	if (count($urls)) {
-		$handlers = [];
-		$mh = curl_multi_init();
-		// Handle all of our URL's
-		foreach ($urls as $item) {
-			$url = $item['url'];
-			$device = $item['device'];
-			$ch = curl_init($url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_multi_add_handle($mh, $ch);
-			$cr = [
-				$ch,
-				$device
-			];
-			array_push($handlers, $cr);
-		}
-		// Execute queries
-		$running = null;
-		do {
-			curl_multi_exec($mh, $running);
-		} while ($running);
-		foreach ($handlers as $ch) {
-			curl_multi_remove_handle($mh, $ch[0]);
-		}
-		curl_multi_close($mh);
-		foreach ($handlers as $ch) {
-			$response = curl_multi_getcontent($ch[0]);
-			$data = [
-				'response' => $response,
-				'device' => $ch[1]
-			];
-			array_push($responses, $data);
-		}
-	}
+		$deviceId = $device['Id'];
+		$urls["${deviceId}_cast"] =  ["$serverUri/chromecast/clients?X-Plex-Token=$token",['Accept: application/json']];
+		$urls["${deviceId}_dvr"] =  ["$serverUri/livetv/dvrs?X-Plex-Token=$token",['Accept: application/json']];
 
+	$results = false;
+	if (count($urls)) {
+		$results = (new multiCurl($urls))->process();
+	}
 	$version = false;
 	$hasPlugin = $_SESSION['hasPlugin'] ?? false;
-
-	if (count($responses)) foreach ($responses as $data) {
-		$device = $data['device'];
-		$data = xmlToJson($data['response']);
-		$token = $device['Token'];
-		$serverId = $device['Id'];
-
-		if ($data) {
-			$castDevices = $data['MediaContainer']['Device'] ?? false;
-			$dvrResponse = $data['MediaContainer']['Dvr'] ?? false;
-			$key = $dvrResponse[0]['key'] ?? false;
-			if ($key) {
-				$device['key'] = $key;
-				$lineup = explode("-", $dvrResponse[0]['lineup'])[1] ?? false;
-				$lineup = $lineup ? str_replace("OTA", "", explode("#", $lineup)[0]) : $lineup;
-				$settings = $dvrResponse[0]['Settings'];
-				foreach ($settings as $setting) {
-					switch ($setting['id']) {
-						case 'startOffsetMinutes':
-						case 'endOffsetMinutes':
-						case 'comskipEnabled':
-							$name = $setting['id'];
-							$device["$name"] = intval($setting['value']);
-					}
-				}
-				$device['zip'] = $lineup;
-				array_push($dvrs, $device);
-			}
-			if ($castDevices) {
-				write_log("Raw cast device data: ".json_encode($data),"ALERT");
-				$devVersion = $data['version'] ?? false;
+	if ($results) {
+		write_log("Results: " . json_encode($results));
+		foreach($serverArray as $device) {
+			$name = $device["Name"];
+			$id = $device['Id'];
+			$token = $device['Token'];
+			$cast = $results["${id}_cast"] ?? false;
+			$dvr = $results["${id}_dvr"]['MediaContainer']['Dvr'] ?? false;
+			if ($cast) {
+				write_log("Cast devices found for $name: ".json_encode($cast));
+				$devVersion = $cast['version'] ?? false;
 				if ($devVersion) {
 					if (!$version || $devVersion > $version) $version = $devVersion;
 				}
 
 				if (!$hasPlugin) updateUserPreference('hasPlugin', true);
+				$castDevices = $cast['MediaContainer']['Device'] ?? [];
 				foreach ($castDevices as $castDevice) {
 					if (isset($castDevice['name'])) {
 						$type = $castDevice['type'];
@@ -1099,11 +1042,34 @@ function scrapeServers($serverArray) {
 							'Product' => $type,
 							'Type' => $castDevice['type'],
 							'Token' => $token,
-							'Parent' => $serverId,
+							'Parent' => $id,
 							'Uri' => $castDevice['uri']
 						];
 						array_push($clients, $device);
 					}
+				}
+
+			}
+
+			if ($dvr) {
+				write_log("DVR for $name: " . json_encode($dvr));
+				$key = $dvr[0]['key'] ?? false;
+				if ($key) {
+					$device['key'] = $key;
+					$lineup = explode("-", $dvr[0]['lineup'])[1] ?? false;
+					$lineup = $lineup ? str_replace("OTA", "", explode("#", $lineup)[0]) : $lineup;
+					$settings = $dvr[0]['Settings'];
+					foreach ($settings as $setting) {
+						switch ($setting['id']) {
+							case 'startOffsetMinutes':
+							case 'endOffsetMinutes':
+							case 'comskipEnabled':
+								$name = $setting['id'];
+								$device["$name"] = intval($setting['value']);
+						}
+					}
+					$device['zip'] = $lineup;
+					array_push($dvrs, $device);
 				}
 			}
 		}
@@ -1124,18 +1090,16 @@ function scrapeServers($serverArray) {
 		write_log("We have a version number - '$version'");
 	}
 
-
 	if (count($clients) || count($dvrs)) {
 		$returns = [
 			'Client' => $clients,
 			'Dvr' => $dvrs
 		];
 	} else $returns = false;
-	$log = (count($urls) == count($responses)) ? array_combine($urls, $responses) : $urls;
 	$clientCount = count($clients);
 	$dvrCount = count($dvrs);
 	$serverCount = count($serverArray);
-	write_log("Found $clientCount clients and $dvrCount dvrs from $serverCount servers: " . json_encode($log));
+	write_log("Found $clientCount clients and $dvrCount dvrs from $serverCount servers: " . json_encode($returns));
 
 	return $returns;
 }
