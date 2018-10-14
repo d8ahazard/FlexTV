@@ -19,7 +19,7 @@ In addition to being able to host Flex TV yourself, I've taken the liberty of se
 Yes! There's now a plugin that works directly inside your Plex Media Server that helps Flex TV
 bridge the gap between PMS and your Cast Devices! And it works a LOT better than the old version.  You can find it here:
 
-https://github.com/d8ahazard/Cast.bundle
+https://github.com/d8ahazard/FlexTV.bundle
 
 ## QUESTIONS, COMMENTS, CONCERNS
 
