@@ -65,8 +65,10 @@ function bye($msg = false, $title = false, $url = false, $log = false, $clear = 
     }
     $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     $url = parse_url($actual_link);
-    $url = $url['scheme']."://".$url['host'].":".$url['port'].$url['path'];
-    $url = "$url?device=Client&id=rescan&passive=true&apiToken=".$_SESSION['apiToken'];
+
+    $query = ["device"=>"Client","id"=>"rescan","passive"=>true,"apiToken"=>$_SESSION['apiToken']];
+    $url['query'] = http_build_query($query);
+    $url = http_build_url($url);
     $rescan = $_GET['pollPlayer'] ?? $_GET['passive'] ?? null;
     $executionTime = round(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"],2)."s";
 
@@ -355,7 +357,15 @@ function numberToRoman($number) {
     return $returnValue;
 }
 
-function curlGet($url, $headers = null, $timeout = 4, $decode = true, $log=true) {
+/**
+ * @param $url - Where to curl from
+ * @param bool | string | array $headers - Either leave it blank, pass a string, or an array of STRINGS
+ * @param int $timeout
+ * @param bool $decode
+ * @param bool $log
+ * @return bool|mixed
+ */
+function curlGet($url, $headers = false, $timeout = 4, $decode = true, $log=true) {
 	$cert = getCert();
 	if ($log) write_log("GET url $url","INFO","curlGet");
     $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -369,11 +379,19 @@ function curlGet($url, $headers = null, $timeout = 4, $decode = true, $log=true)
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CAINFO, $cert);
-    if ($headers !== null) curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	if ($headers) {
+		if (is_string($headers)) $headers = [$headers];
+		if (is_array($headers)) {
+			write_log("Setting headers.","INFO",false,true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		}
+	}
+	$contentType = false;
     $result = curl_exec($ch);
     if (!curl_errno($ch)) {
         switch ($http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
             case 200:
+	            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
                 break;
             default:
                 write_log('Unexpected HTTP code: ' . $http_code . ', URL: ' . $url, "ERROR");
@@ -381,25 +399,10 @@ function curlGet($url, $headers = null, $timeout = 4, $decode = true, $log=true)
         }
     }
     curl_close($ch);
+
     if ($result) {
     	if ($decode) {
-		    $decoded = false;
-		    try {
-			    $array = json_decode($result, true);
-			    if ($array) {
-				    $decoded = true;
-				    if ($log) write_log("Curl result(JSON): " . json_encode($array));
-			    } else {
-				    $array = (new JsonXmlElement($result))->asArray();
-				    if (!empty($array)) {
-					    $decoded = true;
-					    if ($log) write_log("Curl result(XML): " . json_encode($array));
-				    }
-			    }
-			    if (!$decoded && $log) write_log("Curl result(String): $result");
-		    } catch (Exception $e) {
-
-		    }
+		    $result = decodeResult($result, $contentType, $log);
 	    } else {
     		if ($log) write_log("Curl result(RAW): ".json_encode($result));
 	    }
@@ -455,6 +458,43 @@ function curlQuick($url) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_exec($ch);
     curl_close($ch);
+}
+
+function decodeResult($result, $contentType=false, $log=true) {
+	$contentType = explode(";",$contentType)[0] ?? $contentType;
+
+	if (is_array($result)) {
+		if ($log) write_log("Returning result(ARRAY): ".json_encode($result));
+	}
+	if (is_string($result) && $contentType) {
+		if ($contentType === 'application/json') {
+			$result = json_decode($result,true);
+			if ($log) write_log("Decoded by content-type: ".json_encode($result));
+			if ($result) return $result;
+		}
+		if ($contentType === 'application/xml') {
+			$result = (new JsonXmlElement($result))->asArray();
+			if ($log) write_log("Decoded by content-type: ".json_encode($result));
+			if (is_array($result)) return $result;
+		}
+		write_log("Unable to decode data with specified content type of $contentType");
+	}
+
+	$array = @json_decode($result, true);
+	if ($array) {
+		if ($log) write_log("Returning result(JSON): " . json_encode($array));
+		return $array;
+	}
+
+	$array = (@new JsonXmlElement($result))->asArray();
+	if (!empty($array)) {
+		if ($log) write_log("Returning result(XML): " . json_encode($array));
+		return $array;
+	}
+
+	if ($log) write_log("Returning result(RAW): $result");
+
+	return $result;
 }
 
 function doRequest($parts, $timeout = 6) {
@@ -2133,9 +2173,8 @@ function plexSignIn($token) {
 	$user = $token = false;
 	$headers = headerRequestArray(plexHeaders());
 	$result = curlGet($url,$headers);
-	$data = $result ? flattenXML(new SimpleXMLElement($result)) : false;
-	if ($data) {
-		$token = $data['auth_token'] ?? false;
+	if ($result) {
+		$token = $result['pin']['auth_token'][0]['_text'] ?? false;
 	}
 
 	if ($token) {
@@ -2518,7 +2557,7 @@ function write_log($text, $level = false, $caller = false, $force=false, $skip=f
         $authString = "; <?php die('Access denied'); ?>".PHP_EOL;
         file_put_contents($log,$authString);
     }
-    if (filesize($log) > 1048576) {
+    if (filesize($log) > 4194304) {
         $oldLog = file_build_path(dirname(__FILE__),"..",'logs',"Phlex.log.php.old");
         if (file_exists($oldLog)) unlink($oldLog);
         rename($log, $oldLog);
@@ -2554,8 +2593,7 @@ function writeSession($key, $value, $unset = false) {
 	if ($unset) {
 		unset($_SESSION[$key]);
 	} else {
-		write_log("Writing session value $key to $value");
-	    $_SESSION[$key] = $value;
+		$_SESSION[$key] = $value;
     }
 }
 
