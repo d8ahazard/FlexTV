@@ -178,7 +178,6 @@ var PROFILE_APPS = [
 
 // Initialize global variables, special classes
 $(function () {
-    setBackground();
     $(".select").dropdown({"optionClass": "withripple"});
 	$("#mainWrap").css({"top": 0});
 
@@ -189,8 +188,6 @@ $(function () {
 	bgWrap = $('#bgwrap');
 	logLevel = "ALL";
 
-	// Initialize CRITICAL UI Elements
-	$('.castArt').show();
 	$('#play').addClass('clicked');
     // Hides the loading animation
     $('body').addClass('loaded');
@@ -199,6 +196,24 @@ $(function () {
 
 // This fires after the page is completely ready
 $(window).on("load", function() {
+    var backgrounds = $('.backgrounds');
+    var modals = $('.modals');
+    var combined = "";
+    backgrounds.each(function () {
+        combined += $(this).html();
+    });
+
+    backgrounds.not(':first').remove();
+    backgrounds.html(combined);
+
+    var combined2 = "";
+    modals.each(function () {
+        combined2 += $(this).html();
+    });
+
+    modals.first().remove();
+    modals.html(combined2);
+
     fetchData();
 
     getServerStatus();
@@ -228,6 +243,7 @@ $(window).on('resize', function () {
 });
 
 $('#ghostDiv').on('click', function() {
+    console.log("Ghost click...");
     closeDrawer();
     closeClientList();
 });
@@ -709,12 +725,10 @@ function setBackground() {
     bgs = $('.bg');
     var newImage = bgs.last();
     newImage.css('background-image', 'url(' + image.src + ')');
-    bgs.children('#weatherDiv').show();
     newImage.fadeIn(1000).removeClass('hidden');
     console.log("The fade in...");
 	setTimeout(
 		function () {
-            var bgWrap = $('#bgwrap');
             $("#bgwrap div:not(:last-child)").remove();
 		}, 1500);
 }
@@ -1508,7 +1522,6 @@ function setListeners() {
 			function () {
 				$('#mainWrap').css({"top": "-200px"});
 				bgs.fadeOut(1000);
-				$('.castArt').fadeOut(1000);
 
 			}, 500);
         window.location.href = "?logout";

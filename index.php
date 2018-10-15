@@ -95,39 +95,25 @@ checkUpdate();
     <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
     <link rel="stylesheet" href="./php/homeBase/assets/styles/custom.css">
-
-
-
-
 </head>
 
 <body style="background-color:black">
+	<div class="backgrounds">
+        <div id="bgwrap">
 
-	<div id="loader-wrapper">
-		<div id="loader"></div>
-		<div class="loader-section section-left"></div>
-		<div class="loader-section section-right"></div>
-	</div>
-
-	<div id="bgwrap">
-
-	</div>
-    <div id="weatherDiv">
-        <div id="tempDiv" class="meta"></div>
-        <div id="weatherStatus" class="row justify-content-end meta">
-            <div id="city" class="meta col"></div>
-            <div id="weatherIcon" class="meta col-1"> </div>
         </div>
-        <div id="timeDiv" class="meta"></div>
-        <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
+        <div id="weatherDiv">
+            <div id="tempDiv" class="meta"></div>
+            <div id="weatherStatus" class="row justify-content-end meta">
+                <div id="city" class="meta col"></div>
+                <div id="weatherIcon" class="meta col-1"> </div>
+            </div>
+            <div id="timeDiv" class="meta"></div>
+            <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
+        </div>
     </div>
-    <script>
-		<?php echo fetchBackground();?>
-	</script>
 
-    <div id="bodyWrap">
-
-	<?php
+    <?php
 
 		$code = false;
 		foreach ($_GET as $key => $value) {
@@ -207,28 +193,32 @@ checkUpdate();
 			headerhtml();
 	}
 	?>
-	</div>
 
-	<div class="modal fade" id="alertModal">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="alertTitle">Modal title</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body" id="alertBody">
-					<p>Modal body text goes here.</p>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="modals">
+        <div class="modal fade" id="alertModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="alertTitle">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="alertBody">
+                        <p>Modal body text goes here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<meta id="messages" data-array="<?php if (count($messages)) echo urlencode(json_encode($messages)); ?>"/>
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+    </div>
 
-
-
+    <meta id="messages" data-array="<?php if (count($messages)) echo urlencode(json_encode($messages)); ?>"/>
 
 	<script type="text/javascript" src="./js/lib/dist/ui.js"></script>
 	<script type="text/javascript" src="./js/lib/dist/support.js" async></script>
@@ -242,13 +232,12 @@ checkUpdate();
 		echo '<script type="text/javascript" src="./js/homebase.js" async></script>';
 		echo '<script src="./js/utilities.js"></script>';
         echo '<script src="./js/main.js"></script>';
-
 	}
 	?>
 
 
 	<script>
-
+		<?php echo fetchBackground();?>
 		var noWorker = true;
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.register('service-worker.js').then(function (registration) {

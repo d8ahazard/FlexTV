@@ -135,118 +135,18 @@ function makeBody($defaults) {
 
 	$bodyText = '
 			
-			<div class="wrapperArt"></div>
-			<div class="castArt">
-				<div class="background-container">
-					<div class="ccWrapper">
-						<div class="fade1 ccBackground">
+			<div class="backgrounds">
+				<div class="wrapperArt"></div>
+				<div class="castArt">
+					<div class="background-container">
+						<div class="ccWrapper">
+							<div class="fade1 ccBackground">
+							</div>
 						</div>
-					</div>
-				</div>      
-			</div>
-			
-			<div class="modal fade" id="jsonModal">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="jsonTitle">Modal title</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body" id="jsonBody">
-							<p>Modal body text goes here.</p>
-						</div><div class="modal-footer">
-						<button class="btnAdd" title="Copy JSON to clipboard">Copy JSON</button></div>
-					</div>
+					</div>      
 				</div>
 			</div>
 			
-			<div class="modal" id="cardModal">
-				<div class="row justify-content-center" role="document" id="cardModalBody">
-					<div id="cardWrap" class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-					
-					</div>
-				</div>
-			</div>
-			<div id="plexClient">
-			 	<div class="popover-arrow"></div>
-				<div id="clientWrapper">
-                    <a class="dropdown-item client-item" data-id="rescan"><b>rescan devices</b></a>
-                </div>
-  		    </div>
-			<div id="sideMenu">
-            	<div class="drawer-header container">
-	                <div class="userWrap row justify-content-around">
-	                	<div class="col-3">
-	                    	<img class="avatar" src="' . $_SESSION['plexAvatar'] . '"/>
-	                    </div>
-	                    <div class="col-9">
-		                    <p class="userHeader">' . ucfirst($_SESSION['plexUserName']) . '</p>
-		                    <p class="userEmail">' . $_SESSION['plexEmail'] . '</p>
-	                    </div>
-	                </div>
-            	</div>
-            	<div class="drawer-item btn active" data-link="homeTab" data-label="Home">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
-                </div>
-                <div class="drawer-item btn" data-link="expandDrawer" data-target="Client" id="clientBtn">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
-                </div>
-                <div class="drawer-list collapsed" id="ClientDrawer">
-	                <div class="drawer-item btn" data-link="rescan">
-	                    <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
-	                </div>
-                </div>
-                <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
-                </div>
-                <div class="drawer-separator"></div>
-                <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
-                </div>
-                <div class="drawer-list collapsed" id="AppzDrawer">
-                </div>
-                <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
-                </div>
-                <div class="drawer-list collapsed" id="StatsDrawer">
-	                <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
-	                    <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
-	                </div>
-	                <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
-	                    <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
-	                </div>
-	                <div class="drawer-item btn" data-link="userStats" data-target="Stats">
-	                    <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
-	                </div>
-	                <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
-	                    <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
-	                </div>
-				</div>
-                <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
-                </div>
-                
-                <div class="drawer-list collapsed" id="SettingsDrawer">
-                	
-                    <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
-                        <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
-                    </div>
-                    '.$masterBtn.'
-                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
-                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
-                    </div> 
-				</div>
-				<div class="drawer-separator"></div>
-				<div class="drawer-item btn" data-link="logTab" data-label="Logs">
-                	<span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
-                </div>
-				<div class="drawer-item btn" id="logout">
-                    <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
-                </div>   
-			</div>
-        	<div id="ghostDiv"></div>
 			<div id="body" class="container">
 				<div id="topBar" class="row testGrp justify-content-between">
 					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="leftGrp">
@@ -319,6 +219,7 @@ function makeBody($defaults) {
 			            </div>
 			        </div>
 			        '.$masterDiv.'
+			        
         			<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="generalSettingsTab">     
         			<div class="gridBox">      
 			            <div class="appContainer card">
@@ -590,7 +491,6 @@ function makeBody($defaults) {
 		                    </div>		                
 			            </div>
 		            </div>
-		       
 					<div class="view-tab settingPage col-sm-9 col-lg-8 fade'. $hidden.'" id="logTab">
 						<div class="modal-header">
 							<div class="form-group" id="logGroup">
@@ -616,44 +516,151 @@ function makeBody($defaults) {
 							</div>
 						</div>
 					</div>
-			
-					<div class="nowPlayingFooter">
-						<div class="coverImage">
-							<img class="statusImage card-1" src=""/>
-							<div id="textBar">
-								<h6>Now Playing on <span id="playerName"></span>: </h6>
-								<h6><span id="mediaTitle"></span></h6>
-								<span id="mediaTagline"></span>
-							</div>
-						</div>
-						<div class="statusWrapper row justify-content-around">
-							<div id="progressWrap">
-								<input id="progressSlider" type="text" data-slider-min="0" data-slider-id="progress" data-slider-tooltip="hide"/>
-							</div>
-							<div id="controlWrap">
-								<div id="controlBar">
-									<button class="controlBtn btn btn-default" id="previousBtn"><span class="material-icons colorItem mat-md">skip_previous</span></button>
-									<button class="controlBtn btn btn-default" id="playBtn"><span class="material-icons colorItem mat-lg">play_circle_filled</span></button>
-									<button class="controlBtn btn btn-default" id="pauseBtn"><span class="material-icons colorItem mat-lg">pause_circle_filled</span></button>
-									<button class="controlBtn btn btn-default" id="nextBtn"><span class="material-icons colorItem mat-md">skip_next</span></button>
-								</div>
-							</div>
-							<div class="scrollContainer">
-								<div class="scrollContent" id="mediaSummary"></div>
-							</div>
-							<div id="volumeWrap"/>
-							<div class="volumeBar"></div>
-						</div>
-						<div id="stopBtnDiv">
-							<button class="controlBtn btn btn-default" id="stopBtn"><span class="material-icons colorItem">close</span></button>
-							<div id="volumeWrap">
-								<input id="volumeSlider" type="text" data-slider-min="0" data-slider-max="100" data-slider-id="volume" data-slider-orientation="vertical" data-slider-tooltip="hide"/>
-							</div>
+				</div>
+			</div>
+				
+			<div id="ghostDiv"></div>
+					
+			<div class="modals">
+				<div class="nowPlayingFooter">
+					<div class="coverImage">
+						<img class="statusImage card-1" src=""/>
+						<div id="textBar">
+							<h6>Now Playing on <span id="playerName"></span>: </h6>
+							<h6><span id="mediaTitle"></span></h6>
+							<span id="mediaTagline"></span>
 						</div>
 					</div>
-				        <div id="metaTags">
-					    <meta id="apiTokenData" data-token="' . $_SESSION["apiToken"] . '"/>
+					<div class="statusWrapper row justify-content-around">
+						<div id="progressWrap">
+							<input id="progressSlider" type="text" data-slider-min="0" data-slider-id="progress" data-slider-tooltip="hide"/>
+						</div>
+						<div id="controlWrap">
+							<div id="controlBar">
+								<button class="controlBtn btn btn-default" id="previousBtn"><span class="material-icons colorItem mat-md">skip_previous</span></button>
+								<button class="controlBtn btn btn-default" id="playBtn"><span class="material-icons colorItem mat-lg">play_circle_filled</span></button>
+								<button class="controlBtn btn btn-default" id="pauseBtn"><span class="material-icons colorItem mat-lg">pause_circle_filled</span></button>
+								<button class="controlBtn btn btn-default" id="nextBtn"><span class="material-icons colorItem mat-md">skip_next</span></button>
+							</div>
+						</div>
+						<div class="scrollContainer">
+							<div class="scrollContent" id="mediaSummary"></div>
+						</div>
+						<div id="volumeWrap"></div>
+						<div class="volumeBar"></div>
 					</div>
+					<div id="stopBtnDiv">
+						<button class="controlBtn btn btn-default" id="stopBtn"><span class="material-icons colorItem">close</span></button>
+						<div id="volumeWrap">
+							<input id="volumeSlider" type="text" data-slider-min="0" data-slider-max="100" data-slider-id="volume" data-slider-orientation="vertical" data-slider-tooltip="hide"/>
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="jsonModal">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="jsonTitle">Modal title</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body" id="jsonBody">
+								<p>Modal body text goes here.</p>
+							</div><div class="modal-footer">
+							<button class="btnAdd" title="Copy JSON to clipboard">Copy JSON</button></div>
+						</div>
+					</div>
+				</div>			
+				<div class="modal" id="cardModal">
+					<div class="row justify-content-center" role="document" id="cardModalBody">
+						<div id="cardWrap" class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+						
+						</div>
+					</div>
+				</div>
+				<div id="plexClient">
+				    <div class="popover-arrow"></div>
+					<div id="clientWrapper">
+	                    <a class="dropdown-item client-item" data-id="rescan"><b>rescan devices</b></a>
+	                </div>
+	            </div>
+				<div id="sideMenu">
+	                <div class="drawer-header container">
+		                <div class="userWrap row justify-content-around">
+		                    <div class="col-3">
+		                        <img class="avatar" src="' . $_SESSION['plexAvatar'] . '"/>
+		                    </div>
+		                    <div class="col-9">
+			                    <p class="userHeader">' . ucfirst($_SESSION['plexUserName']) . '</p>
+			                    <p class="userEmail">' . $_SESSION['plexEmail'] . '</p>
+		                    </div>
+		                </div>
+	                </div>
+	                <div class="drawer-item btn active" data-link="homeTab" data-label="Home">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
+	                </div>
+	                <div class="drawer-item btn" data-link="expandDrawer" data-target="Client" id="clientBtn">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
+	                </div>
+	                <div class="drawer-list collapsed" id="ClientDrawer">
+		                <div class="drawer-item btn" data-link="rescan">
+		                    <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
+		                </div>
+	                </div>
+	                <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
+	                </div>
+	                <div class="drawer-separator"></div>
+	                <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
+	                </div>
+	                <div class="drawer-list collapsed" id="AppzDrawer">
+	                </div>
+	                <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
+	                </div>
+	                <div class="drawer-list collapsed" id="StatsDrawer">
+		                <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
+		                    <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
+		                </div>
+		                <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
+		                    <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
+		                </div>
+		                <div class="drawer-item btn" data-link="userStats" data-target="Stats">
+		                    <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
+		                </div>
+		                <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
+		                    <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
+		                </div>
+					</div>
+	                <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
+	                </div>
+	                
+	                <div class="drawer-list collapsed" id="SettingsDrawer">
+	                    
+	                    <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
+	                        <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
+	                    </div>
+	                    '.$masterBtn.'
+	                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
+	                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
+	                    </div> 
+					</div>
+					<div class="drawer-separator"></div>
+					<div class="drawer-item btn" data-link="logTab" data-label="Logs">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
+	                </div>
+					<div class="drawer-item btn" id="logout">
+	                    <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
+	                </div>   
+				</div>
+            </div>
+            
+	        <div id="metaTags">
+			    <meta id="apiTokenData" data-token="' . $_SESSION["apiToken"] . '"/>
+			</div>
 					';
 
 
