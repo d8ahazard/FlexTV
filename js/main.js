@@ -22,6 +22,8 @@ var caches = null;
 var forceUpdate = true;
 
 var scrolling = false;
+var scaling = false;
+
 var lastUpdate = [];
 var devices = "foo";
 var staticCount = 0;
@@ -176,6 +178,7 @@ var PROFILE_APPS = [
 
 // Initialize global variables, special classes
 $(function () {
+    setBackground();
     $(".select").dropdown({"optionClass": "withripple"});
 	$("#mainWrap").css({"top": 0});
 
@@ -215,9 +218,13 @@ $(window).on("load", function() {
 
 // Scale the dang diddly-ang slider to the correct width, as it doesn't like to be responsive by itself
 $(window).on('resize', function () {
-    scaleSlider();
-    setBackground();
-    scaleElements();
+    clearTimeout(scaling);
+    scaling = setTimeout(function() {
+        scaleSlider();
+        setBackground();
+        scaleElements();
+    }, 250);
+
 });
 
 $('#ghostDiv').on('click', function() {
@@ -694,20 +701,21 @@ function scaleElements() {
 
 function setBackground() {
 	//Add your images, we'll set the path in the next step
-	var image = new Image();
-	image.src = "https://img.phlexchat.com?new=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
-	$('#bgwrap').append("<div class='bg hidden'></div>");
-	bgs = $('.bg');
-	var bgWrap = document.getElementById('bgwrap');
-	bgs.last().css('background-image', 'url(' + image.src + ')');
-	bgs.last().fadeIn(1000);
+    var image = new Image();
+	var bgWrap = $('#bgwrap');
+
+    image.src = "https://img.phlexchat.com?new=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
+    bgWrap.append("<div class='bg hidden'></div>");
+    bgs = $('.bg');
+    var newImage = bgs.last();
+    newImage.css('background-image', 'url(' + image.src + ')');
+    bgs.children('#weatherDiv').show();
+    newImage.fadeIn(1000).removeClass('hidden');
+    console.log("The fade in...");
 	setTimeout(
 		function () {
-			while (bgWrap.childNodes.length > 1) {
-				bgWrap.removeChild(bgWrap.firstChild);
-			}
-			bgs.last().removeClass('hidden');
-			$('.imgHolder').remove();
+            var bgWrap = $('#bgwrap');
+            $("#bgwrap div:not(:last-child)").remove();
 		}, 1500);
 }
 
@@ -1301,6 +1309,8 @@ function fetchWeather() {
 
 function setWeather(weather) {
 	var condition;
+	var weatherIcon = $('#weatherIcon');
+	weatherIcon.removeClass(weatherClass);
 	if (weather !== "") {
 		var cityString = weather.city + ", " + weather.region;
 		var weatherHtml = weather.temp + String.fromCharCode(176) + weather.units.temp;
@@ -1394,8 +1404,9 @@ function setWeather(weather) {
 			break;
 
 	}
-	$('.weatherIcon').html('<span id="city">'+cityString+'</span><span class="weather ' + weatherClass + '"> </span>');
-	$(".tempDiv").text(weatherHtml);
+	$('#city').text(cityString);
+	weatherIcon.addClass(weatherClass);
+	$("#tempDiv").text(weatherHtml);
 }
 
 function setTime() {
@@ -1407,7 +1418,7 @@ function setTime() {
     hours = hours ? hours : 12; // the hour '0' should be '12'
     minutes = minutes < 10 ? '0' + minutes : minutes;
     var time = hours + ':' + minutes + ' ' + ampm;
-    var timeDiv = $(".timeDiv");
+    var timeDiv = $("#timeDiv");
     if (time !== timeDiv.text()) timeDiv.text(time);
 }
 

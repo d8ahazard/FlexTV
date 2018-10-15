@@ -12,14 +12,12 @@ function makeBody($defaults) {
 	$defaults['lang'] = $lang;
 	$hide = $defaults['isWebApp'];
 	$hidden = $hide ? " remove" : "";
-	$hiddenHome = $hide ? "" : " remove";
 	$useGit = $hide ? false : checkGit();
 	$webAddress = serverAddress();
 	$lang = $defaults['lang'];
 	$apiToken = $_SESSION['apiToken'];
+	$masterUser = $_SESSION['masterUser'] ?? false;
 
-	$rev = checkRevision(true);
-	$revString = $rev ? "Revision: $rev" : "";
 	$ombiAddress = $_SESSION['ombiUri'] ?? "./ombi";
 	$homeBase = file_get_contents(dirname(__FILE__) . "/homeBase/index.html");
 	$homeBase = str_replace('<OMBI_URL>', $ombiAddress, $homeBase);
@@ -54,6 +52,86 @@ function makeBody($defaults) {
 			    </div>' : "";
 
 
+	$masterBtn = "";
+	$masterDiv = "";
+
+	if ($masterUser) {
+		$masterBtn = '
+		 			<div class="drawer-item btn" data-link="userSettingsTab" data-label="Users">
+                        <span class="barBtn"><i class="material-icons colorItem barIcon">people</i></span>Users
+                    </div>
+		';
+
+		$userData = getPreference('userdata',false, false, false, false);
+		$users = [];
+		$userDiv = "";
+		foreach($userData as $user) {
+			array_push($users, $user);
+		}
+
+		if (count($users)) {
+			$headers = ["#",'Name','Plex Email','Master User'];
+			$apps = ['ombi','couch','radarr','watcher','sonarr','sick','lidarr','headphones','deluge','downloadstation','nzbhydra'];
+			$headerStrings = [];
+			foreach($headers as $header) $headerStrings[] = $header;
+			foreach($apps as $header) $headerStrings[] = ucfirst($header);
+			$tableHeads = "";
+			foreach($headerStrings as $title) {
+				$tableHeads .= "<th scope='col'>$title</th>".PHP_EOL;
+			}
+
+			$userStrings = "";
+			$i = 1;
+			foreach($users as $user) {
+				$values = "";
+				foreach($headers as $header) {
+					$value = "";
+					foreach($user as $key => $check) {
+						$lowKey = strtolower(str_replace(" ", "", $key));
+						$lowHead = strtolower(str_replace(" ", "", $header));
+						if ($lowKey === $lowHead) {
+							$value = $check;
+						}
+						if ($key === "Name") $value = $user['plexUserName'];
+					}
+					if ($header !== "#") $values .= "<td>$value</td>".PHP_EOL;
+				}
+					$userString = '
+					<tr>
+						<th scope="row">'.$i.'</th>
+						'.$values.'
+					</tr>
+					';
+					$i++;
+					$userStrings .= $userString . PHP_EOL;
+			}
+
+			$userDiv = '
+			<table class="table-responsive">
+				<thead>
+					<tr>
+						'.$tableHeads.'
+					</tr>
+				</thead>
+				<tbody>
+					'.$userStrings.'
+				</tbody>
+			</table>
+			';
+		}
+
+		$masterDiv = '
+					<div class="view-tab settingPage col-sm-11 col-lg-11 fade" id="userSettingsTab">
+						<div class="card">
+							<div class="form-group" id="userGroup">
+								'.$userDiv.'
+							</div>
+						</div>
+					</div>
+			
+		';
+	}
+
 
 	$bodyText = '
 			
@@ -62,19 +140,11 @@ function makeBody($defaults) {
 				<div class="background-container">
 					<div class="ccWrapper">
 						<div class="fade1 ccBackground">
-							<div class="ccTextDiv">
-								<span class="spacer"></span>
-								<span class="tempDiv meta"></span><br>
-								<div class="weatherIcon"></div>
-								<div class="timeDiv meta"></div>
-								<div id="revision" class="meta">'.$revString.'</div>
-							</div>
 						</div>
 					</div>
 				</div>      
 			</div>
-		                    
-        	
+			
 			<div class="modal fade" id="jsonModal">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
@@ -163,6 +233,7 @@ function makeBody($defaults) {
                     <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
                         <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
                     </div>
+                    '.$masterBtn.'
                     <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
                         <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
                     </div> 
@@ -247,6 +318,7 @@ function makeBody($defaults) {
 			            <div id="resultsInner"  class="queryWrap row justify-content-around">
 			            </div>
 			        </div>
+			        '.$masterDiv.'
         			<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="generalSettingsTab">     
         			<div class="gridBox">      
 			            <div class="appContainer card">

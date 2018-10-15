@@ -86,9 +86,9 @@ checkUpdate();
     <link href="./css/lib/06_ripples.min.css" rel="stylesheet">
     <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
     <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
-    <link href="./css/lib/09_bootstrap-ie8.min.css" rel="stylesheet">
+    <link href="./css/lib/09_bootstrap-ie8.css" rel="stylesheet">
     <link href="./css/main.css" rel="stylesheet">
-    <?php if ($_SESSION['theme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
+    <?php if ($_SESSION['darkTheme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
@@ -112,16 +112,20 @@ checkUpdate();
 	<div id="bgwrap">
 
 	</div>
-    <?php
-    $rev = checkRevision(true);
-    $revString = $rev ? "<div id='revision' class='meta'>Revision: $rev</div>" : "";
-    echo $revString;
-    ?>
+    <div id="weatherDiv">
+        <div id="tempDiv" class="meta"></div>
+        <div id="weatherStatus" class="row justify-content-end meta">
+            <div id="city" class="meta col"></div>
+            <div id="weatherIcon" class="meta col-1"> </div>
+        </div>
+        <div id="timeDiv" class="meta"></div>
+        <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
+    </div>
     <script>
 		<?php echo fetchBackground();?>
 	</script>
 
-	<div id="bodyWrap">
+    <div id="bodyWrap">
 
 	<?php
 
@@ -143,7 +147,6 @@ checkUpdate();
 			if ($getToken) $user = verifyApiToken($_GET['apiToken']);
 			if ($user) $token = $user['apiToken'] ?? false;
 			if ($token) $apiToken = $token;
-			write_log("Result here: ".json_encode($result));
 			if ($result || $apiToken) {
 				if ($result == "Not allowed.") {
 					showError();
@@ -154,7 +157,7 @@ checkUpdate();
 					$defaults['token'] = $token;
 					$bodyData = makeBody($defaults);
 					$body = $bodyData[0];
-					$_SESSION['theme'] = $bodyData[1];
+					$_SESSION['darkTheme'] = $bodyData[1];
 					echo $body;
 				}
 			}

@@ -67,12 +67,6 @@ body {
     border: 1px solid var(--theme-primary-inverse-50);
 }
 
-#city {
-    right: 62px;
-    position: fixed;
-    text-align: right;
-}
-
 .nav-tabs {
     border: 1px solid var(--theme-primary-inverse-50);
     background-color: var(--theme-accent-dark);
@@ -1367,29 +1361,10 @@ span.toggle {
     background: no-repeat center center;
 }
 
-.ccTextDiv {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    text-align: right;
-    color: var(--theme-primary-shade2);
-}
-
 .logbutton {
     right: 5px;
     position: absolute;
     top: 27px;
-}
-
-.meta {
-    color: var(--theme-primary-shade2);
-    direction: ltr;
-    z-index: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
 }
 
 .ng-scope {
@@ -1401,10 +1376,6 @@ span.toggle {
     right: 0;
     text-align: right;
     bottom: -39px;
-}
-
-.timeDiv {
-    font: 300 48px 'Roboto';
 }
 
 #metadata-line-1 {
@@ -1419,19 +1390,50 @@ span.toggle {
     font: 300 24px 'Roboto';
 }
 
-.weatherIcon {
+#weatherDiv {
+    position: fixed;
+    bottom: 35px;
+    right: 13px;
     text-align: right;
-var(--theme-primary) -space: pre;
-    height: 25px;
+    z-index: 0;
+    mix-blend-mode: difference;
+    color: var(--theme-primary-inverse);
 }
 
-.weather {
+.meta {
+    text-align: right;
+    height: 25px;
+    direction: ltr;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: inherit;
+    mix-blend-mode: difference;
+    color: var(--theme-primary-inverse);
+}
+
+#revision {
+
+}
+
+#city {
+    margin-right: 30px;
+}
+
+#timeDiv {
+    font: 300 48px 'Roboto';
+    height: 55px;
+}
+
+#weatherStatus {
+    position: relative;
+}
+
+#weatherIcon {
     width: 25px;
     height: 25px;
-    position: fixed;
-    right: 25px;
+    position: absolute;
+    right: 10px;
     background-size: 100% 100%;
-    background: no-repeat center center;
 }
 
 .weather_sunny {

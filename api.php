@@ -1823,7 +1823,7 @@ function fetchPlayerStatus() {
 	$url = $host['Uri'] . '/status/sessions?X-Plex-Token=' . $host['Token'];
 	$result = ($host['Owned'] ?? false) ? curlGet($url) : false;
 	if ($result) {
-		$mc = $jsonXML['MediaContainer'] ?? false;
+		$mc = $result['MediaContainer'] ?? false;
 		if ($mc) {
 			$track = $mc['Track'] ?? [];
 			$video = $mc['Video'] ?? [];
