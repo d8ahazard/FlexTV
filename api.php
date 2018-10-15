@@ -2268,8 +2268,7 @@ function fetchTransientToken($host = false, $type=false) {
 	$url = $host['Uri'] . '/security/token?type=delegation&scope=all' . $header;
 	$result = curlGet($url);
 	if ($result) {
-		$container = new SimpleXMLElement($result);
-		$ttoken = (string)$container['token'];
+		$ttoken = (string)$result['token'];
 		if ($ttoken) {
 			return $ttoken;
 		} else {
