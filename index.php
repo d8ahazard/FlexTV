@@ -76,17 +76,15 @@ checkUpdate();
 
     <link rel="stylesheet" href="css/loader_main.css">
     <link rel="stylesheet" href="css/font-muximux.css">
-    <link href="./css/lib/00_bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link href="./css/lib/000_fonts.css" rel="stylesheet">
     <link href="./css/lib/01_bootstrap-grid.min.css" rel="stylesheet">
-    <link href="./css/lib/02_material.css" rel="stylesheet">
     <link href="./css/lib/03_snackbar.min.css" rel="stylesheet">
     <link href="./css/lib/04_bootstrap-material-design.min.css" rel="stylesheet">
     <link href="./css/lib/05_bootstrap-dialog.css" rel="stylesheet">
     <link href="./css/lib/06_ripples.min.css" rel="stylesheet">
     <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
     <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
-    <link href="./css/lib/09_bootstrap-ie8.css" rel="stylesheet">
     <link href="./css/main.css" rel="stylesheet">
     <?php if ($_SESSION['darkTheme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
@@ -94,7 +92,8 @@ checkUpdate();
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
     <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
-    <link rel="stylesheet" href="./php/homeBase/assets/styles/custom.css">
+    <link rel="stylesheet" href="./css/homeBase.css">
+
 </head>
 
 <body style="background-color:black">
@@ -220,10 +219,29 @@ checkUpdate();
 
     <meta id="messages" data-array="<?php if (count($messages)) echo urlencode(json_encode($messages)); ?>"/>
 
-	<script type="text/javascript" src="./js/lib/dist/ui.js"></script>
-	<script type="text/javascript" src="./js/lib/dist/support.js" async></script>
-	<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./js/lib/ui/00_jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="./js/lib/ui/01_tether.min.js"></script>
 
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./js/lib/ui/07_material.min.js"></script>
+
+    <script type="text/javascript" src="./js/lib/ui/03_html5shiv.min.js"></script>
+    <script type="text/javascript" src="./js/lib/ui/04_lazyload.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/00_run_prettify.js"></script>
+    <script type="text/javascript" src="./js/lib/support/01_jquery-ui.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/02_clipboard.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/03_jquery.simpleWeather.min.js"></script>
+
+    <script type="text/javascript" src="./js/lib/support/04_snackbar.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/06_arrive.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/08_ripples.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/06_arrive.min.js"></script>
+    <script type="text/javascript" src="./js/lib/support/10_swiped.min.js"></script>
+
+    <script type="text/javascript" src="./js/lib/support/12_cache-polyfill.js"></script>
+
+
+    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
     <?php
 	if ($GLOBALS['login']) {

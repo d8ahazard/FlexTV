@@ -207,8 +207,9 @@ function makeBody($defaults) {
 						</div>
 					</div>
 				</div>
+				
 		        <div id="results">	    
-			        <div class="view-tab active" id="homeTab">
+			        <div class="view-tab active col-md-9 col-lg-10 col-xl-8" id="homeTab">
 			            '. $homeBase. '
 			        </div>
 			        <div class="view-tab fade" id="recentStats">

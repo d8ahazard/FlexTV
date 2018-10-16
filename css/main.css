@@ -1107,9 +1107,9 @@ select {
     border-radius: 15px;
 }
 
-h4.card-header {
-    background-color: var(--theme-accent);
-}
+/*h4.card-header {*/
+    /*background-color: var(--theme-accent);*/
+/*}*/
 
 .settingLabel {
     font-size: 12px;

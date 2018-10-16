@@ -611,13 +611,14 @@ function currentAddress() {
 function serverAddress() {
     //write_log("function fired: ".json_encode(getSessionData()),"ALERT");
     $loggedIn = isset($_SESSION['apiToken']);
-    $section = ($loggedIn) ? 'userdata' : 'general';
-    $key = ($loggedIn) ? 'publicAddress' : 'value';
-    $selector = ($loggedIn) ? 'apiToken' : 'name';
-    $search = ($loggedIn) ? $_SESSION['apiToken'] : 'publicAddress';
-    //write_log("Getting sec $section key $key sel $selector sear $search");
-    $serverAddress = getPreference($section, [$key], 'http://localhost', [$selector=>$search]);
-    //write_log("Response: ".json_encode($serverAddress));
+    $default = 'http://localhost';
+    if ($loggedIn) {
+	    $serverAddress = getPreference('userdata', ['publicAddress'], $default, ['apiToken' => $_SESSION['apiToken']]);
+    } else {
+    	$serverAddress = getPreference('general','value',$default,['name'=>'publicAddress']);
+    }
+    while (is_array($serverAddress)) $serverAddress = $serverAddress[0] ?? "";
+
     return $serverAddress;
 }
 

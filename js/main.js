@@ -185,7 +185,6 @@ $(function () {
 	apiToken = $('#apiTokenData').data('token');
 
 	bgs = $('.bg');
-	bgWrap = $('#bgwrap');
 	logLevel = "ALL";
 
 	$('#play').addClass('clicked');
@@ -718,6 +717,7 @@ function scaleElements() {
 function setBackground() {
 	//Add your images, we'll set the path in the next step
     var image = new Image();
+    console.log("Fired.");
 	var bgWrap = $('#bgwrap');
 
     image.src = "https://img.phlexchat.com?new=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
@@ -1077,7 +1077,7 @@ function updateCommands(data, prepend) {
 				console.error(e, e.stack);
 			}
 			$('#JSON' + i).on('click', function () {
-				var jsonData = decodeURIComponent($(this).attr('data'));
+			    var jsonData = decodeURIComponent($(this).data('json'));
 				jsonData = JSON.parse(jsonData);
 				jsonData = recurseJSON(jsonData);
 				$('#jsonTitle').text('Result JSON');
@@ -1533,7 +1533,7 @@ function setListeners() {
 	});
 
 	$(".btn").on('click', function () {
-        var serverAddress = $("#publicAddress").attr('value');
+        var serverAddress = $("#publicAddress").val();
 		var value, regUrl;
 		if ($(this).hasClass("copyInput")) {
 			value = $(this).val();

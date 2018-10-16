@@ -15,7 +15,7 @@ function getServerStatus () {
   getServerStatus.done(function (data) {
     if (data) {
       serverStatusDiv.removeClass('list-group-item-info');
-      serverStatusDiv.addClass('list-group-item-success');
+      serverStatusDiv.addClass('list-group-item-primary');
       serverStatusDiv.html('Server Status: Online <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i>');
     } else {
       serverStatusDiv.removeClass('list-group-item-info');

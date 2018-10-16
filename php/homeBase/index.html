@@ -1,37 +1,28 @@
-<body>
+<div class="queryWrap row justify-content-around">
 
-  <main role="main" class="container">
 
-    <div class="row">
+    <div class="card bg-dark text-white shadow col-xl-5 col-lg-5-5 col-md-12">
+        <h4 class="card-header text-center px-2">Statistics</h4>
 
-      <div class="col-sm-12 col-lg-4 mb-4">
-
-        <div class="card bg-dark text-white shadow">
-          <h4 class="card-header text-center px-2">Statistics</h4>
-          
-          <ul id="serverInformation" class="list-group list-group-flush">
+        <ul id="serverInformation" class="list-group list-group-flush">
 
             <!-- Check if Plex Server is online -->
-            <li id="serverStatus" class="list-group-item d-flex justify-content-between align-items-center list-group-item-info">
-              Server Status: Loading...
+            <li id="serverStatus"
+                class="list-group-item d-flex justify-content-between align-items-center list-group-item-info">
+                Server Status: Loading...
             </li>
 
             <!-- Check Current Activity -->
             <li id="currentActivity" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
               <span class="d-flex align-items-center">
-                Current Activity <button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><i class="fas fa-fw fa-sync-alt fa-spin"></i></button>
+                Current Activity <button type="button" id="getCurrentActivity" title="Refresh Current Activity"
+                                         onclick="getCurrentActivityViaPlex()"
+                                         class="btn btn-sm btn-link text-muted py-0"><i
+                      class="fas fa-fw fa-sync-alt fa-spin"></i></button>
               </span>
-              <span id="currentActivityStreamCount">Loading...</span>
+                <span id="currentActivityStreamCount">Loading...</span>
             </li>
+        </ul>
+    </div><!-- col-sm-12 col-lg-4 -->
 
-          </ul>
-
-        </div><!-- card -->
-
-      </div><!-- col-sm-12 col-lg-4 -->
-      
-    </div>
-
-  </main><!-- container -->
-
-</body>
+</div>
