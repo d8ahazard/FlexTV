@@ -316,6 +316,15 @@ function initialize() {
 		}
 	}
 
+	if (isset($_GET['commands'])) {
+		$limit = ($_GET['commands'] !== "all") ? $_GET['commands'] : false;
+		write_log("Limit for command fetch is $limit");
+		$commands = fetchCommands($limit);
+		header('Content-Type: application/json');
+		echo json_encode($commands);
+		bye();
+	}
+
 	if (isset($_GET['fireFallback'])) {
 		sendFallback();
 		echo "SUCCESS";

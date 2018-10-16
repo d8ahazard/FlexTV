@@ -622,7 +622,7 @@ function serverAddress() {
     return $serverAddress;
 }
 
-function fetchCommands() {
+function fetchCommands($limit=false) {
     $commands = getPreference('commands',['data','stamp'],[],['apiToken'=>$_SESSION['apiToken']],false);
     $out = [];
     foreach($commands as $command) {
@@ -638,6 +638,14 @@ function fetchCommands() {
 		}
 		return ($a['timecode'] < $b['timecode']) ? 1 : -1;
 	});
+    if ($limit) {
+    	$out = array_reverse($out);
+    	if ($limit <= count($out)) {
+    		$out = array_slice($out, 0, $limit);
+	    }
+	    $out = array_reverse($out);
+
+    };
     return $out;
 }
 
