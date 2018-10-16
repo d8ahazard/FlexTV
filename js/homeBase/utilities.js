@@ -1,5 +1,5 @@
 'use strict';
-var apiToken = $('#apiTokenData').data('token');
+let apiToken = $('#apiTokenData').data('token');
 
 function queryPlex (query) {
   return $.ajax({

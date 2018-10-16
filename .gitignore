@@ -4,7 +4,6 @@
 /commands*
 /config*
 /composer.lock
-/.idea/*
 /manifest.json
 /logs/*.log.php
 /logs/*.log.old.php
@@ -24,3 +23,5 @@ logCustom.php
 minify.php
 sftp-config.json
 *.db
+.idea/workspace.xml
+.idea/deployment.xml
