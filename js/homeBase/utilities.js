@@ -1,12 +1,12 @@
 'use strict';
-let apiToken = $('#apiTokenData').data('token');
+let utilToken = $('#apiTokenData').data('token');
 
 function queryPlex (query) {
   return $.ajax({
     type: 'POST',
     url: 'api.php',
     cache: false,
-    data: {'postData': query, apiToken: apiToken},
+    data: {'postData': query, apiToken: utilToken},
     dataType: 'json'
   });
 }

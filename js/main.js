@@ -198,21 +198,11 @@ $(function () {
 $(window).on("load", function() {
     var backgrounds = $('.backgrounds');
     var modals = $('.modals');
-    var combined = "";
-    backgrounds.each(function () {
-        combined += $(this).html();
-    });
-
+    backgrounds.first().append(backgrounds.last().children());
     backgrounds.not(':first').remove();
-    backgrounds.html(combined);
 
-    var combined2 = "";
-    modals.each(function () {
-        combined2 += $(this).html();
-    });
-
+    modals.last().append(modals.first().children());
     modals.first().remove();
-    modals.html(combined2);
 
     fetchData();
 

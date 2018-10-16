@@ -131,6 +131,21 @@ a:hover:not(#executeButton) {
     display: none;
 }
 
+.fade-in{
+    -webkit-animation: fade-in 2s ease;
+    -moz-animation: fade-in ease-in-out 2s both;
+    -o-animation: fade-in ease-in-out 2s both;
+    animation: fade-in 2s ease;
+    visibility: visible;
+    -webkit-backface-visibility: hidden;
+}
+
+@-webkit-keyframes fade-in{0%{opacity:0;} 100%{opacity:1;}}
+@-moz-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
+@-o-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
+@keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
+
+
 .appContainer {
     justify-content: center;
 }
@@ -847,6 +862,9 @@ p.card-subtitle {
 .queryWrap {
     margin-top: 20px;
     width: 100%;
+    justify-content: space-around!important;
+    display: flex;
+    flex-wrap: wrap;
 
 }
 
@@ -909,7 +927,7 @@ p.card-subtitle {
     transform: translate(-50%, -50%);
     top: 8px;
     width: 54px;
-    font-size: 9px;
+    font-size: 7px;
     display: block;
     color: var(--theme-primary-inverse-75);
     overflow: hidden;

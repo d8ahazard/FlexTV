@@ -1,5 +1,5 @@
 'use strict';
-apiToken = $('#apiTokenData').data('token');
+let userToken = $('#userTokenData').data('token');
 
 /**
  * Checks Plex directly to see if it's online
@@ -232,13 +232,12 @@ function getTopContentRatings (includeLibraryTypes = ['movie', 'show'], excludeL
 
   $('#contentRatingTabContent .list-group').append(loadingListItem.repeat(stats_count));
 
-  apiToken = $('#apiTokenData').data('token');
   function getContentRatingBySection (id, array) {
     return $.ajax({
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {postData: '/library/sections/' + id + '/contentRating', apiToken: apiToken},
+      data: {postData: '/library/sections/' + id + '/contentRating', userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push(result);
@@ -251,7 +250,7 @@ function getTopContentRatings (includeLibraryTypes = ['movie', 'show'], excludeL
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {'postData': fastKey, apiToken: apiToken},
+      data: {'postData': fastKey, userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push({
@@ -459,7 +458,7 @@ function getTopGenres (includeLibraryTypes = ['movie', 'show'], excludeLibraryId
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {'postData': '/library/sections/' + id + '/genre', apiToken: apiToken},
+      data: {'postData': '/library/sections/' + id + '/genre', userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push(result);
@@ -472,7 +471,7 @@ function getTopGenres (includeLibraryTypes = ['movie', 'show'], excludeLibraryId
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {'postData': fastKey, apiToken: apiToken},
+      data: {'postData': fastKey, userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push({
@@ -869,7 +868,7 @@ function getTopTag (tagType, statCount = 5, includeLibraryTypes = ['movie', 'sho
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {'postData': '/library/sections/' + id + '/' + tagType, apiToken: apiToken},
+      data: {'postData': '/library/sections/' + id + '/' + tagType, userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push(result);
@@ -882,7 +881,7 @@ function getTopTag (tagType, statCount = 5, includeLibraryTypes = ['movie', 'sho
       type: 'POST',
       url: 'api.php',
       cache: false,
-      data: {'postData': fastKey, apiToken: apiToken},
+      data: {'postData': fastKey, userToken: userToken},
       dataType: 'json',
       success: function (result) {
         array.push({

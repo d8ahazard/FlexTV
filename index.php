@@ -8,17 +8,16 @@ scriptDefaults();
 $defaults = checkDefaults();
 if ($defaults['migrated'] ?? false) header("Refresh:0");
 $forceSSL = $defaults['forceSSL'] ?? false;
-if ($forceSSL === "false") $forceSSL = false;
 write_log("ForceSSL is ".($forceSSL ? "Enabled" : "Disabled"));
 if ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") && $forceSSL) {
 	$redirect = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	write_log("Force is on, redirecting to: $redirect","ERROR");
-	if (isDomainAvailable($redirect)) {
-		header('HTTP/1.1 301 Moved Permanently');
-		header('Location: ' . $redirect);
-		exit();
-	}
+    header('HTTP/1.1 301 Moved Permanently');
+    header('Location: ' . $redirect);
+    exit();
 }
+
+header('Cache-Control: max-age=86400');
 
 if (!session_started()) {
 	session_start();
@@ -33,128 +32,53 @@ if (isset($_GET['logout'])) {
 	clearSession();
 	$url = fetchUrl();
 	echo "<script language='javascript'>
-                    document.location.href='$url';
-                    </script>";
+            document.location.href='$url';
+        </script>";
 }
 checkUpdate();
-?>
-<!doctype html>
-<html>
-<head>
-	<title>Flex TV</title>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Plex Voice Automation for Google Assistant">
-	<meta name="msapplication-config" content="./img/browserconfig.xml">
-	<meta name="theme-color" content="#ffffff">
-	<meta name="apple-mobile-web-app-capable" content="yes">
 
-	<link rel="apple-touch-icon" sizes="180x180" href="./img/apple-icon.png">
-	<link rel="icon" type="image/png" href="./img/favicon-32x32.png" sizes="32x32">
-	<link rel="icon" type="image/png" href="./img/favicon-16x16.png" sizes="16x16">
-	<link rel="manifest" href="./manifest.json">
-	<link rel="mask-icon" href="./img/safari-pinned-tab.svg" color="#5bbad5">
-	<link rel="shortcut icon" href="./img/favicon.ico">
-
-	<style>
-		.fade-in{
-			-webkit-animation: fade-in 2s ease;
-			-moz-animation: fade-in ease-in-out 2s both;
-			-o-animation: fade-in ease-in-out 2s both;
-			animation: fade-in 2s ease;
-			visibility: visible;
-			-webkit-backface-visibility: hidden;
-		}
-
-		@-webkit-keyframes fade-in{0%{opacity:0;} 100%{opacity:1;}}
-		@-moz-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
-		@-o-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
-		@keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
-
-	</style>
-
-    <link rel="stylesheet" href="css/loader_main.css">
-    <link rel="stylesheet" href="css/font-muximux.css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link href="./css/lib/000_fonts.css" rel="stylesheet">
-    <link href="./css/lib/01_bootstrap-grid.min.css" rel="stylesheet">
-    <link href="./css/lib/03_snackbar.min.css" rel="stylesheet">
-    <link href="./css/lib/04_bootstrap-material-design.min.css" rel="stylesheet">
-    <link href="./css/lib/05_bootstrap-dialog.css" rel="stylesheet">
-    <link href="./css/lib/06_ripples.min.css" rel="stylesheet">
-    <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
-    <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
-    <link href="./css/main.css" rel="stylesheet">
-    <?php if ($_SESSION['darkTheme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
-    <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
-    <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
-    <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
-    <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
-    <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
-    <link rel="stylesheet" href="./css/homeBase.css">
-
-</head>
-
-<body style="background-color:black">
-	<div class="backgrounds">
-        <div id="bgwrap">
-
-        </div>
-        <div id="weatherDiv">
-            <div id="tempDiv" class="meta"></div>
-            <div id="weatherStatus" class="row justify-content-end meta">
-                <div id="city" class="meta col"></div>
-                <div id="weatherIcon" class="meta col-1"> </div>
-            </div>
-            <div id="timeDiv" class="meta"></div>
-            <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
-        </div>
-    </div>
-
-    <?php
-
-		$code = false;
-		foreach ($_GET as $key => $value) {
-			//write_log("hey, got a key named $key with a value of $value.");
-			if ($key == "pinID") {
-				write_log("We have a PIN: $value");
-				$code = $value;
-			}
-		}
-		$apiToken = $_SESSION['apiToken'] ?? false;
-		$getToken =  $_GET['apiToken'] ?? false;
-		$user = $token = false;
-		if ($code || $apiToken || $getToken) {
-			$GLOBALS['login'] = false;
-			$result = false;
-			if (!$apiToken) $result = plexSignIn($code);
-			if ($getToken) $user = verifyApiToken($_GET['apiToken']);
-			if ($user) $token = $user['apiToken'] ?? false;
-			if ($token) $apiToken = $token;
-			if ($result || $apiToken) {
-				if ($result == "Not allowed.") {
-					showError();
-				} else {
-					define('LOGGED_IN', true);
-					require_once dirname(__FILE__) . '/php/body.php';
-					write_log("Making body!");
-					$defaults['token'] = $token;
-					$bodyData = makeBody($defaults);
-					$body = $bodyData[0];
-					$_SESSION['darkTheme'] = $bodyData[1];
-					echo $body;
-				}
-			}
-		} else {
-			showLogin();
+$code = false;
+foreach ($_GET as $key => $value) {
+	//write_log("hey, got a key named $key with a value of $value.");
+	if ($key == "pinID") {
+		write_log("We have a PIN: $value");
+		$code = $value;
 	}
-	$execution_time = (microtime(true) - $GLOBALS['time']);
+}
+$apiToken = $_SESSION['apiToken'] ?? false;
+$getToken =  $_GET['apiToken'] ?? false;
+$user = $token = false;
+$bodyData = "";
+if ($code || $apiToken || $getToken) {
+	$GLOBALS['login'] = false;
+	$result = false;
+	if (!$apiToken) $result = plexSignIn($code);
+	if ($getToken) $user = verifyApiToken($_GET['apiToken']);
+	if ($user) $token = $user['apiToken'] ?? false;
+	if ($token) $apiToken = $token;
+	if ($result || $apiToken) {
+		if ($result == "Not allowed.") {
+			$bodyData = showError();
+		} else {
+			define('LOGGED_IN', true);
+			require_once dirname(__FILE__) . '/php/body.php';
+			write_log("Making body!");
+			$defaults['token'] = $token;
+			$bodyData = makeBody($defaults);
+			$body = $bodyData[0];
+			$_SESSION['darkTheme'] = $bodyData[1];
+			$bodyData = $body;
+		}
+	}
+} else {
+	$bodyData = showLogin();
+}
+$execution_time = (microtime(true) - $GLOBALS['time']);
 
 
-	function showLogin() {
-		$GLOBALS['login'] = true;
-		echo '
+function showLogin() {
+	$GLOBALS['login'] = true;
+	$loginString = '
 							<div class="loginBox">
 								<div class="login-box">
 									<div class="card loginCard">
@@ -172,13 +96,14 @@ checkUpdate();
 									</div>
 								</div>
 							</div>' .
-			headerhtml();
-	}
+		headerhtml();
+	return $loginString;
+}
 
-	function showError() {
-		write_log("A new user tried to sign in, but new users are not allowed!","ERROR");
-		$GLOBALS['login'] = true;
-		echo '
+function showError() {
+	write_log("A new user tried to sign in, but new users are not allowed!","ERROR");
+	$GLOBALS['login'] = true;
+	$errorString = '
 							<div class="loginBox">
 								<div class="login-box">
 									<div class="card loginCard">
@@ -189,8 +114,85 @@ checkUpdate();
 									</div>
 								</div>
 							</div>' .
-			headerhtml();
-	}
+		headerhtml();
+	return $errorString;
+}
+
+?>
+<!doctype html>
+<html>
+<head>
+	<title>Flex TV</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Plex Voice Automation for Google Assistant">
+	<meta name="msapplication-config" content="./img/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="./img/apple-icon.png">
+	<link rel="icon" type="image/png" href="./img/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="./img/favicon-16x16.png" sizes="16x16">
+	<link rel="mask-icon" href="./img/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="shortcut icon" href="./img/favicon.ico">
+
+    <link rel="stylesheet" href="css/loader_main.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link href="./css/lib/01_bootstrap-grid.min.css" rel="stylesheet">
+    <link href="./css/lib/04_bootstrap-material-design.min.css" rel="stylesheet" id="deferred">
+
+    <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
+    <link href="./css/main.css" rel="stylesheet">
+    <?php if ($_SESSION['darkTheme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
+    <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
+    <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
+    <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
+    <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
+    <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
+    <link rel="stylesheet" href="./css/homeBase.css">
+
+</head>
+
+<body style="background-color:black">
+    <noscript id="deferred-styles">
+        <link href="./css/lib/03_snackbar.min.css" rel="stylesheet">
+        <link href="./css/lib/05_bootstrap-dialog.css" rel="stylesheet">
+        <link href="./css/lib/06_ripples.min.css" rel="stylesheet">
+        <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="css/font-muximux.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+
+    </noscript>
+	<div class="backgrounds">
+        <div id="bgwrap">
+
+        </div>
+        <div id="weatherDiv">
+            <div id="tempDiv" class="meta"></div>
+            <div id="weatherStatus" class="row justify-content-end meta">
+                <div id="city" class="meta col"></div>
+                <div id="weatherIcon" class="meta col-1"> </div>
+            </div>
+            <div id="timeDiv" class="meta"></div>
+            <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
+        </div>
+    </div>
+    <script>
+        var elem = document.createElement("div");
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var url = "https://img.phlexchat.com?new=true&height=" + h + "&width=" + w + "&v=" + (Math.floor(Math.random() * (1084)));
+        elem.className += "bg bgLoaded";
+        document.getElementById("bgwrap").appendChild(elem);
+        elem.style.backgroundImage = 'url(' + url + ')';
+    </script>
+
+    <?php
+        // Body data goes here
+        echo $bodyData;
 	?>
 
     <div class="modals">
@@ -240,23 +242,21 @@ checkUpdate();
 
     <script type="text/javascript" src="./js/lib/support/12_cache-polyfill.js"></script>
 
-
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
     <?php
-	if ($GLOBALS['login']) {
-		echo '<script type="text/javascript" src="./js/login.js" async></script>';
-	} else {
-		echo '<script type="text/javascript" src="./js/homebase.js" async></script>';
-		echo '<script src="./js/utilities.js"></script>';
-        echo '<script src="./js/main.js"></script>';
-	}
+        if ($GLOBALS['login']) {
+            echo '<script type="text/javascript" src="./js/login.js" async></script>';
+        } else {
+            echo '<script type="text/javascript" src="js/homeBase/homebase.js" async></script>';
+            echo '<script src="js/homeBase/utilities.js"></script>';
+            echo '<script src="./js/main.js"></script>';
+        }
 	?>
 
 
 	<script>
-		<?php echo fetchBackground();?>
-		var noWorker = true;
+        var noWorker = true;
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.register('service-worker.js').then(function (registration) {
 				console.log("Service worker registered.");
@@ -319,6 +319,22 @@ checkUpdate();
 				return false;
 			}
 		}
+
+		// Load CSS deferred, because we went down the Lighthouse Audit rabbithole again...
+        var loadDeferredStyles = function() {
+            var addStylesNode = document.getElementById("deferred-styles");
+            var replacement = document.createElement("div");
+            replacement.innerHTML = addStylesNode.textContent;
+            var referenceNode = document.getElementById('deferred');
+            referenceNode.parentNode.insertBefore(replacement, referenceNode.nextSibling);
+            document.getElementById('deferred').appendChild(replacement);
+            addStylesNode.parentElement.removeChild(addStylesNode);
+        };
+        var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+        if (raf) raf(function() { window.setTimeout(loadDeferredStyles, 0); });
+        else window.addEventListener('load', loadDeferredStyles);
+
 	</script>
 
 

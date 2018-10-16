@@ -2294,14 +2294,12 @@ function setStartUrl() {
     $fileOut = dirname(__FILE__) . "/../manifest.json";
     $file = (file_exists($fileOut)) ? $fileOut : dirname(__FILE__) . "/../manifest_template.json";
     $json = json_decode(file_get_contents($file), true);
-    $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $url = parse_url($url);
-    $url = $url['scheme']."://". $url['host'] . $url['path'];
-    $url = str_replace("\api.php","",$url);
+    $url = parse_url($_SESSION['publicAddress']);
+    $url = "https://". $url['host'] . $url['path'];
 
     if ($json['start_url'] !== $url) {
         $json['start_url'] = $url;
-        file_put_contents($fileOut, json_encode($json, JSON_PRETTY_PRINT));
+        file_put_contents($fileOut, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }
 

@@ -231,21 +231,29 @@ function checkDefaults() {
 
     if (!$defaults) {
         write_log("Creating default values!","ALERT");
+        $currentAddress = currentAddress();
         $defaults = [
             'deviceId' => randomToken(12),
             'forceSSL' => false,
             'isWebApp' => false,
             'noNewUsers' => false,
             'deviceName' => "Flex TV (Home)",
-            'publicAddress' => currentAddress(),
+            'publicAddress' => $currentAddress,
             'revision' => '000',
             'updates' => "[]",
 	        'cleanLogs' => true
         ];
-        foreach($defaults as $key=>$value) {
+
+	    foreach($defaults as $key=>$value) {
             $data = ['name'=>$key, 'value'=>$value];
             setPreference('general',$data,["name"=>$key]);
         }
+
+	    $valid = validateIp($currentAddress);
+	    if ($valid) {
+	    	setStartUrl();
+	    }
+
     }
     return $defaults;
 }
@@ -763,6 +771,7 @@ function newUser($user) {
     $apiToken = randomToken(21);
     $user['apiToken'] = $apiToken;
     $_SESSION['apiToken'] = $apiToken;
+    $currentAddress = currentAddress();
     $defaults = [
         'returnItems' => '6',
         'rescanTime' => '6',
@@ -780,13 +789,14 @@ function newUser($user) {
         'hasPlugin' => false,
         'notifyUpdate' => false,
         'masterUser' => firstUser(),
-        'publicAddress' => currentAddress(),
+        'publicAddress' => $currentAddress,
         'shortAnswers' => false,
         'autoUpdate' => false,
 	    'quietStart' => "20:00",
 	    'quietStop' => "8:00"
     ];
     $user = array_merge($user,$defaults);
+    if (validateIp($currentAddress)) setStartUrl();
     write_log("Creating and saving $userName as a new user: ".json_encode($defaults),"ALERT");
     setPreference('userdata',$user,['apiToken'=>$apiToken]);
     return $user;
@@ -796,6 +806,18 @@ function popCommand($id) {
 	write_log("Popping it like it's hot.");
     $result = deletePrefrence('commands',['apiToken'=>$_SESSION['apiToken'], 'stamp'=>$id]);
     write_log("Result of popping it like it's hot is $result");
+}
+
+function validateIp($address) {
+	$parts = parse_url($address);
+	$user_ip = $parts['host'];
+	$isIP = (bool)ip2long($user_ip);
+	return ($isIP) ? (filter_var(
+		$user_ip,
+		FILTER_VALIDATE_IP,
+		FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE |  FILTER_FLAG_NO_RES_RANGE
+	)) : true;
+
 }
 
 function verifyApiToken($apiToken) {
@@ -810,6 +832,7 @@ function verifyApiToken($apiToken) {
     }
     return $data;
 }
+
 
 function checkGit() {
     if (isset($_SESSION['hasGit'])) {
@@ -988,17 +1011,3 @@ function webAddress() {
     return serverAddress();
 }
 
-
-function fetchBackground() {
-    $elem = '';
-    $code = 'var elem = document.createElement("img");'.PHP_EOL.
-	    'var w = window.innerWidth;'.PHP_EOL.
-		'var h = window.innerHeight;'.PHP_EOL.
-	    'var url = "https://img.phlexchat.com?new=true&height=" + h + "&width=" + w + "&v=" + (Math.floor(Math.random() * (1084)));'.PHP_EOL.
-	    'elem.setAttribute("src", url);'.PHP_EOL.
-        'elem.className += "fade-in bg bgLoaded";   '.PHP_EOL.
-        $elem .
-	    'document.getElementById("bgwrap").appendChild(elem);'.PHP_EOL;
-
-    return $code;
-}

@@ -216,7 +216,7 @@ function makeBody($defaults) {
 			        	'. $recentPage. '
 					</div>
 			        <div class="view-tab fade col-md-9 col-lg-10 col-xl-8" id="voiceTab">
-			            <div id="resultsInner"  class="queryWrap row justify-content-around">
+			            <div id="resultsInner" class="queryWrap">
 			            </div>
 			        </div>
 			        '.$masterDiv.'
