@@ -156,6 +156,7 @@ var APP_COLORS = {
 var APP_ICONS = {
     "sonarr": "muximux-sonarr",
     "radarr": "muximux-radarr",
+    "lidarr": "muximux-lidarr",
     "sick": "muximux-sick",
     "couch": "muximux-couch",
     "ombi": "muximux-ombi",
