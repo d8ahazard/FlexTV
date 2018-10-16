@@ -2002,7 +2002,7 @@ function buildSettingsPages(userData) {
 	}
 
 	var drawer = $('#SettingsDrawer');
-	var container = $('#results');
+	var container = $('#results-content');
 
 	$.each(SETTINGS_SECTIONS, function (key, data) {
 		// Create drawer items
@@ -2250,7 +2250,6 @@ function colorItems(color, element) {
     $('.drawer-item').attr('style','');
 	element.attr('style', 'background-color: ' + color + " !important");
     $('.dd-selected').attr('style', 'background-color: ' + color + " !important");
-    $('::-webkit-scrollbar').attr('style','background: ' + color);
     $('.colorBg').attr('style','background-color: ' + color);
     $('#commandTest').attr('style','background-image: linear-gradient('+ color +',' + color + '),linear-gradient(#D2D2D2,#D2D2D2)');
 

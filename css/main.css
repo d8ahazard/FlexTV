@@ -13,6 +13,16 @@
     --theme-primary-shade1: #dededee0;
     --theme-primary-shade2: #8c8c8c;
     --theme-primary-shade3: rgba(71, 71, 71, 0.92);
+
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+
+@-moz-document url-prefix() {
+    html,body{overflow: hidden !important;}
 }
 
 html, body {
@@ -290,9 +300,16 @@ a:hover:not(#executeButton) {
     top: 0;
     left: -352px;
     word-break: break-word;
-    overflow-y: scroll;
+    overflow: hidden;
     -webkit-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
     box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+}
+
+#sideMenu-content, #results-content {
+    margin-right:-17px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height:100%;
 }
 
 .drawer-header {
@@ -395,7 +412,6 @@ a:hover:not(#executeButton) {
 .view-tab {
     width: 100%;
     height: 100%;
-    overflow: scroll;
     padding-top: 25px;
     margin: 0 auto;
 }
@@ -440,11 +456,6 @@ html {
     width: 30px;
     height: 15px;
     background-image: linear-gradient(to bottom, #0d6fc3 0, #2e6da4 100%);
-}
-
-::-webkit-scrollbar {
-    width: 0; /* remove scrollbar space */
-    background: transparent; /* optional: just make scrollbar invisible */
 }
 
 .background {
@@ -809,6 +820,10 @@ p.card-subtitle {
     height: 100%;
     padding-right: 0;
     padding-left: 0;
+}
+
+.statHeader {
+    color: var(--theme-primary-inverse);
 }
 
 .statusWrapper {
@@ -1306,7 +1321,7 @@ span.toggle {
 
 #results {
     top: -5000px;
-    height: calc(100% - 42px);
+    height: calc(100% - 64px);
     left: 0;
     width: 100%;
     overflow: hidden;
