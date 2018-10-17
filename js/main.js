@@ -23,6 +23,7 @@ var forceUpdate = true;
 
 var scrolling = false;
 var scaling = false;
+var backgroundTimer = false;
 
 var lastUpdate = [];
 var devices = "foo";
@@ -481,7 +482,7 @@ function buildUiDeferred() {
 		fetchData();
 	}, 5000);
 
-	setInterval(function () {
+	backgroundTimer = setInterval(function () {
 		setBackground();
 	}, 1000 * 60);
 
@@ -1788,6 +1789,17 @@ function setListeners() {
             });
 		}
 	});
+
+    $(document).keypress(function(event) {
+        if (event.keyCode === 92 || event.keyCode === 93) {
+            if (backgroundTimer !== false) window.clearInterval(backgroundTimer);
+            backgroundTimer = setInterval(function () {
+                setBackground();
+            }, 1000 * 60);
+            setBackground();
+        }
+    });
+
 	$('#plexServerEnabled').on('change', function () {
 		$('#plexGroup').toggle();
 	});
