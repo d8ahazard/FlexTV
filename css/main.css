@@ -7,7 +7,7 @@
     --theme-primary-inverse-75: rgba(15, 15, 15, 0.75);
     --theme-primary-inverse-50: rgba(15, 15, 15, 0.5);
     --theme-primary-inverse-25: rgba(15, 15, 15, 0.25);
-    --theme-accent: #3277d8;
+    --theme-accent: #1d6fff;
     --theme-accent-light: #5fa6ff;
     --theme-accent-dark: #225da0;
     --theme-primary-shade1: #dededee0;
@@ -95,6 +95,12 @@ body {
     background: var(--theme-primary-75) !important;
 }
 
+#actionLabel {
+    position: absolute;
+    left: 40px;
+    top: 25px;
+}
+
 .barBtn, .clientBtn, .appLabel, .btnAdd {
     color: var(--theme-accent) !important;
 }
@@ -155,11 +161,6 @@ a:hover:not(#executeButton) {
 @-o-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
 @keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
 
-
-.appContainer {
-    justify-content: center;
-}
-
 .card .card-body {
     height: auto !important;
     padding: 18px !important;
@@ -181,6 +182,10 @@ a:hover:not(#executeButton) {
 
 .sendBtn:hover {
     color: var(--theme-accent-dark) !important;
+}
+
+.btn:hover .colorItem {
+    color: var(--theme-primary-inverse) !important;
 }
 
 .nowPlayingFooter, .snackbar, .modal-backdrop {
@@ -334,7 +339,6 @@ a:hover:not(#executeButton) {
 }
 
 .drawer-list {
-    margin-left: 70px;
     margin-top: 0;
     margin-bottom: 0;
     width: 100%;
@@ -343,7 +347,7 @@ a:hover:not(#executeButton) {
 }
 
 .drawer-list .drawer-item {
-    padding: 0;
+    padding-left: 60px;
 }
 
 .settings-item.expanded {
@@ -361,7 +365,7 @@ a:hover:not(#executeButton) {
     outline: none;
     color: var(--theme-primary-inverse) !important;
     text-transform: none !important;
-    width: 100% !important;
+    width: calc(100% - 18px) !important;
 }
 
 .navIcon {
@@ -387,7 +391,7 @@ a:hover:not(#executeButton) {
 
 .navIcon > span {   
     color: var(--theme-accent);
-    margin-top: 10px;
+    margin-top: -28px !important;
     margin-left: -5px;
 }
 
@@ -631,7 +635,7 @@ html {
 .load-barz {
     display: none;
     position: absolute;
-    margin-top: -8px;
+    margin-top: -2px;
     width: 100%;
     height: 1px;
     background-color: #0000ff;
@@ -710,7 +714,6 @@ p.card-subtitle {
 }
 
 .cardHeader {
-    text-align: center;
     color: var(--theme-primary-inverse);
 }
 
@@ -744,6 +747,10 @@ p.card-subtitle {
     text-overflow: ellipsis;
     margin-bottom: 5px !important;
     vertical-align: bottom !important;
+}
+
+.linkBtn {
+
 }
 
 .nav-link.active {
@@ -883,10 +890,6 @@ p.card-subtitle {
 
 }
 
-.card {
-    background: var(--theme-primary) !important;
-}
-
 .card-footer {
     background: none;
 }
@@ -926,6 +929,23 @@ p.card-subtitle {
     width: 70px;
     padding-left: 0;
     padding-right: 0;
+}
+
+.btn-50 {
+    width: 50px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.iconpicker .caret {
+    margin-left: -25px !important;
+}
+
+input[type="color"] {
+    height: 35px;
+    top: 6px;
+    position: relative;
+    background: var(--theme-primary-50);
 }
 
 .btn-100 {
@@ -988,11 +1008,8 @@ p.card-subtitle {
 
 }
 
-.queryGroup {
-    margin: 20px 5px;
-    max-height: 20px;
-    display: block;
-    width: 100%;
+#queryGroup {
+    padding-top: 18px !important;
 }
 
 .queryBtnWrap {
@@ -1013,20 +1030,27 @@ p.card-subtitle {
     line-height: 34px;
     cursor: pointer;
     position: absolute;
-    top: -1px;
+    top: 19px;
 }
 
 .inputWrap {
     display: block;
 }
 
-.queryGroup.is-focused label, .form-group.label-floating:not(.is-empty) label {
-    top: -25px !important;
-    left: 16px !important;
+.is-focused .bmd-label-floating, .is-filled .bmd-label-floating {
+    top: 10px !important;
+    left: 0 !important;
+    font-size: 12px !important;
+    transition-duration: .2s;
+}
+
+.queryGroup label {
+    transition-duration: .2s;
 }
 
 .queryGroup.label-floating label.control-label, .form-group.label-placeholder label.control-label {
     top: -10px;
+    transition-duration: .2s;
 }
 
 .nowPlayingFooter {
@@ -1054,8 +1078,8 @@ pre.prettyprint {
     color: var(--theme-accent);
 }
 
-.barIcon {
-    margin-top: 13px;
+.colorItem.barIcon {
+    margin-top: 0 !important;
     color: var(--theme-accent);
 }
 
@@ -1081,11 +1105,6 @@ pre.prettyprint {
 
 input[type=checkbox] {
     float: right;
-}
-
-.appLabel {
-    width: 100%;
-    text-align: center;
 }
 
 .appLabel-short {
@@ -1121,10 +1140,6 @@ select {
     color: var(--theme-primary-50);
 }
 
-#loginTag {
-    text-shadow: none !important;
-}
-
 .userWrap {
     width: 100%;
 }
@@ -1138,6 +1153,10 @@ select {
 .loginCard {
     background: var(--theme-primary-inverse-75) !important;
     border-radius: 15px;
+}
+
+.loginCard div {
+    text-align: center;
 }
 
 /*h4.card-header {*/
@@ -1209,7 +1228,7 @@ select {
 }
 
 .checkLabel {
-    text-align: left;
+    width: 100%;
 }
 
 .toggle {
@@ -1283,9 +1302,8 @@ span.toggle {
 }
 
 .card-subtitle {
-    color: var(--theme-primary-shade3);
+    color: var(--theme-primary-75);
     margin-bottom: 10px;
-    text-shadow: -1px 1px 0 var(--theme-primary);
 }
 
 .card-description {
@@ -1444,8 +1462,10 @@ span.toggle {
 }
 
 #timeDiv {
-    font: 300 48px 'Roboto';
-    height: 55px;
+    font-size: 50px;
+    height: 50px;
+    font-weight: 300;
+    line-height: 1em;
 }
 
 #weatherStatus {
@@ -1582,4 +1602,154 @@ span.toggle {
     left: 0;
     z-index: -1;
     background-size: cover;
+}
+
+
+/*SortTable Stuff:*/
+.tableContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.listCard {
+    margin: 10px;
+}
+
+.appCard {
+    background: var(--theme-primary-75);
+    width: 100%;
+    margin: 10px;
+    padding:10px;
+}
+
+.form-group label.control-label {
+    font-size: 16px;
+    line-height: 1.07142857;
+    font-weight: 400;
+    margin: 22px 0 0;
+}
+
+
+/*STEALING CSS IS FUN!!*/
+.progress-circular {
+    height: 2.5rem;
+    position: relative;
+    width: 2.5rem;
+}
+
+.progress-circular-wrapper {
+    -webkit-animation: progress-circular-wrapper-rotate 2.666s linear infinite;
+    animation: progress-circular-wrapper-rotate 2.666s linear infinite;
+}
+
+.progress-circular-inner {
+    -webkit-animation: progress-circular-inner-rotate 5.332s cubic-bezier(.4,0,.2,1) infinite;
+    animation: progress-circular-inner-rotate 5.332s cubic-bezier(.4,0,.2,1) infinite;
+    height: 2.5rem;
+    position: relative;
+    width: 2.5rem;
+}
+
+.progress-circular-left {
+    left: 0;
+}
+
+.progress-circular-left, .progress-circular-right {
+    height: 2.5rem;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 1.25rem;
+}
+
+.progress-circular-gap {
+    border-top: .125rem solid #3f51b5;
+    bottom: 0;
+    left: 1.1875rem;
+    position: absolute;
+    right: 1.1875rem;
+    top: 0;
+}
+
+.progress-circular-right {
+    right: 0;
+}
+
+.progress-circular-right .progress-circular-spinner {
+    -webkit-animation: progress-circular-spinner-right 1.333s cubic-bezier(.4,0,.2,1) infinite;
+    animation: progress-circular-spinner-right 1.333s cubic-bezier(.4,0,.2,1) infinite;
+    border-left-color: transparent;
+    right: 0;
+}
+
+.progress-circular-spinner {
+    border: .25rem solid;
+    border-color: #3f51b5 #3f51b5 transparent;
+    border-radius: 50%;
+    height: 2.5rem;
+    position: absolute;
+    top: 0;
+    width: 2.5rem;
+}
+
+@keyframes progress-circular-inner-rotate {
+    12.5% {
+        transform: rotate(135deg);
+    }
+
+    25% {
+        transform: rotate(270deg);
+    }
+
+    37.5% {
+        transform: rotate(405deg);
+    }
+
+    50% {
+        transform: rotate(540deg);
+    }
+
+    62.5% {
+        transform: rotate(675deg);
+    }
+
+    75% {
+        transform: rotate(810deg);
+    }
+
+    87.5% {
+        transform: rotate(945deg);
+    }
+
+    100% {
+        transform: rotate(1080deg);
+    }
+}
+
+@keyframes progress-circular-spinner-left {
+    0%,
+    100% {
+        transform: rotate(130deg);
+    }
+
+    50% {
+        transform: rotate(-5deg);
+    }
+}
+
+@keyframes progress-circular-spinner-right {
+    0%,
+    100% {
+        transform: rotate(-130deg);
+    }
+
+    50% {
+        transform: rotate(5deg);
+    }
+}
+
+@keyframes progress-circular-wrapper-rotate {
+    100% {
+        transform: rotate(360deg);
+    }
 }

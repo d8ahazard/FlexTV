@@ -79,23 +79,23 @@ $execution_time = (microtime(true) - $GLOBALS['time']);
 function showLogin() {
 	$GLOBALS['login'] = true;
 	$loginString = '
+
 							<div class="loginBox">
 								<div class="login-box">
 									<div class="card loginCard">
-									<div class="card-block">
+									<div class="card-body">
+									    <h4 class="card-title loginLabel">Welcome to Flex TV!</h4>
 										<img class="loginLogo" src="./img/phlex-med.png" alt="Card image">
-										<b><h3 class="loginLabel card-title">Welcome to Flex TV!</h3></b>
-										<h6 class="loginLabel cardSub" id="loginTag">Please log in below to begin.</h6>
-									</div>
-									<div class="card-block">
+										<div class="card-subtitle">Please log in below to begin.</div>
 										<div id="loginForm">
-											<button class="btn btn-raised btn-primary" id="plexAuth">DO IT!</button>
+											<button class="btn btn-primary btn-link btn-wd" id="plexAuth">DO IT!</button>
 											<br><br>
 											<a href="http://phlexchat.com/Privacy.html" class="card-link">Privacy Policy</a>
 										</div>
 									</div>
 								</div>
-							</div>' .
+							</div>
+							' .
 		headerhtml();
 	return $loginString;
 }
@@ -136,34 +136,29 @@ function showError() {
 	<link rel="icon" type="image/png" href="./img/favicon-16x16.png" sizes="16x16">
 	<link rel="mask-icon" href="./img/safari-pinned-tab.svg" color="#5bbad5">
 	<link rel="shortcut icon" href="./img/favicon.ico">
-
-    <link rel="stylesheet" href="css/loader_main.css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/loadingAnimation.css">
+    <!-- Material Kit/Bootstrap4 CSS, Material Icons-->
+    <link href="css/material-kit_custom.css?v=2.0.4" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link href="./css/lib/01_bootstrap-grid.min.css" rel="stylesheet">
-    <link href="./css/lib/04_bootstrap-material-design.min.css" rel="stylesheet" id="deferred">
-
-    <link href="./css/lib/08_bootstrap-slider.min.css" rel="stylesheet">
+    <!--Flex TV CSS Files-->
     <link href="./css/main.css" rel="stylesheet">
-    <?php if ($_SESSION['darkTheme']) echo '<link href="./css/dark.css" rel="stylesheet">'.PHP_EOL?>
+    <?php if ($_SESSION['darkTheme']) echo '<link href="css/darkTheme.css" rel="stylesheet">' .PHP_EOL?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
     <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
-    <link rel="stylesheet" href="./css/homeBase.css">
+    <link rel="stylesheet" href="./css/homeBase.css" id="deferred">
 
 </head>
 
 <body style="background-color:black">
     <noscript id="deferred-styles">
-        <link href="./css/lib/03_snackbar.min.css" rel="stylesheet">
-        <link href="./css/lib/05_bootstrap-dialog.css" rel="stylesheet">
-        <link href="./css/lib/06_ripples.min.css" rel="stylesheet">
-        <link href="./css/lib/07_jquery-ui.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="css/font-muximux.css">
+        <link href="css/lib/snackbar.min.css" rel="stylesheet">
+        <link href="css/lib/jquery-ui.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="css/font/font-muximux.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+        <link href="css/lib/bootstrap-iconpicker.min.css" rel="stylesheet">
 
     </noscript>
 	<div class="backgrounds">
@@ -221,26 +216,31 @@ function showError() {
 
     <meta id="messages" data-array="<?php if (count($messages)) echo urlencode(json_encode($messages)); ?>"/>
 
-    <script type="text/javascript" src="./js/lib/ui/00_jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="./js/lib/ui/01_tether.min.js"></script>
+    <!-- The root of all evil-->
+    <script type="text/javascript" src="js/lib/jquery-3.3.1.min.js"></script>
+    <!-- material kit stuff -->
+    <script src="js/lib/popper.min.js" type="text/javascript"></script>
+    <script src="js/lib/bootstrap-material-design.min.js" type="text/javascript"></script>
+    <script src="js/lib/moment.min.js"></script>
+    <script src="js/lib/nouislider.min.js" type="text/javascript"></script>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="./js/lib/ui/07_material.min.js"></script>
+    <!-- Utility scripts -->
+    <script type="text/javascript" src="js/lib/lazyload.min.js"></script>
+    <script defer type="text/javascript" src="js/lib/run_prettify.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-ui.min.js"></script>
+    <script defer type="text/javascript" src="js/lib/jquery.simpleWeather.min.js"></script>
 
-    <script type="text/javascript" src="./js/lib/ui/03_html5shiv.min.js"></script>
-    <script type="text/javascript" src="./js/lib/ui/04_lazyload.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/00_run_prettify.js"></script>
-    <script type="text/javascript" src="./js/lib/support/01_jquery-ui.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/02_clipboard.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/03_jquery.simpleWeather.min.js"></script>
+    <!-- Icon picker -->
+    <script defer type="text/javascript" src="js/lib/iconset_muximux.js"></script>
+    <script defer type="text/javascript" src="js/lib/bootstrap-iconpicker.min.js"></script>
 
-    <script type="text/javascript" src="./js/lib/support/04_snackbar.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/06_arrive.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/08_ripples.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/06_arrive.min.js"></script>
-    <script type="text/javascript" src="./js/lib/support/10_swiped.min.js"></script>
-
-    <script type="text/javascript" src="./js/lib/support/12_cache-polyfill.js"></script>
+    <!-- Snakbar, sort table, swipe to close, cache pfill for service worker -->
+    <script defer type="text/javascript" src="js/lib/snackbar.min.js"></script>
+    <script defer type="text/javascript" src="js/lib/swiped.min.js"></script>
+    <script src="https://rubaxa.github.io/Sortable/Sortable.js"></script>
+    <script type="text/javascript" src="js/lib/cache-polyfill.js"></script>
 
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
@@ -248,8 +248,8 @@ function showError() {
         if ($GLOBALS['login']) {
             echo '<script type="text/javascript" src="./js/login.js" async></script>';
         } else {
-            echo '<script type="text/javascript" src="js/homeBase/homebase.js" async></script>';
-            echo '<script src="js/homeBase/utilities.js"></script>';
+            echo '<script type="text/javascript" src="js/homebase.js" async></script>';
+            echo '<script src="js/utilities.js"></script>';
             echo '<script src="./js/main.js"></script>';
         }
 	?>

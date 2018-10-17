@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="PROJECT" libraries="{@types/bootstrap-slider, @types/jquery, all, bootstrap, bootstrap.bundle, html5shiv, jquery, jquery-3.3.1, jquery-ui, material, material-components-web, popper, respond}" />
+    <file url="PROJECT" libraries="{@types/jquery, Sortable, all, bootstrap, bootstrap.bundle, buttons, jquery, jquery-3.3.1, material, material-components-web, popper}" />
     <includedPredefinedLibrary name="HTTP Response Handler" />
   </component>
 </project>

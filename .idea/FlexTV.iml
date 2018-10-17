@@ -17,5 +17,10 @@
     <orderEntry type="library" name="html5shiv" level="application" />
     <orderEntry type="library" name="jquery-ui" level="application" />
     <orderEntry type="library" name="respond" level="application" />
+    <orderEntry type="library" name="muuri" level="application" />
+    <orderEntry type="library" name="hammer" level="application" />
+    <orderEntry type="library" name="Sortable" level="application" />
+    <orderEntry type="library" name="Sortable" level="application" />
+    <orderEntry type="library" name="buttons" level="application" />
   </component>
 </module>

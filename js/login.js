@@ -3,6 +3,7 @@ var deviceId, product, version, platform, platformVersion, device, deviceName, d
 var ov = false;
 var staticCount = 0;
 $(function ($) {
+    materialInit();
 	bg = $('.bg');
 	bodyWrap = $('#bodyWrap');
 	loginBox = $('.login-box');

@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'muximuxfonts';
-  src:  url('./font/muximuxfonts.eot?wczx5m');
-  src:  url('./font/muximuxfonts.eot?wczx5m#iefix') format('embedded-opentype'),
-    url('./font/muximuxfonts.ttf?wczx5m') format('truetype'),
-    url('./font/muximuxfonts.woff?wczx5m') format('woff'),
-    url('./font/muximuxfonts.svg?wczx5m#muximuxfonts') format('svg');
+  src:  url('muximuxfonts.eot?wczx5m');
+  src:  url('muximuxfonts.eot?wczx5m#iefix') format('embedded-opentype'),
+    url('muximuxfonts.ttf?wczx5m') format('truetype'),
+    url('muximuxfonts.woff?wczx5m') format('woff'),
+    url('muximuxfonts.svg?wczx5m#muximuxfonts') format('svg');
   font-weight: normal;
   font-style: normal;
 }

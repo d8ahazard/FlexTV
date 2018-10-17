@@ -37,12 +37,8 @@ input {
 	grid-auto-flow: dense;
 }
 
-#client.main {
+#client {
 	display: none;
-}
-
-#client.side {
-	display: block;
 }
 
 #sendBtn {

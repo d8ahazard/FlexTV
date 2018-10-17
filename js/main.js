@@ -29,6 +29,8 @@ var devices = "foo";
 var staticCount = 0;
 var javaStrings = [];
 
+var grid = null;
+
 // A global array of Setting Keys that correlate to an input type
 var SETTING_KEYTYPES = {
     Label: 'text',
@@ -436,7 +438,8 @@ function parseUpdates(data) {
 }
 // Build the UI elements after document load
 function buildUiDeferred() {
-	$.material.init();
+    materialInit();
+    initGrid();
 	$(".drawer-list").slideUp(500);
 	var messages = $('#messages').data('array');
 	var IPString = $('#publicAddress').val() + "/api.php?";
@@ -490,6 +493,38 @@ function buildUiDeferred() {
 	setInterval(function() {
 		setTime();
 	}, 1000)
+
+}
+
+function initGrid() {
+    Sortable.create(document.getElementById('simpleList'), {
+        group: "localStorage-example",
+        store: {
+            /**
+             * Get the order of elements. Called once during initialization.
+             * @param   {Sortable}  sortable
+             * @returns {Array}
+             */
+            get: function (sortable) {
+                var order = localStorage.getItem(sortable.options.group.name);
+                console.log("Order: ", order);
+                return order ? order.split('|') : [];
+            },
+
+            /**
+             * Save the order of elements. Called onEnd (when the item is dropped).
+             * @param {Sortable}  sortable
+             */
+            set: function (sortable) {
+                var order = sortable.toArray();
+                console.log("Order: ", order);
+                localStorage.setItem(sortable.options.group.name, order.join('|'));
+            }
+        }
+    })
+}
+
+function gridChange(evt) {
 
 }
 
@@ -718,7 +753,7 @@ function setBackground() {
     newImage.css('background-image', 'url(' + image.src + ')');
     newImage.fadeIn(1000).removeClass('hidden');
     console.log("The fade in...");
-	setTimeout(
+    setTimeout(
 		function () {
             $("#bgwrap div:not(:last-child)").remove();
 		}, 1500);
@@ -2120,8 +2155,11 @@ function buildSettingsPages(userData) {
                     checked: checked
                 });
 
+                var iSpan = $('<span class="toggle"></span>');
+
                 // Well, this just generates the header and toggle, we still need the settings body...
                 tBl.append(iUrl);
+                tBl.append(iSpan);
                 iUrl.data('app', itemKey);
                 tB.append(tBl);
                 cB.append(h);
@@ -2251,7 +2289,6 @@ function colorItems(color, element) {
 	element.attr('style', 'background-color: ' + color + " !important");
     $('.dd-selected').attr('style', 'background-color: ' + color + " !important");
     $('.colorBg').attr('style','background-color: ' + color);
-    $('#commandTest').attr('style','background-image: linear-gradient('+ color +',' + color + '),linear-gradient(#D2D2D2,#D2D2D2)');
 
 
 }

@@ -1,0 +1,19 @@
+:root {
+	--theme-primary: rgba(15, 15, 15, 0.9);
+	--theme-primary-75: rgba(0, 0, 0, 0.75);
+	--theme-primary-50: rgba(0, 0, 0, 0.5);
+	--theme-primary-20: rgba(0, 0, 0, 0.2);
+	--theme-primary-inverse: rgba(255, 255, 255, 0.9);
+	--theme-primary-inverse-75: rgba(255, 255, 255, 0.75);
+	--theme-primary-inverse-50: rgba(255, 255, 255, 0.5);
+	--theme-primary-inverse-25: rgba(255, 255, 255, 0.25);
+	--theme-accent: #3476ff;
+	--theme-accent-dark: #1c3b7f;
+	--theme-accent-light: #a6c3ff;
+	--theme-primary-shade1: #404040;
+	--theme-primary-shade2: #8c8c8c;
+	--theme-primary-shade3: #eaeaea;
+}
+
+
+
