@@ -6182,7 +6182,7 @@ a.bg-primary:hover,
 a.bg-primary:focus,
 button.bg-primary:hover,
 button.bg-primary:focus {
-  background-color: #1c64d5 !important;
+  background-color: var(--theme-primary-inverse-50) !important;
 }
 
 .bg-secondary {
@@ -9532,7 +9532,7 @@ button:focus {
 .btn:hover,
 .btn.btn-default:hover {
   color: var(--theme-primary-inverse-75);
-  background-color: var(--theme-accent);
+  background-color: var(--theme-primary);
   border-color: var(--theme-primary-inverse-50);
 }
 
@@ -9543,7 +9543,7 @@ button:focus {
 .btn.btn-default.focus,
 .btn.btn-default:hover {
   color: var(--theme-primary-inverse-75);
-  background-color: var(--theme-accent);
+  background-color: var(--theme-primary);
   border-color: var(--theme-primary-inverse-50);
 }
 

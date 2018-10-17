@@ -153,17 +153,17 @@ function makeBody($defaults) {
 				<div id="topBar" class="row testGrp justify-content-between">
 					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="leftGrp">
 						<div class="row testGrp">
-							<div class="col-12 col-md-6 col-lg-4 col-xl-3 center-block">
+							<div class="col-12 col-md-6 col-lg-4 center-block">
 								<div class="btn btn-sm navIcon center-block" id="hamburger">
 									<span class="material-icons colorItem">menu</span>
 								</div>
 							</div>
-							<div class="col-0 col-md-6 col-lg-4 col-xl-3 center-block">
+							<div class="col-0 col-md-6 col-lg-4 center-block">
 								<div class="btn btn-sm navIcon center-block" id="refresh">
 									<span class="material-icons colorItem">refresh</span>
 								</div>
 							</div>
-							<div class="col-md-0 col-lg-4 col-xl-6"></div>
+							<div class="col"></div>
 						</div>
 					</div>
 					<div class="col-8 col-sm-10 col-md-9 col-lg-8 wrapper">
@@ -178,8 +178,9 @@ function makeBody($defaults) {
 										<div class="barz"></div>
 										<div class="barz"></div>
 									</div>
-			        
-                                    <a class="material-icons colorItem sendBtn" id="sendBtn">message</a>
+			        				<div class="btn btn-sm navIcon sendBtn" id="sendBtn">
+            							<span class="material-icons colorItem">message</span>
+									</div>
                                 </div>
 					        </div>
 				        </div>

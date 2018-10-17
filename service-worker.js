@@ -38,9 +38,6 @@ self.addEventListener('install', function (e) {
                 './css/homeBase.css',
                 './css/lib/bootstrap-iconpicker.min.css',
                 './css/lib/jquery-ui.min.css',
-                './css/lib/material-kit.css',
-                './css/lib/material-kit.css.map',
-                './css/lib/material-kit.min.css',
                 './css/lib/snackbar.min.css',
                 './css/loadingAnimation.css',
                 './css/main.css',
@@ -48,7 +45,10 @@ self.addEventListener('install', function (e) {
                 './css/main_max_768.css',
                 './css/main_min_1200.css',
                 './css/main_min_768.css',
-                './css/main_min_992.css'
+                './css/main_min_992.css',
+                './css/material-kit_custom.css',
+                './css/material-kit_custom.css.map',
+                './css/material-kit_custom.min.css'
 			]);
 		})
 	);

@@ -180,6 +180,12 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-shade3) !important;
 }
 
+#queryGroup.is-focused #actionLabel, #queryGroup.is-filled #actionLabel {
+    position: absolute;
+    top: 2px !important;
+    left: 0 !important;
+}
+
 .sendBtn:hover {
     color: var(--theme-accent-dark) !important;
 }
@@ -374,7 +380,6 @@ a:hover:not(#executeButton) {
     cursor: pointer;
     color: var(--theme-primary-inverse);
     text-align: center;
-    margin: 5px 1px;
 }
 
 #hamburger {
@@ -389,10 +394,12 @@ a:hover:not(#executeButton) {
     right: 13px;
 }
 
-.navIcon > span {   
+.navIcon > span {
     color: var(--theme-accent);
-    margin-top: -28px !important;
-    margin-left: -5px;
+    margin: 0 !important;
+    position: absolute !important;
+    top: 15px !important;
+    left: 15px;
 }
 
 .searchWrap {
@@ -1025,12 +1032,10 @@ input[type="color"] {
 
 #sendBtn {
     color: var(--theme-accent);
-    height: 34px;
-    width: 34px;
-    line-height: 34px;
-    cursor: pointer;
     position: absolute;
-    top: 19px;
+    top: 2px;
+    left: -18px;
+    background-color: transparent;
 }
 
 .inputWrap {
