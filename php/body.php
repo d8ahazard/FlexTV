@@ -206,7 +206,7 @@ function makeBody($defaults) {
 				</div>
 				
 		        <div id="results">
-	                <div id="results-content">
+	                <div id="results-content" class="row">
 				        <div class="view-tab active col-md-9 col-lg-10 col-xl-8" id="homeTab">
 				            '. $homeBase. '
 				        </div>
@@ -429,23 +429,13 @@ function makeBody($defaults) {
 	                </div>
 	                <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
                         <div class="tableContainer">
-							<div id="simpleList">
-								<div class="listCard row col-sm-10 col-lg-6" data-id="1">
-									<div class="appCard bs-component">
-										<div class="form-group bmd-form-group bmd-form-group">
-                                            <label for="exampleInput1" class="bmd-label-floating">With Floating Label</label>
-                                            <input type="email" class="form-control" id="exampleInput1">
-                                            <span class="bmd-help">We\'ll never share your email with anyone else.</span>
-                                        </div>
-                                        <div class="form-group bmd-form-group bmd-form-group">
-                                            <div class="col-md-10 col-md-offset-2">
-                                                <input type="color" name="favcolor" value="#ff0000">
-												<button class="btn btn-raised btn-info btn-50" role="iconpicker" data-iconset="muximux" data-icon="muximux-sonarr"></button>
-                                            </div>
-                                        </div>
-									</div>
-								</div>
-			                </div>              
+							<div id="simpleList" class="row">
+			                </div>  
+			                <div id="appFab" class="btn btn-primary btn-fab-lg">
+			                	<span class="material-icons">add</span>
+							</div>   
+							<div id="deleteList">
+			                </div>  
 	                    </div>
                     </div>
 			            <div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="plexSettingsTab">

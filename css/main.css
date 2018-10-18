@@ -161,11 +161,16 @@ a:hover:not(#executeButton) {
 @-o-keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
 @keyframes fade-in{0%{opacity:0} 100%{opacity:1}}
 
+.card .custom-body {
+    padding: 20px 10px;
+}
+
 .card .card-body {
     height: auto !important;
     padding: 18px !important;
     margin: 15px !important;
 }
+
 
 .nav-item > .nav-link, .appContainer, .userGroup *, .form-control, .text-muted {
     color: var(--theme-primary-shade2) !important;
@@ -184,6 +189,108 @@ a:hover:not(#executeButton) {
     position: absolute;
     top: 2px !important;
     left: 0 !important;
+}
+
+.appHandle {
+    position: absolute;
+    top: -5px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.appHandle:hover {
+    background: var(--theme-primary-inverse-25);
+}
+
+.appHandle.btn .material-icons {
+    color: var(--theme-primary-inverse-50);
+    position: absolute;
+    left: calc(50% - 12px);
+    top: 24px;
+}
+
+.appSetter {
+    cursor: pointer;
+}
+
+.btn-icon {
+    width: 80px;
+    padding: 10px 0;
+}
+
+#appFab {
+    position: fixed;
+    bottom: 20px;
+    margin: 0 auto;
+    left: calc(50% - 34px);
+}
+
+#deleteList {
+    position: fixed;
+    bottom: 20px;
+    margin: 0 auto;
+    left: calc(50% - 34px);
+    width: 34px;
+    height: 34px;
+}
+
+.btn-fab-lg {
+    -webkit-border-radius: 50px;
+    border-radius: 50px;
+    font-size: 0;
+    height: 68px;
+    padding: 34px;
+    width: 68px;
+    -webkit-transition: box-shadow .08s linear,min-width .15s cubic-bezier(0.4,0.0,0.2,1);
+    transition: box-shadow .08s linear,min-width .15s cubic-bezier(0.4,0.0,0.2,1);
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149);
+    -webkit-font-smoothing: antialiased;
+    font-family: 'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+}
+
+.btn-fab-lg span {
+    margin-left: -12px;
+}
+
+.btn-fab-lg:hover {
+    background-color: var(--theme-primary-inverse-75);
+}
+
+.btn-icon i {
+    font-size: 2.75rem;
+}
+
+.btn-color {
+    width: 50px;
+    padding: 10px;
+    margin-top: 17px;
+}
+
+.btn-newtab {
+    width: 50px;
+    padding: 10px;
+    margin-top: -2px;
+}
+
+.custom-body .input-group {
+    margin-left: 11px;
+}
+
+.custom-body .card-title {
+    margin-top: 18px;
+}
+
+.iconpicker.dropdown-toggle:after {
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -o-transform: none !important;
+    -ms-transform: none !important;
+    transform: none !important;
+    bottom: 10px;
+    position: absolute;
+    right: 10px;
 }
 
 .sendBtn:hover {
@@ -424,7 +531,10 @@ a:hover:not(#executeButton) {
     width: 100%;
     height: 100%;
     padding-top: 25px;
+    padding-left: 0;
+    padding-right: 0;
     margin: 0 auto;
+    overflow-y: scroll;
 }
 
 .drawer-item.active {
@@ -434,6 +544,10 @@ a:hover:not(#executeButton) {
 
 .drawer-item.active i {
     color: var(--theme-primary-inverse) !important;
+}
+
+#simpleList, #results-content: {
+    overflow: hidden;
 }
 
 html {
@@ -986,7 +1100,6 @@ input[type="color"] {
 }
 
 .dropdown-toggle::after {
-    margin-left: 2.5em;
     margin-top: 2px;
 }
 
@@ -1619,7 +1732,7 @@ span.toggle {
 }
 
 .listCard {
-    margin: 10px;
+    margin: 10px 0;
 }
 
 .appCard {

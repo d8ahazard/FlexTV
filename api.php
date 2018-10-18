@@ -187,11 +187,16 @@ function initialize() {
 		}
 		if (preg_match("/Path/", $id)) if ((substr($value, 0, 1) != "/") && (trim($value) !== "")) $value = "/" . $value;
 
+		if ($id === 'appArray') {
+			write_log("Updating app array.");
+			$value = base64_encode($value);
+		}
+
 		if ($valid) {
 			if ($id === 'forceSSL' || $id === 'noNewUsers' || $id === 'cleanLogs') {
 				$data = ['name'=>$id, 'value'=>$value];
 				if ($_SESSION['masterUser']) {
-					write_log("Setting general perference: " . json_encode($data));
+					write_log("Setting general preference: " . json_encode($data));
 					setPreference('general', $data, ["name"=>$id]);
 					writeSession($id,$value);
 				} else {
@@ -399,7 +404,6 @@ function getUiData($force = false) {
 		if (preg_match("/List/", $key) && $key !== 'deviceList') {
 			$value = fetchList(str_replace("List", "", $key));
 		}
-
 		$staticBools = [
 			'darkTheme',
 			'forceSSL',
@@ -421,6 +425,16 @@ function getUiData($force = false) {
 			if ($value == "1") $value = true;
 		}
 	}
+
+	$appArray = $settingData['appArray'] ?? [];
+	$oldArray = $_SESSION['appArray'] ?? [];
+	if (json_encode($appArray) !== json_encode($oldArray) || $force) {
+		write_log("SENDING APP ARRAY","ALERT",false,true);
+		writeSession('appArray', $appArray);
+	} else {
+		unset($settingData['appArray']);
+	}
+
 	$commands = fetchCommands();
 	if ($playerStatus) {
 		$result['playerStatus'] = $playerStatus;

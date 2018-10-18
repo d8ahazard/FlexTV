@@ -1512,6 +1512,9 @@
 .muximux-couch:before {
   content: "\e900";
 }
+.muximux-couchpotato:before {
+  content: "\e900";
+}
 .muximux-headphones3:before {
   content: "\e901";
 }

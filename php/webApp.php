@@ -669,6 +669,14 @@ function fetchDeviceCache() {
     return $list;
 }
 
+function fetchappArray() {
+	$list = [];
+	$keys = ['appArray'];
+	$data = getPreference('userdata',['appArray'], false,['apiToken'=>$_SESSION['apiToken']]);
+	if ($data) $data = json_decode(base64_decode($data),true);
+	return $data;
+}
+
 function fetchUser($userData) {
     $email = $userData['plexEmail'];
     $keys = ['plexUserName', 'plexEmail','apiToken','plexAvatar','plexPassUser','plexToken','apiToken','appLanguage'];
@@ -680,11 +688,14 @@ function fetchUserData($rescan=false) {
     $temp = getPreference('userdata',false,false,['apiToken'=>$_SESSION['apiToken']]);
     $data = [];
     foreach($temp as $key => $value) {
-        if (isJSON($value)) $value = json_decode($value,true);
+    	if (isJSON($value)) $value = json_decode($value,true);
         $value = scrubBools($value,$key);
         $data[$key] = $value;
     }
 	$dlist = $data['dlist'] ?? false;
+    $aList = $data['appArray'] ?? false;
+    if ($aList) $aList = json_decode(base64_decode($aList),true);
+    $data['appArray'] = $aList;
 	$devices = json_decode(base64_decode($dlist), true);
 	if ($rescan || !$devices) $devices = scanDevices(true);
 	if (isset($data['dlist'])) unset($data['dlist']);
