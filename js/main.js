@@ -1753,7 +1753,7 @@ function setListeners() {
             clearTimeout(clickTimer);
             clickCount = 0;
             console.log("Reloading frame source.");
-            var frame = "#" + $(this).data('frame');
+            var frame = "#" + $(this).data('Frame');
             $('.load-barz').show();
             $(frame,window.parent.document).attr('src',$(frame,window.parent.document).attr('src'));
             $(frame).load(function() {
@@ -1794,7 +1794,7 @@ function setListeners() {
 
 	$(document).on('click', '#refresh', function () {
 	    console.log("Refreshing tab.");
-	    var frame = $('.framediv.active').find('iframe');
+	    var frame = $('.frameDiv.active').find('iframe');
         $('.load-barz').show();
         $(frame,window.parent.document).attr('src',$(frame,window.parent.document).attr('src'));
         // #TODO: Add an animation to rotate the icon here.
@@ -2073,11 +2073,11 @@ function addAppGroup(app) {
 
 
             $('<div>', {
-                class: 'view-tab fade framediv',
+                class: 'view-tab fade frameDiv',
                 id: appId + "Div"
             }).appendTo(container);
 
-            var newDiv = $(appId + "Div");
+            var newDiv = $('#' + appId + "Div");
             newDiv.attr("data-uri", appUrl);
             newDiv.attr("data-target", appId + "Frame");
             newDiv.attr("data-label", appLabel);
@@ -2214,7 +2214,7 @@ function saveAppContainers() {
         console.log("Label value: " + appLabel + " or test: ");
 
         if (appLabel === "") appLabel = "Click Me";
-        var appIcon = $(this).find('.iconpicker').data('icon');
+        var appIcon = $(this).find('.iconpicker').find('input[type=hidden]').val();
         var appColor = $(this).find('input[type="color"]').val();
         var appId = $(this).find('.appSetter').data('id');
         var newTab = $(this).find('.app-newtab').is(':checked');

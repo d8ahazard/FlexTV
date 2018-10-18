@@ -1201,6 +1201,13 @@ pre.prettyprint {
     color: var(--theme-accent);
 }
 
+.colorItem.barIcon.muximux {
+    top: 13px;
+    position: absolute;
+    font-size: 22px;
+    left: 89px;
+}
+
 .barBtn {
     height: 50px;
     width: 64px;
@@ -1331,7 +1338,7 @@ select {
     height: 100%;
 }
 
-.framediv {
+.frameDiv {
     padding-top: 0;
     position: absolute;
     top: 0;
