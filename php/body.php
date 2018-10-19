@@ -219,7 +219,7 @@ function makeBody($defaults) {
 				        </div>
 				        '.$masterDiv.'
 				        
-	                    <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="generalSettingsTab">     
+						<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="generalSettingsTab">     
 	                    <div class="gridBox">
 						    <div class="appContainer card">
 				                <div class="card-body">
@@ -427,7 +427,7 @@ function makeBody($defaults) {
 				            </div>
 			            </div>	                    
 	                </div>
-	                <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
+	                	<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
                         <div class="tableContainer">
 							<div id="simpleList" class="row">
 			                </div>  
@@ -438,7 +438,8 @@ function makeBody($defaults) {
 			                </div>  
 	                    </div>
                     </div>
-			            <div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="plexSettingsTab">
+                    
+		            	<div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="plexSettingsTab">
 				            <div class="gridBox">
 			                    <div class="appContainer card">
 			                        <div class="card-body">
@@ -516,32 +517,37 @@ function makeBody($defaults) {
 			                        </div>
 			                    </div>		                
 				            </div>
-			            </div>
+		            	</div>
 						<div class="view-tab settingPage col-sm-9 col-lg-8 fade'. $hidden.'" id="logTab">
-						<div class="modal-header">
-							<div class="form-group bmd-form-group" id="logGroup">
-								<label for="logLimit" class="logControl">' . $lang['uiSettingLogCount'] . '
-									<select id="logLimit" class="form-control">
-										<option value="10">10</option>
-										<option value="50" selected>50</option>
-										<option value="100">100</option>
-										<option value="500">500</option>
-										<option value="1000">1000</option>
-									</select>
-								</label>
-								<div id="log">
-									<div id="logInner">
-										<div>
-											<iframe class="card card-body" id="logFrame" src=""></iframe>
+							<div class="modal-header">
+								<div class="form-group bmd-form-group" id="logGroup">
+									<label for="logLimit" class="logControl">' . $lang['uiSettingLogCount'] . '
+										<select id="logLimit" class="form-control">
+											<option value="10">10</option>
+											<option value="50" selected>50</option>
+											<option value="100">100</option>
+											<option value="500">500</option>
+											<option value="1000">1000</option>
+										</select>
+									</label>
+									<div id="log">
+										<div id="logInner">
+											<div>
+												<iframe class="card card-body" id="logFrame" src=""></iframe>
+											</div>
 										</div>
 									</div>
+									<a class="logbutton" href="log.php?apiToken='.$apiToken.'" target="_blank">
+										<span class="material-icons colorItem">open_in_browser</span>
+									</a>
 								</div>
-								<a class="logbutton" href="log.php?apiToken='.$apiToken.'" target="_blank">
-									<span class="material-icons colorItem">open_in_browser</span>
-								</a>
 							</div>
 						</div>
-					</div>
+						<div class="view-tab settingPage col-sm-9 col-lg-8 fade" id="fetcherSettingsTab">
+							<div class="gridBox" id="fetcherTab">
+							
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -690,7 +696,10 @@ function makeBody($defaults) {
 		                    '.$masterBtn.'
 		                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
 		                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
-		                    </div> 
+		                    </div>
+		                    <div class="drawer-item btn" data-link="fetcherSettingsTab" data-label="Fetchers">
+								<span class="barBtn"><i class="material-icons colorItem barIcon">cloud_download</i></span>Fetchers
+		                	</div>
 						</div>
 						<div class="drawer-separator"></div>
 						<div class="drawer-item btn" data-link="logTab" data-label="Logs">

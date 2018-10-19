@@ -66,10 +66,6 @@ var SETTINGS_SECTIONS = {
     music: {
         icon: 'music_note',
         items: ['headphones','lidarr']
-    },
-    download: {
-        icon: 'cloud_download',
-        items: ['deluge', 'downloadstation', "nzbhydra", 'sabnzbd', 'transmission', 'utorrent']
     }
 };
 
@@ -234,8 +230,9 @@ $(window).on('resize', function () {
     clearTimeout(scaling);
     scaling = setTimeout(function() {
         scaleSlider();
-        setBackground();
         scaleElements();
+        setBackground(true);
+        startBackgroundTimer();
     }, 250);
 });
 
@@ -477,6 +474,7 @@ function buildUiDeferred() {
 	setListeners();
 	checkUpdate();
 	fetchWeather();
+    startBackgroundTimer();
 
 	$(".remove").remove();
 
@@ -484,10 +482,6 @@ function buildUiDeferred() {
 		forceUpdate = false;
 		fetchData();
 	}, 5000);
-
-	backgroundTimer = setInterval(function () {
-		setBackground();
-	}, 1000 * 60);
 
 	setInterval(function () {
 		fetchWeather();
@@ -748,19 +742,20 @@ function scaleElements() {
 	$('#logFrame').height(($(window).height()/3) * 2);
 }
 
-function setBackground() {
-	//Add your images, we'll set the path in the next step
-    var image = new Image();
-    console.log("Fired.");
-	var bgWrap = $('#bgwrap');
-
-    image.src = "https://img.phlexchat.com?new=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
+function setBackground(last) {
+	var image = new Image();
+	last = last ? "&last" : "";
+    // image.on("load", function() {
+    //    console.log("BG Image loaded.");
+    // });
+    var bgWrap = $('#bgwrap');
+    console.log("Setting image source...");
+    image.src = "https://img.phlexchat.com?new=true"+last+"&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
     bgWrap.append("<div class='bg hidden'></div>");
     bgs = $('.bg');
     var newImage = bgs.last();
     newImage.css('background-image', 'url(' + image.src + ')');
     newImage.fadeIn(1000).removeClass('hidden');
-    console.log("The fade in...");
     setTimeout(
 		function () {
             $("#bgwrap div:not(:last-child)").remove();
@@ -930,7 +925,6 @@ function closeClientList() {
 }
 
 function toggleGroups() {
-    console.log("Group toggles fired...");
     var vars = {
         "sonarr": sonarrEnabled,
         "sick": sickEnabled,
@@ -1303,6 +1297,20 @@ function animateContent(angle,speed) {
 	});
 }
 
+function startBackgroundTimer() {
+    if (backgroundTimer) {
+        clearInterval(backgroundTimer);
+        backgroundTimer = null;
+    }
+    if (!backgroundTimer) {
+        backgroundTimer = setInterval(function () {
+            setBackground(false);
+        }, 1000 * 60);
+    }
+}
+
+
+
 function startScrolling(){
 	if (!scrolling) {
 		direction = "down";
@@ -1542,7 +1550,7 @@ function setListeners() {
 		if (staticCount >= 14 && cv==="") {
 			cv="&cage=true";
 			$('#actionLabel').text("You don't say!?!?");
-			setBackground();
+			setBackground(false);
 		}
 	});
 
@@ -1606,12 +1614,6 @@ function setListeners() {
 			},"json");
 		}
 
-		if ($(this).hasClass("resetInput")) {
-			appName = $(this).data('value');
-			if (confirm('Are you sure you want to clear settings for ' + appName + '?')) {
-
-			}
-		}
 
 		if ($(this).hasClass("hookLnk")) {
 			appName = $(this).data('value');
@@ -1621,13 +1623,10 @@ function setListeners() {
 
         if ($(this).hasClass("logBtn")) {
 			location.href = 'api.php?castLogs&apiToken=' + apiToken;
-
-
         }
 
 		if ($(this).hasClass("setupInput")) {
 			appName = $(this).data('value');
-
 			$.get('api.php?setup&apiToken=' + apiToken, function (data) {
 				$.snackbar({content: JSON.stringify(data).replace(/"/g, "")});
 			});
@@ -1690,14 +1689,14 @@ function setListeners() {
     });
 
     $(document).on('click', '.btn-newtab', function() {
-       var target=$(this.data('for'));
+       var target=$(this).data('for');
        $('#' + target).click();
     });
 
     $(document).on('change', function ( event ) {
         var id = $(event.target).attr('id');
         if (id === undefined) id = "";
-        var classes = ['app-url', 'app-newtab', 'iconpicker', 'appSetter', 'btn-color'];
+        var classes = ['app-url', 'app-newtab', 'appSetter', 'btn-color'];
         for (var className in classes) {
             if ($(event.target).hasClass(classes[className])) {
                 console.log("Building apps is ", buildingApps);
@@ -1715,7 +1714,7 @@ function setListeners() {
                 saveAppContainers();
             }
         }
-        console.log("Change detected for " + id);
+        console.log("Change detected for ", $(event.target));
     });
 
     $(document).on('blur', '.blur', function () {
@@ -1883,7 +1882,11 @@ function setListeners() {
 
     $(document).keypress(function(event) {
         if (event.keyCode === 92 || event.keyCode === 93) {
-            setBackground();
+            var last = false;
+            console.log("Keycode is " + event.keyCode);
+            if (event.keyCode=== 93) last = true;
+            setBackground(last);
+            startBackgroundTimer();
         }
     });
 
@@ -2093,11 +2096,12 @@ function addAppGroup(app) {
 
 }
 
-function reloadAppGroups(appList) {
-    $("#results").find('.frameDiv').remove();
+function reloadAppGroups(appList, force) {
+    if (force) $("#results").find('.frameDiv').remove();
     $("#AppzDrawer").html("");
     for (var app in appList) if (appList.hasOwnProperty(app)) {
-        addAppGroup(appList[app]);
+        if (force) addAppGroup(appList[app]);
+        addAppContainer(appList[app])
     }
 }
 
@@ -2145,7 +2149,7 @@ function addAppContainer(data) {
                     '<div class="col-auto">' +
                         '<button class="btn btn-raised btn-icon" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"></button>' +
                     '</div>' +
-                    '<div class="col-8">' +
+                    '<div class="col-6">' +
                         '<h4 class="card-title">' +
                             '<span class="label label-default appSetter" data-for="appName'+appId+'"  data-id="' + appId + '" title="Click here to set the app display name.">'+appLabel+'</span>' +
                             '<input value="" type="text" id="appName'+appId+'" name="textBox1"  data-id="' + appId + '" class="blur hidden" value="'+appLabel+'">' +
@@ -2184,16 +2188,17 @@ function addAppContainer(data) {
     $('#simpleList').append(container);
     $('*[data-id="'+ appId +'"]').css('color',appColor);
     $('button[role="iconpicker"],div[role="iconpicker"]').iconpicker();
-    addAppGroup(data);
 }
 
 function loadAppContainers(data) {
     $('#simpleList').html("");
+    $('#AppzDrawer').html("");
     buildingApps = true;
     console.log("Building apps is ", buildingApps);
     for (var app in data) if (data.hasOwnProperty(app)) {
         console.log("Adding an app: ",data[app]);
         addAppContainer(data[app]);
+        addAppGroup(data[app]);
     }
     setTimeout(function() {
         buildingApps = false;
@@ -2230,60 +2235,23 @@ function saveAppContainers() {
         appList.push(item);
     });
     console.log("Saving app List: ", appList);
-    reloadAppGroups(appList);
+    reloadAppGroups(appList, false);
     var url = "./api.php?apiToken=" + apiToken + "&id=appArray&value=" + encodeURIComponent(JSON.stringify(appList));
     $.get(url,function(data) {
        console.log("Result from save: ", data);
     });
 }
 
-
 function buildSettingsPages(userData) {
 	if (userData.hasOwnProperty('userData')) {
 		userData = userData['userData'];
 	}
 
-	var drawer = $('#SettingsDrawer');
-	var container = $('#results-content');
+    var gB = $('#fetcherTab');
 
 	$.each(SETTINGS_SECTIONS, function (key, data) {
-		// Create drawer items
-        var btnDiv = $('<div>', {
-            class: 'drawer-item btn',
-            id: key + "SettingBtn"
-        });
-        btnDiv.data('link', key + "SettingsTab");
-        btnDiv.data('label', ucFirst(key));
-
-        var btnSpan = $('<span>', {
-            class: 'barBtn',
-            id: key + "Span"
-        });
-
-        var btnIcon = $('<i>', {
-            class: 'colorItem barIcon material-icons',
-			text: data.icon
-        });
-        btnSpan.append(btnIcon);
-        btnDiv.append(btnSpan);
-        btnDiv.append(ucFirst(key));
-        drawer.append(btnDiv);
-
-        // Create settings items (Wheeee!)
-		var tabDiv = $('<div>', {
-			class: 'view-tab fade settingPage col-md-9 col-lg-10 col-xl-8',
-			id: key + "SettingsTab"
-		});
-
-		var items = data.items;
-		itemClass = "gridBox";
-		if (items.length <= 1) {
-			var itemClass = "gridBox-1 col-xl-8 col-lg-10 col-sm-12";
-		}
-		var gB = $('<div>', {
-			class: itemClass
-		});
-
+		// Create settings items (Wheeee!)
+        var items = data.items;
         for (var itemKey in items) {
             if (items.hasOwnProperty(itemKey)) {
                 itemKey = items[itemKey];
@@ -2295,7 +2263,6 @@ function buildSettingsPages(userData) {
                     auth = APP_DEFAULTS[itemKey].Token;
                     label = APP_DEFAULTS[itemKey].Label;
                     list = APP_DEFAULTS[itemKey].Profile;
-                    search = APP_DEFAULTS[itemKey].Search;
                 }
                 var SETTINGS_INPUTS = {
                     Token: {
@@ -2318,10 +2285,6 @@ function buildSettingsPages(userData) {
                     },
                     Uri: {
                         label: "Uri",
-                        value: true
-                    },
-                    Newtab: {
-                        label: "Open in new tab",
                         value: true
                     }
                 };
@@ -2430,11 +2393,11 @@ function buildSettingsPages(userData) {
                 });
                 cB.append(pFg);
                 aC.append(cB);
-                gB.append(aC);
-                tabDiv.append(gB);
             }
+
+            gB.append(aC);
 		}
-        container.append(tabDiv);
+
 	});
 
 
