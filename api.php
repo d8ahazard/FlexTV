@@ -626,7 +626,8 @@ function fetchMediaInfo(Array $params) {
 	$result = $meta = $searches = [];
 	$result['params'] = $data;
 	$subType = $data['subType'] ?? false;
-
+	$searchUrl = "https://search.phlexchat.com/search.php";
+	$queryParams = ['key' => keyGen()];
 	if ($castMember) {
 		$type = $params['type'][0] ?? 'movie';
 		$castMedia = fetchRandomMediaByCast($castMember,$type);
@@ -635,7 +636,10 @@ function fetchMediaInfo(Array $params) {
 			write_log("All purdy-like: ".json_encode($mediaItem));
 			$query = urlencode($mediaItem['title']);
 			$year = $mediaItem['year'];
-			$url = "https://search.phlexchat.com/search.php?query=$query&type=$type&year=$year&key=".keyGen();
+			$queryParams['query'] = $query;
+			$queryParams['type'] = $type;
+			$queryParams['year'] = $year;
+			$url = $searchUrl . "?" . http_build_query($queryParams);
 			$metaData = curlGet($url);
 			$meta = $metaData ? json_decode($metaData,true) : [];
 			$meta = $meta[0] ?? false;
@@ -676,16 +680,16 @@ function fetchMediaInfo(Array $params) {
 
 	}
 
-	$query = urlencode($request);
-	$url = "https://search.phlexchat.com/search.php?query=$query&key=".keyGen();
+	$queryParams['query'] = $request;
 	$queued = false;
-	if ($artist) $url .= "&artist=$artist";
-	if ($album) $url .= "&album=$album";
-	if ($subType) $url .= "&type=$subType";
-	if ($year) $url .= "&year=$year";
+	$tmp = "";
+	if ($artist) $queryParams['artist'] = $artist;
+	if ($album) $queryParams['album'] = $album;
+	if ($subType) $queryParams['type'] = $subType;
+	if ($year) $queryParams['year'] = $year;
 
 	if ($request) {
-		$searches['meta'] = $url;
+		$searches['meta'] = $searchUrl . "?" . http_build_query($queryParams);
 		foreach ($_SESSION['deviceList']['Server'] as $server) {
 			$id = $server['Id'];
 			$searches["plex.$id"] = $server['Uri'] . "/hubs/search?query=" . urlencode($request) . "&limit=30&X-Plex-Token=" . $server['Token'];
@@ -834,7 +838,7 @@ function fetchMediaInfo(Array $params) {
 			}
 		}
 	}
-
+	write_log("Testing, testing...");
 	if (!$castMember && !$queued) {
 		if ($action == 'fetchMedia' && !isset($data['type'])) {
 			$fetchers = listFetchers();
