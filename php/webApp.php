@@ -163,7 +163,7 @@ function checkRevision($short=false) {
 }
 
 function installUpdate() {
-    write_log("Function fired!!");
+    write_log("Function firsssed!!");
     $git = new GitUpdate\GitUpdate(dirname(__FILE__)."/..");
     $result = [];
     if ($git->hasGit) {
