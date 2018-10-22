@@ -33,7 +33,6 @@ var javaStrings = [];
 var grid = null;
 
 var buildingApps = false;
-console.log("Building apps is ", buildingApps);
 
 // A global array of Setting Keys that correlate to an input type
 var SETTING_KEYTYPES = {
@@ -1695,6 +1694,7 @@ function setListeners() {
 
     $(document).on('click', '.btn-newtab', function() {
        var target=$(this).data('for');
+       $(this).toggleClass('active');
        $('#' + target).click();
     });
 
@@ -1704,22 +1704,17 @@ function setListeners() {
         var classes = ['app-url', 'app-newtab', 'iconpicker', 'appSetter', 'btn-color'];
         for (var className in classes) {
             if ($(event.target).hasClass(classes[className])) {
-                console.log("Building apps is ", buildingApps);
                 if (buildingApps !== true) {
-                    console.log("Saving app containers because not building and change detected on matching class " + classes[className]);
                     saveAppContainers();
                 }
             }
         }
 
         if (id.indexOf('appName') > -1 || id.indexOf('appColor') > -1) {
-            console.log("Building apps is ", buildingApps);
             if (buildingApps !== true) {
-                console.log("Saving app containers because not building and change detected on appSetter!");
                 saveAppContainers();
             }
         }
-        console.log("Change detected for ", $(event.target));
     });
 
     $(document).on('blur', '.blur', function () {
@@ -2015,10 +2010,10 @@ function setListeners() {
             appBtn.data('label', labelVal);
         }
 
-        if (id.indexOf('Newtab') > -1) {
-            var appLabel = id.replace("Newtab","");
-            console.log("Adjusting 'open in new tab' setting for " + appLabel);
-            var element = $('#' + appLabel + "Btn");
+        if (id.indexOf('newtab') > -1) {
+            $(this).toggleClass('disabled');
+            var app = $(this).data('for');
+            var element = $('#' + app + "Btn");
             element.attr('data-newtab',value);
         }
 
@@ -2145,7 +2140,8 @@ function addAppContainer(data) {
         };
     }
 
-    var checked = (appNewTab) ? " checked" : "";
+    var checked = (appNewTab) ? " active" : "";
+    var pressed = (appNewTab) ? " aria-pressed='true'" : "";
     var container = $('' +
     '<div class="col-10 col-lg-6">' +
         '<div class="appContainer card listCard" data-id="' + appId + '">' +
@@ -2155,7 +2151,7 @@ function addAppContainer(data) {
                 '</div>' +
                 '<div class="row">' +
                     '<div class="col-auto">' +
-                        '<button class="btn btn-raised btn-icon" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"></button>' +
+                        '<button class="btn btn-raised btn-icon" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"'+pressed+'></button>' +
                     '</div>' +
                     '<div class="col-6">' +
                         '<h4 class="card-title">' +
@@ -2182,7 +2178,7 @@ function addAppContainer(data) {
                         '</div>' +
                     '</div>' +
                     '<div class="col-auto ml-auto">' +
-                        '<div class="btn btn-newtab'+checked+'" data-for="appNewTab1" data-id="'+appId+'">' +
+                        '<div class="btn btn-newtab'+checked+'" data-toggle="button" data-for="appNewTab1" data-id="'+appId+'">' +
                             '<span class="material-icons" title="Open app in a new tab.">open_in_new</span>' +
                         '</div>' +
                         '<input type="checkbox" class="app-newtab" id="appNewTab1" data-id="'+appId+'" hidden'+checked+'>' +
@@ -2221,16 +2217,14 @@ function saveAppContainers() {
 
         var appLabel = $(this).find('.blur').val();
         if (appLabel === "") {
-            console.log("No value, using label text...");
             appLabel = $(this).find('.appSetter').text();
         }
-        console.log("Label value: " + appLabel + " or test: ");
 
         if (appLabel === "") appLabel = "Click Me";
         var appIcon = $(this).find('.iconpicker').find('input[type=hidden]').val();
         var appColor = $(this).find('input[type="color"]').val();
         var appId = $(this).find('.appSetter').data('id');
-        var newTab = $(this).find('.app-newtab').is(':checked');
+        var newTab = $(this).find('input:checkbox').prop('checked');
         var appUrl = $(this).find('.app-url').val();
         var item = {
             id: appId,
@@ -2246,7 +2240,7 @@ function saveAppContainers() {
     reloadAppGroups(appList, false);
     var url = "./api.php?apiToken=" + apiToken + "&id=appArray&value=" + encodeURIComponent(JSON.stringify(appList));
     $.get(url,function(data) {
-       console.log("Result from save: ", data);
+
     });
 }
 
