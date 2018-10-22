@@ -1057,73 +1057,96 @@ function joinStrings($items, $tail = "and") {
 }
 
 function joinItems($items, $tail = "and", $noType=false) {
-    $titles = [];
-    $counts = [];
+    $types = [];
     $names = [];
+    $artists = [];
+
     foreach ($items as $item) {
         write_log("Item: " . json_encode($item));
         $type = explode(".",$item['type'])[1] ?? $item['type'];
+        $artist = $item['Artist'] ?? false;
+	    $title = $item['Title'];
         if (!isset($counts[$type])) $counts[$type] = 0;
-        $title = $item['Title'];
-        foreach($names as $check) if ($check['Title'] == $title) {
-            $counts[$type]++;
-        }
-        array_push($names,$item);
+        if (!isset($names[$title])) $names[$title] = 0;
+        if ($artist && !isset($artists[$artist])) $artists[$artist] = 0;
+        if ($artist) $artists[$artist] ++;
+        $types[$type]++;
+        $names[$title]++;
     }
 
-    write_log("Counts: ". json_encode($counts));
-    $singleType = (count($counts) == 1);
-    foreach ($names as $item) {
-        $year = $item['year'] ?? false;
-	    if (is_array($year)) $year = $year[0];
-        $type = explode(".",$item['type'])[1] ?? $item['type'];
-        $typeCount = $counts[$type];
-        switch ($type) {
-            case 'movie':
-            case 'show':
-                $string = $item['title'];
-                if ($year) {
-	                $string .= " ($year)";
-                }
-                break;
-            case 'episode':
-                $string = $item['grandparentTitle'] . " - " . $item['title'];
-                break;
-            case 'track':
-                $string = $item['artist'] . " - " . $item['title'];
-                if ($typeCount >= 2 && isset($item['album'])) {
-                	$album = (is_array($item['album'])) ? $item['album'][0] : $item['album'];
-	                $string .= " ($album)";
-                }
-                break;
-            case 'album':
-	        case 'artist':
-                $string = $item['title'] . "(The $type)";
-                if ($typeCount >=2 && $year) {
-                	$string .= " ($year)";
-                }
-                break;
-            default:
-                $string = $item['title'];
-                if ($typeCount >=2 && $year) $string .= " ($year)";
-        }
-        if (!$singleType && !$noType) $string = $string . " (the $type)";
-        $string = trim($string);
-        write_log("String is $string");
-        if (!in_array($string, $titles)) array_push($titles, $string);
+	$itemStrings = [];
+
+	foreach ($items as $item) {
+		$title = $item['Title'];
+		$parent = "";
+		$type = explode(".",$item['type'])[1] ?? $item['type'];
+		if ($type == 'track') {
+			$artist = $item['Artist'];
+			$album = (is_array($item['album'])) ? $item['album'][0] : $item['album'];
+			// If multiple track titles by the same artist...
+			if (count($artists[$artist]) > 1) {
+				if (count($artists) > 1) {
+					$parent = "$artist - $album";
+				} else {
+					$parent = $album;
+				}
+			} else {
+				if (count($artists) > 1) {
+					$parent  = $artist;
+				}
+			}
+
+		}
+		if ($type == 'episode') $parent = $item['Show'];
+		if ($type == 'album') $parent = $item['Artist'];
+		// If all items have the same name...
+		if (count($names) == 1) {
+			// If all items have the same name and same type...
+			if (count($types) == 1) {
+				if ($type == 'movie') {
+					$year = $item['Year'];
+					$itemString = "$title ($year)";
+				} else {
+					if ($parent != "") {
+						$itemString = "$parent - $title";
+					} else {
+						$itemString = "$title (The $type)";
+					}
+				}
+			} else {
+				$itemString = "(The $type)";
+			}
+		} else {
+			// If there are items with different names
+			if (count($names[$title]) == 1) {
+				$itemString = $title;
+			} else {
+				if ($parent != "") {
+					$itemString = "$parent - $title";
+				} else {
+					$itemString = "$title (The $type)";
+				}
+			}
+		}
+		$counter = 0;
+		foreach($itemStrings as $itemString) {
+			$checkString = explode(" (", $itemString);
+			$checkSub = $checkString[1] ?? "";
+			$checkSub = str_replace(")", "", $checkSub);
+			if (strlen($checkSub) == 1 && is_int($checkSub)) {
+				$counter = $checkSub;
+			}
+		}
+
+		if ($counter) {
+			$counter++;
+			$itemString .= " ($counter)";
+		}
+		array_push($itemStrings, $itemString);
     }
-    $string = "";
-    $count = count($titles);
-    if ($count == 1) $string = $titles[0] . ".";
-    if ($count == 2) {
-        $title1 = $titles[0];
-        $title2 = $titles[1];
-        $string = "$title1 $tail $title2.";
-    }
-    if ($count >= 3) {
-        $last = array_pop($titles);
-        $string = join(", ", $titles) . ", $tail $last.";
-    }
+
+    $string = join($tail, $itemStrings);
+
     return $string;
 }
 

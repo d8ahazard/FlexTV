@@ -3585,7 +3585,9 @@ function buildQueryMedia($params) {
 			$playItem = $media[0];
 		}
 		if (count($media) >= 2 && !$noPrompts) {
+			write_log("Multiple results found, fetching fallback item.");
 			$fallBackMedia = fetchPlayItem($media[0], $shuffle);
+			if ($fallBackMedia) write_log("Fallback media saved.");
 			writeSession("fallBackAction", 'play');
 			writeSession("fallBackMedia", $fallBackMedia);
 		}
