@@ -851,6 +851,7 @@ function checkGit() {
         return $_SESSION['hasGit'];
     } else {
         exec("git", $lines);
+        write_log("Lines from git check: ".json_encode($lines),"ALERT");
         $hasGit = ((preg_match("/git help/", implode(" ", $lines))) && (file_exists(dirname(__FILE__) . '/../.git')));
         writeSession('hasGit',$hasGit);
     }
