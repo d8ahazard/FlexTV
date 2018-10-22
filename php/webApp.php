@@ -490,7 +490,7 @@ function upgradeDbTable($config) {
 		$results = $mysqli->query($checkQuery);
 		if ($results) {
 			while ($row = $results->fetch_assoc()) {
-				$columns[] = $row;
+				$columns[] = $row['Field'];
 			}
 		}
 		write_log("Columns: " . json_encode($columns));
@@ -565,7 +565,7 @@ function upgradeDbTable($config) {
 		}
 
 		$addLong = [];
-		$dbLong = ['customCards'];
+		$dbLong = ['appArray'];
 		foreach ($dbLong as $long) {
 			if (!isset($columns[$long])) {
 				write_log("Long $long is missing.");
