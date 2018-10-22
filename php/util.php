@@ -1090,7 +1090,7 @@ function joinItems($items, $tail = "and", $noType = false) {
 			$singleArtist = (count($artists) == 1);
 			$singleArtistName = (count($artists[$artist]) == 1);
 			$parents = [];
-			if ($singleArtist && $singleArtistName) $parents[] = $album;
+			if ($singleArtist && $singleArtistName) $parents[] = $artist;
 			if (!$singleArtist && !$singleArtistName) {
 				$parents[] = $artist;
 				$parents[] = $album;
