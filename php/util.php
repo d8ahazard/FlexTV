@@ -1161,6 +1161,7 @@ function joinItems($items, $tail = "and", $noType = false) {
 			case ($singleName && !$singleType && $singleTypeItem && !$singleNameItem)://1010, "Play Toy Story"
 				$itemString = "the $type";
 				if ($type == 'episode') $itemString = "$parent - $name";
+				if ($type == 'track') $itemString = "the $type by $parent";
 				break;
 			case ($singleName && !$singleType && $singleTypeItem && $singleNameItem):
 				$itemString = "the $type";
