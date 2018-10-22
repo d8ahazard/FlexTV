@@ -1079,6 +1079,9 @@ function joinItems($items, $tail = "and", $noType = false) {
 		$names[$title]++;
 	}
 
+	$singleName = (count($names) == 1);
+	$singleType = (count($types) == 1);
+
 	write_log("Counters: " . json_encode([$types, $names, $artists]));
 	foreach ($items as &$item) {
 		$parent = "";
@@ -1090,7 +1093,9 @@ function joinItems($items, $tail = "and", $noType = false) {
 			$singleArtist = (count($artists) == 1);
 			$singleArtistName = (count($artists[$artist]) == 1);
 			$parents = [];
-			if ($singleArtist && $singleArtistName) $parents[] = $artist;
+			if ($singleArtist && $singleArtistName && $singleType) $parents[] = $album;
+			if ($singleArtist && $singleArtistName && !$singleType) $parents[] = $artist;
+
 			if (!$singleArtist && !$singleArtistName) {
 				$parents[] = $artist;
 				$parents[] = $album;
@@ -1110,8 +1115,6 @@ function joinItems($items, $tail = "and", $noType = false) {
 
 	$itemStrings = [];
 	// Finally, we build strings
-	$singleName = (count($names) == 1);
-	$singleType = (count($types) == 1);
 
 	foreach ($items as $final) {
 		$type = $final['type'];
