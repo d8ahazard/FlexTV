@@ -1056,98 +1056,155 @@ function joinStrings($items, $tail = "and") {
     return $string;
 }
 
-function joinItems($items, $tail = "and", $noType=false) {
-    $types = [];
-    $names = [];
-    $artists = [];
-	write_log("Joining: ".json_encode($items));
-    foreach ($items as $item) {
-        write_log("Item: " . json_encode($item));
-        $typeStr = explode(".",$item['type'])[1] ?? $item['type'];
-        $artist = $item['artist'] ?? false;
-	    $title = $item['title'];
-        if (!isset($counts[$typeStr])) $counts[$typeStr] = 0;
-        if (!isset($names[$title])) $names[$title] = 0;
-        if ($artist && !isset($artists[$artist])) $artists[$artist] = 0;
-        if ($artist) $artists[$artist] ++;
-        $types[$typeStr]++;
-        $names[$title]++;
-    }
 
-	$itemStrings = [];
-	write_log("Counters: ".json_encode([$types, $names, $artists]));
-	foreach ($items as $item) {
-		$title = $item['title'];
+function joinItems($items, $tail = "and", $noType = false) {
+	$types = [];
+	$names = [];
+	$artists = [];
+	$shows = [];
+	write_log("Joining: " . json_encode($items));
+
+	foreach ($items as $scan) {
+		write_log("Item: " . json_encode($scan));
+		$typeStr = explode(".", $scan['type'])[1] ?? $scan['type'];
+		$artist = $scan['artist'] ?? false;
+		$show = $scan['show'] ?? false;
+		$title = $scan['title'];
+		if (!isset($counts[$typeStr])) $counts[$typeStr] = 0;
+		if (!isset($names[$title])) $names[$title] = 0;
+		if ($artist && !isset($artists[$artist])) $artists[$artist] = 0;
+		if ($artist) $artists[$artist]++;
+		if ($show) $shows[$show] ++;
+		$types[$typeStr]++;
+		$names[$title]++;
+	}
+
+	write_log("Counters: " . json_encode([$types, $names, $artists]));
+	foreach ($items as &$item) {
 		$parent = "";
-		$type = explode(".",$item['type'])[1] ?? $item['type'];
-		if ($type == 'track') {
+		$type = explode(".", $item['type'])[1] ?? $item['type'];
+		write_log("Item type is $type...");
+		if ($type === 'track') {
 			$artist = $item['artist'];
 			$album = (is_array($item['album'])) ? $item['album'][0] : $item['album'];
-			// If multiple track titles by the same artist...
-			if (count($artists[$artist]) > 1) {
-				if (count($artists) > 1) {
-					$parent = "$artist - $album";
-				} else {
-					$parent = $album;
-				}
+			$singleArtist = (count($artists) == 1);
+			$singleArtistName = (count($artists[$artist]) == 1);
+			$parents = [];
+			if ($singleArtist && $singleArtistName) $parents[] = $album;
+			if (!$singleArtist && !$singleArtistName) {
+				$parents[] = $artist;
+				$parents[] = $album;
 			} else {
-				if (count($artists) > 1) {
-					$parent  = $artist;
-				}
+				if (!$singleArtist) $parents[] = $artist;
+				if (!$singleArtistName) $parents[] = $album;
 			}
+			$parent = join(" - ", $parents);
+		}
+		if ($type === 'episode') {
+			$parent = $item['seriesTitle'];
+		}
+		if ($type === 'album') $parent = $item['artist'];
+		if ($type === 'movie') $parent = $item['year'];
+		$item['parent'] = $parent;
+	}
 
+	$itemStrings = [];
+	// Finally, we build strings
+	$singleName = (count($names) == 1);
+	$singleType = (count($types) == 1);
+
+	foreach ($items as $final) {
+		$type = $final['type'];
+		$name = $final['title'];
+		$parent = $final['parent'];
+		$singleTypeItem = ($types[$type] == 1);
+		$singleNameItem = ($names[$name] == 1);
+		$itemString = "";
+		$p0 = $singleName ? "1" : "0";
+		$p1 = $singleType ? "1" : "0";
+		$p2 = $singleTypeItem ? "1" : "0";
+		$p3 = $singleNameItem ? "1" : "0";
+		$itemCombo = "${p0}${p1}${p2}${p3}";
+		write_log("Combo is $itemCombo");
+		switch(true) {
+			case (!$singleName && !$singleType && !$singleTypeItem && !$singleNameItem): // 0000, play "The avengers"
+				$itemString = "$name";
+				break;
+			case (!$singleName && !$singleType && !$singleTypeItem && $singleNameItem): // 0001, play "The avengers"
+				$itemString = "$name";
+				if ($type === 'episode' || $type === 'track') $itemString = "$parent - $name";
+				break;
+			case (!$singleName && !$singleType && $singleTypeItem && !$singleNameItem): // 0010, play "The avengers"
+				$itemString = "$parent $name";
+				break;
+			case (!$singleName && !$singleType && $singleTypeItem && $singleNameItem): // 0011, play "Doctor Who"
+				$itemString = "$name (the $type)";
+				break;
+			case (!$singleName && $singleType && !$singleTypeItem && !$singleNameItem):
+				$itemString = "$name $parent";
+				break;
+			case (!$singleName && $singleType && !$singleTypeItem && $singleNameItem):
+				$itemString = "$name $parent";
+				break;
+			case (!$singleName && $singleType && $singleTypeItem && !$singleNameItem):
+				$itemString = "$name $parent";
+				break;
+			case (!$singleName && $singleType && $singleTypeItem && $singleNameItem):
+				$itemString = "the $type";
+				break;
+			case ($singleName && !$singleType && !$singleTypeItem && !$singleNameItem): //1000, "Play Toy Story"
+				$itemString = "$name ($parent)";
+				break;
+			case ($singleName && !$singleType && !$singleTypeItem && $singleNameItem):
+				$itemString = "$parent - $name";
+				break;
+			case ($singleName && !$singleType && $singleTypeItem && !$singleNameItem)://1010, "Play Toy Story"
+				$itemString = "the $type";
+				if ($type == 'episode') $itemString = "$parent - $name";
+				break;
+			case ($singleName && !$singleType && $singleTypeItem && $singleNameItem):
+				$itemString = "the $type";
+				break;
+			case ($singleName && $singleType && !$singleTypeItem && !$singleNameItem): //1100, "Play stan
+				$itemString = "$parent";
+				break;
+			case ($singleName && $singleType && !$singleTypeItem && $singleNameItem):
+				$itemString = "$name $parent";
+				break;
+			case ($singleName && $singleType && $singleTypeItem && !$singleNameItem):
+				$itemString = "$name $parent";
+				break;
+			case ($singleName && $singleType && $singleTypeItem && $singleNameItem):
+				$itemString = "$parent";
+				break;
+			default:
+				write_log("Unknown combination? $itemCombo");
 		}
-		if ($type == 'episode') $parent = $item['show'];
-		if ($type == 'album') $parent = $item['artist'];
-		// If all items have the same name...
-		if (count($names) == 1) {
-			// If all items have the same name and same type...
-			if (count($types) == 1) {
-				if ($type == 'movie') {
-					$year = $item['year'];
-					$itemString = "$title ($year)";
-				} else {
-					if ($parent != "") {
-						$itemString = "$parent - $title";
-					} else {
-						$itemString = "$title (The $type)";
-					}
-				}
-			} else {
-				$itemString = "(The $type)";
-			}
-		} else {
-			// If there are items with different names
-			if (count($names[$title]) == 1) {
-				$itemString = $title;
-			} else {
-				if ($parent != "") {
-					$itemString = "$parent - $title";
-				} else {
-					$itemString = "$title (The $type)";
-				}
-			}
-		}
-		$counter = 0;
-		foreach($itemStrings as $itemString) {
-			$checkString = explode(" (", $itemString);
-			$checkSub = $checkString[1] ?? "";
-			$checkSub = str_replace(")", "", $checkSub);
-			if (strlen($checkSub) == 1 && is_int($checkSub)) {
-				$counter = $checkSub;
-			}
+		$itemStrings[] = $itemString;
+	}
+
+	$counter = 0;
+	$finalStrings = [];
+	foreach ($itemStrings as $checkString) {
+		$checkStrings = explode(" (", $checkString);
+		$checkSub = $checkStrings[1] ?? "";
+		$checkSub = str_replace(")", "", $checkSub);
+		if (strlen($checkSub) == 1 && is_int($checkSub)) {
+			$counter = $checkSub;
 		}
 
 		if ($counter) {
 			$counter++;
-			$itemString .= " ($counter)";
+			$checkString .= " ($counter)";
 		}
-		array_push($itemStrings, $itemString);
-    }
+		write_log("pushing item string '$checkString");
+		array_push($finalStrings, $checkString);
+	}
 
-    $string = join(" $tail ", $itemStrings);
-
-    return $string;
+	$lastString = array_pop($finalStrings);
+	$string = join(", ", $finalStrings);
+	$string = ucfirst($string) . " $tail $lastString" . "?";
+	return $string;
 }
 
 function joinTitles($items,$tail="and") {

@@ -192,7 +192,7 @@ class multiCurl
 	    }
 	    $array = false;
 	    try {
-		    $array = (@new JsonXmlElement($result))->asArray();
+		    $array = is_array($result) ? $result : (@new JsonXmlElement($result))->asArray();
 	    } catch (\Exception $e) {
 
 	    }

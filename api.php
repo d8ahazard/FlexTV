@@ -309,7 +309,7 @@ function initialize() {
 
 	$command = $_GET['command'] ?? $_SERVER['HTTP_COMMAND'] ?? false;
 	if ((isset($_GET['say'])) && $command) {
-		write_log("Incoming API request detected.", "INFO");
+		write_log("Incoming API request detected: '$command'", "INFO");
 		try {
 			$request = fetchApiAiData($command);
 			if ($request) {
@@ -3719,6 +3719,14 @@ function buildSpeech($params, $results) {
 
 			write_log("Media array for playback Command: " . json_encode($media), "INFO", false, true);
 			$mediaArray = $media;
+			$types = [];
+			$artists = [];
+			foreach($media as $check) {
+				$type = explode(".", $check['type'])[1] ?? $check['type'];
+				$artist = $check['artist'];
+				if (!in_array($type, $types)) $types[] = $type;
+				if (!in_array($artist, $artists)) $artists[] = $artist;
+			}
 			switch (count($mediaArray)) {
 				case 0:
 					write_log("No results found.");
@@ -3735,11 +3743,18 @@ function buildSpeech($params, $results) {
 					$playback = $media[0];
 					break;
 				default:
-					$speech = "Which one did you want? ";
+					$speech = "Which one did you want, ";
+					if (count($types) == 1) {
+						$type = $types[0];
+						if ($type === 'track') {
+							$typeStr = (count($artists) == 1) ? "album" : "artist";
+							$speech = "Which $typeStr was that from, ";
+						}
+						if ($type === 'episode') $speech = "Which show was that from, ";
+					}
 					$noType = isset($params['type']);
 					$speech .= joinItems($media, "or", $noType);
 					$mediaArray = $media;
-					write_log("We found a bunch! " . count($media));
 					$wait = true;
 					$context = "playMedia-followup";
 			}
