@@ -559,6 +559,7 @@ function fetchMediaInfo(Array $params) {
 	$time = ($time ? ($time - strtotime("now")) : 0) * 1000;
 	// Associate number values and subtypes
 	$types = $params['type'] ?? [$type] ?? false;
+	$season = $episode = $album = $track = false;
 	if ($types) {
 		$i = 0;
 		foreach ($types as $checkType) {
@@ -726,7 +727,7 @@ function fetchMediaInfo(Array $params) {
 	$ep = $key = $parent = false;
 	write_log("Mapped metadata array: " . json_encode($result));
 	// If we have a season or episode number
-	if ($season || $episode && (count($meta) >= 1)) {
+	if (($season || $episode) && (count($meta) >= 1)) {
 		write_log("We need a numbered TV item.");
 		if (count($media)) {
 			foreach ($media as $item) {
@@ -1750,9 +1751,8 @@ function fetchNumberedTVItem($seriesKey, $num, $epNum = false, $parent = false) 
 	$url = "$host$mediaDir?X-Plex-Token=$token";
 	$result = curlGet($url);
 	if ($result) {
-		$series = (new JsonXmlElement($result))->asArray();
-		$episodes = $series['MediaContainer']['Video'];
-		write_log("New container: " . json_encode($series));
+		$episodes = $result['MediaContainer']['Video'];
+		write_log("New container: " . json_encode($result));
 		// If we're specifying a season, get all those episodes who's ParentIndex matches the season number specified
 		if ($selector == "season") {
 			foreach ($episodes as $episode) {

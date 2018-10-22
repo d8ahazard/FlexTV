@@ -215,7 +215,7 @@ function cleanCommandString($string) {
     $string = preg_replace("/tell Flex TV/", "", $string);
     $string = preg_replace("/Flex TV/", "", $string);
     $stringArray = explode(" ", $string);
-    $stripIn = ["th", "nd", "rd", "by"];
+    $stripIn = ["th", "nd", "rd", "by", "the"];
     $stringArray = array_diff($stringArray, array_intersect($stringArray, $stripIn));
     foreach ($stringArray as &$word) {
         $word = preg_replace("/[^\w\']+|\'(?!\w)|(?<!\w)\'/", "", $word);
