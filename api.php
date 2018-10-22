@@ -3653,7 +3653,7 @@ function buildQueryMulti($params) {
 					break;
 				}
 			}
-			$type = $params['mediaTypes'] ?? false;
+			$type = $params['mediaTypes'] ?? $params['type'][0] ?? $params['type'] ?? false;
 			$mediaType = $media['type'];
 			$match = $title ? (strtolower($title) == strtolower($media['title'])) : true;
 			$match = $match ? $match : ($title == $media['key']);
