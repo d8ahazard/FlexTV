@@ -520,7 +520,7 @@ function upgradeDbTable($config) {
 			'utorrentUri'
 		];
 		foreach ($dbStrings as $string) {
-			if (!isset($columns[$string])) {
+			if (!in_array($string, $columns)) {
 				write_log("String $string is missing.");
 				array_push($addStrings, $string);
 			}
@@ -558,7 +558,7 @@ function upgradeDbTable($config) {
 			'watcherSearch'
 		];
 		foreach ($dbBools as $bool) {
-			if (!isset($columns[$bool])) {
+			if (!in_array($bool, $columns)) {
 				write_log("Bool $bool is missing.");
 				array_push($addBools, $bool);
 			}
@@ -567,7 +567,7 @@ function upgradeDbTable($config) {
 		$addLong = [];
 		$dbLong = ['appArray'];
 		foreach ($dbLong as $long) {
-			if (!isset($columns[$long])) {
+			if (!in_array($long, $columns)) {
 				write_log("Long $long is missing.");
 				array_push($addLong, $long);
 			}
