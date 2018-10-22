@@ -1060,12 +1060,12 @@ function joinItems($items, $tail = "and", $noType=false) {
     $types = [];
     $names = [];
     $artists = [];
-
+	write_log("Joining: ".json_encode($items));
     foreach ($items as $item) {
         write_log("Item: " . json_encode($item));
         $type = explode(".",$item['type'])[1] ?? $item['type'];
-        $artist = $item['Artist'] ?? false;
-	    $title = $item['Title'];
+        $artist = $item['artist'] ?? false;
+	    $title = $item['title'];
         if (!isset($counts[$type])) $counts[$type] = 0;
         if (!isset($names[$title])) $names[$title] = 0;
         if ($artist && !isset($artists[$artist])) $artists[$artist] = 0;
@@ -1075,13 +1075,13 @@ function joinItems($items, $tail = "and", $noType=false) {
     }
 
 	$itemStrings = [];
-
+	write_log("Counters: ".json_encode([$types, $names, $artists]));
 	foreach ($items as $item) {
-		$title = $item['Title'];
+		$title = $item['title'];
 		$parent = "";
 		$type = explode(".",$item['type'])[1] ?? $item['type'];
 		if ($type == 'track') {
-			$artist = $item['Artist'];
+			$artist = $item['artist'];
 			$album = (is_array($item['album'])) ? $item['album'][0] : $item['album'];
 			// If multiple track titles by the same artist...
 			if (count($artists[$artist]) > 1) {
@@ -1097,14 +1097,14 @@ function joinItems($items, $tail = "and", $noType=false) {
 			}
 
 		}
-		if ($type == 'episode') $parent = $item['Show'];
-		if ($type == 'album') $parent = $item['Artist'];
+		if ($type == 'episode') $parent = $item['show'];
+		if ($type == 'album') $parent = $item['artist'];
 		// If all items have the same name...
 		if (count($names) == 1) {
 			// If all items have the same name and same type...
 			if (count($types) == 1) {
 				if ($type == 'movie') {
-					$year = $item['Year'];
+					$year = $item['year'];
 					$itemString = "$title ($year)";
 				} else {
 					if ($parent != "") {
@@ -1145,7 +1145,7 @@ function joinItems($items, $tail = "and", $noType=false) {
 		array_push($itemStrings, $itemString);
     }
 
-    $string = join($tail, $itemStrings);
+    $string = join(" $tail ", $itemStrings);
 
     return $string;
 }
