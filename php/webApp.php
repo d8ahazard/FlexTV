@@ -196,6 +196,7 @@ function scriptDefaults() {
 
 function checkDefaults() {
     $config = dirname(__FILE__) . "/../rw/db.conf.php";
+	mapIcons(__DIR__ . '/../css/font/font-muximux.css','.muximux-');
     $useDb = file_exists($config);
     $migrated = false;
     if ($useDb) {

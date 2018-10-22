@@ -229,7 +229,7 @@ $(window).on("load", function() {
 $(window).on('resize', function () {
     clearTimeout(scaling);
     scaling = setTimeout(function() {
-        scaleSlider();
+        //scaleSlider();
         scaleElements();
         setBackground(true);
         startBackgroundTimer();
@@ -998,20 +998,25 @@ function updatePlayerStatus(data) {
 			var resultSummary = mr["summary"];
 			var tagline = mr["tagline"];
 			var vs = $('#volumeSlider');
-			progressSlider = $('#progressSlider').bootstrapSlider();
-			volumeSlider = vs.bootstrapSlider({
-				reversed : true
-			});
+            progressSlider = document.getElementById('progressSlider');
+            noUiSlider.create(progressSlider, {
+                start: 40,
+                connect: [true,false],
+                range: {
+                    min: 0,
+                    max: 100
+                }
+            });
 
-			vs.on("change", function() {
-				apiToken = $('#apiTokenData').data('token');
-				var volume = $(this).val();
-				var url = 'api.php?say&command=set+the+volume+to+' + volume + "+percent&apiToken=" + apiToken;
-				$.get(url);
-			});
+			// vs.on("change", function() {
+			// 	apiToken = $('#apiTokenData').data('token');
+			// 	var volume = $(this).val();
+			// 	var url = 'api.php?say&command=set+the+volume+to+' + volume + "+percent&apiToken=" + apiToken;
+			// 	$.get(url);
+			// });
 
-			progressSlider.fadeOut();
-			volumeSlider.fadeOut();
+			$(progressSlider).fadeOut();
+			//volumeSlider.fadeOut();
 
 			TitleString = resultTitle;
 			if (resultType === "episode") {
@@ -1028,9 +1033,9 @@ function updatePlayerStatus(data) {
 			var volume = data["volume"];
 			resultDuration = mr["duration"];
 			var progress = (resultOffset / 1000);
-			progressSlider.bootstrapSlider({max: resultDuration / 1000});
-			progressSlider.bootstrapSlider('setValue', progress);
-			volumeSlider.bootstrapSlider('setValue', parseInt(volume));
+			// progressSlider.bootstrapSlider({max: resultDuration / 1000});
+			// progressSlider.bootstrapSlider('setValue', progress);
+			// volumeSlider.bootstrapSlider('setValue', parseInt(volume));
 			var statusImage = $('.statusImage');
 			if (thumbPath !== false) {
 				statusImage.attr('src', thumbPath).show();
@@ -1696,7 +1701,7 @@ function setListeners() {
     $(document).on('change', function ( event ) {
         var id = $(event.target).attr('id');
         if (id === undefined) id = "";
-        var classes = ['app-url', 'app-newtab', 'appSetter', 'btn-color'];
+        var classes = ['app-url', 'app-newtab', 'iconpicker', 'appSetter', 'btn-color'];
         for (var className in classes) {
             if ($(event.target).hasClass(classes[className])) {
                 console.log("Building apps is ", buildingApps);
@@ -2090,7 +2095,10 @@ function addAppGroup(app) {
                 id: appId + "Frame",
                 class: 'appFrame',
                 frameborder: 0,
-                scrolling: 'yes'
+                scrolling: 'yes',
+                allowFullScreen: true,
+                webkitallowfullscreen: true,
+                mozallowfullscreen: true
             }).appendTo(newDiv);
         }
 
@@ -2100,8 +2108,8 @@ function reloadAppGroups(appList, force) {
     if (force) $("#results").find('.frameDiv').remove();
     $("#AppzDrawer").html("");
     for (var app in appList) if (appList.hasOwnProperty(app)) {
-        if (force) addAppGroup(appList[app]);
-        addAppContainer(appList[app])
+        addAppGroup(appList[app]);
+        if (force) addAppContainer(appList[app])
     }
 }
 
@@ -2159,7 +2167,7 @@ function addAppContainer(data) {
                         '<div class="btn btn-color" data-for="appColor'+appId+'" data-id="' + appId + '" title="Select the application color.">' +
                             '<span class="material-icons">colorize</span>' +
                         '</div>' +
-                        '<input type="color" name="favcolor" value="'+appColor+'" id="appColor'+appId+'" data-id="'+appId+'" hidden>' +
+                        '<input type="color" name="favcolor" list="colorList" value="'+appColor+'" id="appColor'+appId+'" data-id="'+appId+'" hidden>' +
                     '</div>' +
                 '</div>' +
                 '<div class="row">' +

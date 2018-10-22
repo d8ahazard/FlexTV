@@ -232,8 +232,8 @@ a:hover:not(#executeButton) {
     bottom: 20px;
     margin: 0 auto;
     left: calc(50% - 34px);
-    width: 34px;
-    height: 34px;
+    width: 70px;
+    height: 70px;
 }
 
 .btn-fab-lg {
@@ -546,7 +546,7 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-inverse) !important;
 }
 
-#simpleList, #results-content: {
+#simpleList, #results-content {
     overflow: hidden;
 }
 

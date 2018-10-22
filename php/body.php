@@ -430,12 +430,12 @@ function makeBody($defaults) {
 	                	<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
                         <div class="tableContainer">
 							<div id="simpleList" class="row">
-			                </div>  
+			                </div>
+			                <div id="deleteList">
+			                </div>    
 			                <div id="appFab" class="btn btn-primary btn-fab-lg">
 			                	<span class="material-icons">add</span>
-							</div>   
-							<div id="deleteList">
-			                </div>  
+							</div>  
 	                    </div>
                     </div>
                     
@@ -566,7 +566,7 @@ function makeBody($defaults) {
 					</div>
 					<div class="statusWrapper row justify-content-around">
 						<div id="progressWrap">
-							<input id="progressSlider" type="text" data-slider-min="0" data-slider-id="progress" data-slider-tooltip="hide"/>
+							<div id="progressSlider" class="slider"></div>
 						</div>
 						<div id="controlWrap">
 							<div id="controlBar">
@@ -715,6 +715,23 @@ function makeBody($defaults) {
 	        <div id="metaTags">
 			    <meta id="apiTokenData" data-token="' . $_SESSION["apiToken"] . '"/>
 			</div>
+			
+			<datalist id=colorList>
+			    <option>#36c6f4</option>
+			    <option>#2674b2</option>
+			    <option>#3c6daf</option>
+			    <option>#304663</option>
+			    <option>#219901</option>
+			    <option>#00a65b</option>
+			    <option>#76b83f</option>
+			    <option>#ffc230</option>
+                <option>#c99907</option>
+			    <option>#e5a00d</option>
+			    <option>#c99907</option>
+			    <option>#f85c22</option>
+			    <option>#a7401c</option>
+			    <option>#b90900</option>
+            </datalist>
 					';
 
 

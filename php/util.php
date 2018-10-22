@@ -2071,6 +2071,26 @@ function localeName($locale = "en") {
     return $locale;
 }
 
+function mapIcons($file,$classSelector){
+	if (true) {
+		write_log("Mapping icons");
+		$css = file_get_contents($file);
+		preg_match_all( '/(?ims)([a-z0-9\s\.\:#_\-@,]+)\{([^\}]*)\}/', $css, $arr);
+		$result = '"",';
+		foreach ($arr[0] as $i => $x){
+			$selector = trim($arr[1][$i]);
+			if (strpos($selector, $classSelector) !== false) {
+				$selector = str_replace($classSelector,'',$selector);
+				$selector = str_replace(':before','',$selector);
+				$result .='"'.$selector.'", ';
+			}
+		}
+		$result = substr_replace($result ,"",-2);
+		$result = '!function($){$.iconset_muximux={iconClass:"muximux",iconClassFix:"muximux-",icons:['.$result.']}}(jQuery);';
+		file_put_contents(__DIR__ . '/../js/lib/iconset_muximux.js', $result);
+	}
+}
+
 function multiCurl($urls, $timeout=10) {
     $mh = curl_multi_init();
     $ch = $res = [];
