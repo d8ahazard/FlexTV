@@ -1063,14 +1063,14 @@ function joinItems($items, $tail = "and", $noType=false) {
 	write_log("Joining: ".json_encode($items));
     foreach ($items as $item) {
         write_log("Item: " . json_encode($item));
-        $type = explode(".",$item['type'])[1] ?? $item['type'];
+        $typeStr = explode(".",$item['type'])[1] ?? $item['type'];
         $artist = $item['artist'] ?? false;
 	    $title = $item['title'];
-        if (!isset($counts[$type])) $counts[$type] = 0;
+        if (!isset($counts[$typeStr])) $counts[$typeStr] = 0;
         if (!isset($names[$title])) $names[$title] = 0;
         if ($artist && !isset($artists[$artist])) $artists[$artist] = 0;
         if ($artist) $artists[$artist] ++;
-        $types[$type]++;
+        $types[$typeStr]++;
         $names[$title]++;
     }
 
