@@ -852,7 +852,8 @@ function checkGit() {
     } else {
         exec("git", $lines);
         $hasGit = ((preg_match("/git help/", implode(" ", $lines))) && (file_exists(dirname(__FILE__) . '/../.git')));
-        if (!file_exists(dirname(__FILE__) . '/../.git')) write_log("No git dir??","ALERT");
+        $gitPath = dirname(__FILE__) . '/../.git';
+        if (!file_exists($gitPath)) write_log("No git dir at '$gitPath'","ALERT");
         writeSession('hasGit',$hasGit);
     }
     return $hasGit;
