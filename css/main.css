@@ -220,14 +220,81 @@ a:hover:not(#executeButton) {
     padding: 10px 0;
 }
 
-#appFab {
+#appFab, #widgetFab {
     position: fixed;
     bottom: 20px;
     margin: 0 auto;
     left: calc(50% - 34px);
+    transition: .3s;
+    background-color: var(--theme-accent-dark);
 }
 
-#deleteList {
+#appFab:hover, #widgetFab:hover {
+    background-color: var(--theme-accent);
+    transform: scale(1.1);
+    transition: transform .3s;
+    background-color: var(--theme-accent);
+    box-shadow: 0 14px 26px -12px rgba(87, 105, 233, 0.42), 0 4px 23px 0 rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(10, 70, 233, 0.2);
+}
+
+#appFab:hover span, #widgetFab:hover span {
+    transition: transform .3s;
+    transform: rotate(90deg);
+}
+
+#widgetList {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 64px;
+    left: 16px;
+}
+
+#widgetAddList {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--theme-primary-inverse);
+    left: 16px;
+    height: 50%;
+    display: none;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149);
+
+}
+
+#appFab.add {
+    -webkit-animation: color_change .3s;
+    -moz-animation: color_change .3s;
+    -ms-animation: color_change .3s;
+    -o-animation: color_change .3s;
+    animation: color_change .3s;
+    background-color: #960000;
+    transform: scale(1.1);
+    box-shadow: 0 14px 26px -12px rgba(196, 0, 33, 0.42), 0 4px 23px 0 rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(233, 4, 0, 0.2);
+}
+
+@-webkit-keyframes color_change {
+    from { background-color: var(--theme-accent); }
+    to { background-color: #960000; }
+}
+@-moz-keyframes color_change {
+    from { background-color: var(--theme-accent); }
+    to { background-color: #960000; }
+}
+@-ms-keyframes color_change {
+    from { background-color: var(--theme-accent); }
+    to { background-color: #960000; }
+}
+@-o-keyframes color_change {
+    from { background-color: var(--theme-accent); }
+    to { background-color: #960000; }
+}
+@keyframes color_change {
+    from { background-color: var(--theme-accent); }
+    to { background-color: #960000; }
+}
+
+#appDeleteList {
     position: fixed;
     bottom: 20px;
     margin: 0 auto;
@@ -546,8 +613,9 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-inverse) !important;
 }
 
-#simpleList, #results-content {
+#appList, #results-content {
     overflow: hidden;
+    margin: 5px;
 }
 
 html {
@@ -1342,6 +1410,18 @@ select {
     padding-top: 0;
     position: absolute;
     top: 0;
+    overflow: hidden;
+}
+
+.addIcon {
+    transition: transform .3s;
+    transform: rotate(-360deg);
+
+}
+
+.delIcon {
+    transition: transform .3s;
+    transform: rotate(360deg);
 }
 
 .no-gutters > .col,

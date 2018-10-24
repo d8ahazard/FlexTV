@@ -121,56 +121,6 @@ var APP_DEFAULTS = {
     }
 };
 
-// I think this can be supplanted by something else, it was just necessary when I added it
-var APP_TITLES = [
-    "sonarr",
-    "sick",
-    "couch",
-    "radarr",
-    "ombi",
-    "headphones",
-    "lidarr",
-    "watcher",
-    "deluge",
-    "downloadstation",
-    "nzbhydra",
-    "sabnzbd",
-    "utorrent",
-    "transmission"
-];
-
-// Self explainatory
-var APP_COLORS = {
-    "sonarr": "#36c6f4",
-    "sick": "#2674b2",
-    "downloadstation": "#3c6daf",
-    "deluge": "#304663",
-    "nzbhydra": "#219901",
-    "lidarr": "#00a65b",
-    "utorrent": "#76b83f",
-    "radarr": "#ffc230",
-    "sabnzbd": "#c99907",
-    "couch": "#e6521d",
-    "ombi": "#a7401c",
-    "transmission": "#b90900"
-};
-
-// Same as colors
-var APP_ICONS = {
-    "sonarr": "muximux-sonarr",
-    "radarr": "muximux-radarr",
-    "lidarr": "muximux-lidarr",
-    "sick": "muximux-sick",
-    "couch": "muximux-couch",
-    "ombi": "muximux-ombi",
-    "headphones": "muximux-headphones3",
-    "utorrent": "muximux-utorrent",
-    "sabnzbd": "muximux-sabnzbd",
-    "downloadstation": "muximux-synology",
-    "nzbhydra": "muximux-nzbhydra",
-    "transmission": "muximux-transmission"
-};
-
 var PROFILE_APPS = [
     "sonarr",
     "radarr",
@@ -494,38 +444,87 @@ function buildUiDeferred() {
 }
 
 function initGrid() {
-    Sortable.create(document.getElementById('simpleList'), {
+    Sortable.create(document.getElementById('appList'), {
         group: "localStorage-example",
         handle: ".appHandle",
         animation: 250,
         onEnd: function() {
+            var afIcon = $('#appFab .material-icons');
             console.log("onEnd called...");
             saveAppContainers();
-            $('#appFab .material-icons').html('add');
-            $('#appFab').css('background-color',"#003E96");
+            afIcon.html('add');
+            $('#appFab').toggleClass('add');
+            afIcon.toggleClass('addIcon');
+            afIcon.toggleClass('delIcon');
 
         },
         onStart: function() {
-            $('#appFab .material-icons').html('delete_forever');
-            $('#appFab').css('background-color',"#960000");
+            var afIcon = $('#appFab .material-icons');
+            afIcon.html('delete_forever');
+            $('#appFab').toggleClass('add');
+            afIcon.toggleClass('addIcon');
+            afIcon.toggleClass('delIcon');
         }
 
     });
-    Sortable.create(document.getElementById('deleteList'), {
+
+    Sortable.create(document.getElementById('appDeleteList'), {
         group: "localStorage-example",
         handle: ".appHandle",
         animation: 250,
         onAdd: function() {
+            var dL = $('#appDeleteList');
             console.log("onEnd called...");
             saveAppContainers();
-            var appId = $('#deleteList').find('.listCard').data('id');
+            var appId = dL.find('.listCard').data('id');
             removeAppGroup(appId);
-            $('#deleteList').html("");
+            dL.html("");
         }
     });
-}
 
-function gridChange(evt) {
+    Sortable.create(document.getElementById('widgetList'), {
+        group: "localStorage-example",
+        handle: ".sampleCard",
+        animation: 250,
+        onEnd: function() {
+            var afIcon = $('#widgetFab .material-icons');
+            console.log("onEnd called...");
+            saveAppContainers();
+            afIcon.html('add');
+            $('#widgetFab').toggleClass('add');
+            afIcon.toggleClass('addIcon');
+            afIcon.toggleClass('delIcon');
+
+        },
+        onStart: function() {
+            var afIcon = $('#widgetFab .material-icons');
+            afIcon.html('delete_forever');
+            $('#widgetFab').toggleClass('add');
+            afIcon.toggleClass('addIcon');
+            afIcon.toggleClass('delIcon');
+        }
+
+    });
+
+    Sortable.create(document.getElementById('widgetDeleteList'), {
+        group: "localStorage-example",
+        handle: ".sampleCard",
+        animation: 250,
+        onAdd: function() {
+            console.log("onEnd called...");
+        }
+    });
+
+    Sortable.create(document.getElementById('widgetAddList'), {
+        group: "localStorage-example",
+        handle: ".sampleCard",
+        pull: 'clone',
+        put: false,
+        animation: 250,
+        onAdd: function() {
+            console.log("onEnd called...");
+        }
+    });
 
 }
 
@@ -552,8 +551,7 @@ function drawerClick(element) {
                 var activeItem = $('.drawer-item.active');
                 if (typeof element.data('src') !== 'undefined') {
                     var frameSrc = element.data('src');
-                    var newTabPop = (element.attr("data-newtab") == "true");
-                    console.log("Newtab is "+ newTab);
+                    var newTabPop = (element.attr("data-newtab") === "true");
                     if (newTabPop) {
                         console.log("Opening link in new tab.");
                         window.open(frameSrc, '_blank');
@@ -713,7 +711,7 @@ function updateDevice(type, id) {
 			id: id
 		}, function (data) {
 			updateDevices(data);
-			if (id === 'rescan') {                
+			if (id === 'rescan') {
                 $.snackbar({content: "Device rescan completed."});
                 $('#loadbar').hide();
             }
@@ -1680,6 +1678,12 @@ function setListeners() {
         addAppContainer(false);
     });
 
+    $(document).on('click', '#widgetFab', function () {
+        addAppContainer(false);
+        $('#widgetAddList').slideToggle();
+        $(this).toggleClass('open');
+    });
+
     $(document).on('click', '.appSetter', function () {
         var target = $(this).data('for');
         console.log("Appsetter click for " + target);
@@ -1701,10 +1705,11 @@ function setListeners() {
     $(document).on('change', function ( event ) {
         var id = $(event.target).attr('id');
         if (id === undefined) id = "";
-        var classes = ['app-url', 'app-newtab', 'iconpicker', 'appSetter', 'btn-color'];
+        var classes = ['app-url', 'app-newtab', 'appSetter', 'btn-color'];
         for (var className in classes) {
             if ($(event.target).hasClass(classes[className])) {
                 if (buildingApps !== true) {
+                    console.log("Saving list from change, " + classes[className]);
                     saveAppContainers();
                 }
             }
@@ -1712,6 +1717,7 @@ function setListeners() {
 
         if (id.indexOf('appName') > -1 || id.indexOf('appColor') > -1) {
             if (buildingApps !== true) {
+                console.log("Saving list from change2");
                 saveAppContainers();
             }
         }
@@ -1856,7 +1862,7 @@ function setListeners() {
         }
     });
 
-	
+
     $('.clientBtn').on('click', function () {
 		toggleClientList();
 	});
@@ -2189,13 +2195,13 @@ function addAppContainer(data) {
     '</div>'
     );
 
-    $('#simpleList').append(container);
+    $('#appList').append(container);
     $('*[data-id="'+ appId +'"]').css('color',appColor);
     $('button[role="iconpicker"],div[role="iconpicker"]').iconpicker();
 }
 
 function loadAppContainers(data) {
-    $('#simpleList').html("");
+    $('#appList').html("");
     $('#AppzDrawer').html("");
     buildingApps = true;
     console.log("Building apps is ", buildingApps);
@@ -2213,7 +2219,7 @@ function loadAppContainers(data) {
 
 function saveAppContainers() {
     var appList = [];
-    $('#simpleList').children().each(function() {
+    $('#appList').children().each(function() {
 
         var appLabel = $(this).find('.blur').val();
         if (appLabel === "") {

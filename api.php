@@ -12,7 +12,14 @@ use digitalhigh\DialogFlow\DialogFlow;
 use digitalhigh\multiCurl;
 use Kryptonit3\SickRage\SickRage;
 use Kryptonit3\Sonarr\Sonarr;
-
+$errorLogPath = file_build_path(dirname(__FILE__), 'logs', 'Phlex_error.log.php');
+ini_set("log_errors", 1);
+ini_set("display_errors", 0);
+ini_set("display_startup_errors", 0);
+ini_set('max_execution_time', 300);
+ini_set("error_log", $errorLogPath);
+error_reporting(E_ERROR);
+date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
 
 
 if ( basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"]) )	analyzeRequest();
@@ -2243,7 +2250,6 @@ function shuffleMedia($type=false) {
 }
 
 function fetchServerData($server = false) {
-	$host = false;
 	$server = $server ? $server : findDevice(false, false, 'Server');
 	$sections = [];
 	$stations = false;
@@ -2286,10 +2292,11 @@ function fetchServerData($server = false) {
 		$stations = $items;
 	}
 	return ['Sections'=>$sections, 'Stations'=>$stations];
+
 }
 
-	$host = $host ? $host : findDevice(false, false, "Server");
 function fetchTransientToken($host = false, $type=false) {
+	$host = $host ? $host : findDevice(false, false, "Server");
 	$header = headerQuery(plexHeaders($host));
 
 	$url = $host['Uri'] . '/security/token?type=delegation&scope=all' . $header;

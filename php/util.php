@@ -3,6 +3,14 @@
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/JsonXmlElement.php';
 require_once dirname(__FILE__) . '/multiCurl.php';
+$errorLogPath = file_build_path(dirname(__FILE__),'..', 'logs', 'Phlex_error.log.php');
+ini_set("log_errors", 1);
+ini_set("display_errors", 0);
+ini_set("display_startup_errors", 0);
+ini_set('max_execution_time', 300);
+ini_set("error_log", $errorLogPath);
+error_reporting(E_ERROR);
+date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
 
 function array_diff_assoc_recursive($array1, $array2)
 {
@@ -2291,7 +2299,7 @@ function plexSignIn($token) {
 
 function protectMessage($string) {
 	//return $string;
-	if ($_SESSION['cleanLogs'] == "false") $_SESSION['cleanLogs'] = false;
+	if (($_SESSION['cleanLogs'] ?? "false") == "false") $_SESSION['cleanLogs'] = false;
     if (($_SESSION['cleanLogs'] ?? true) && !isWebApp()) {
     	$str = $string;
 	    preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $string, $urls);// Remove tokens and host from URL's
