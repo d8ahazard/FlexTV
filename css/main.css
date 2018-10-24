@@ -226,6 +226,7 @@ a:hover:not(#executeButton) {
     margin: 0 auto;
     left: calc(50% - 34px);
     transition: .3s;
+    z-index: 10;
     background-color: var(--theme-accent-dark);
 }
 
@@ -270,6 +271,7 @@ a:hover:not(#executeButton) {
     animation: color_change .3s;
     background-color: #960000;
     transform: scale(1.1);
+    z-index: 8;
     box-shadow: 0 14px 26px -12px rgba(196, 0, 33, 0.42), 0 4px 23px 0 rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(233, 4, 0, 0.2);
 }
 
@@ -296,11 +298,16 @@ a:hover:not(#executeButton) {
 
 #appDeleteList {
     position: fixed;
-    bottom: 20px;
+    bottom: 14px;
     margin: 0 auto;
-    left: calc(50% - 34px);
-    width: 70px;
-    height: 70px;
+    left: calc(50% - 40px);
+    width: 80px;
+    height: 80px;
+    z-index: 8;
+}
+
+#appDeleteList.elevate {
+    z-index: 10 !important;
 }
 
 .btn-fab-lg {

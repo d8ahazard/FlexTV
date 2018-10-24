@@ -456,6 +456,7 @@ function initGrid() {
             $('#appFab').toggleClass('add');
             afIcon.toggleClass('addIcon');
             afIcon.toggleClass('delIcon');
+            $('#appDeleteList').removeClass('elevate');
 
         },
         onStart: function() {
@@ -464,6 +465,7 @@ function initGrid() {
             $('#appFab').toggleClass('add');
             afIcon.toggleClass('addIcon');
             afIcon.toggleClass('delIcon');
+            $('#appDeleteList').addClass('elevate');
         }
 
     });
@@ -786,7 +788,7 @@ function updateUi(data) {
                 var elementType = false;
                 if (propertyName === 'appArray') {
                     if (window.hasOwnProperty(propertyName)) {
-                        if (window[propertyName] !== value) {
+                        if (window[propertyName] !== JSON.stringify(value)) {
                             loadAppContainers(value);
                         } else {
                             console.log("Skipping reload of apps...");
@@ -2244,6 +2246,7 @@ function saveAppContainers() {
     });
     console.log("Saving app List: ", appList);
     reloadAppGroups(appList, false);
+    window['appArray'] = JSON.stringify(appList);
     var url = "./api.php?apiToken=" + apiToken + "&id=appArray&value=" + encodeURIComponent(JSON.stringify(appList));
     $.get(url,function(data) {
 
