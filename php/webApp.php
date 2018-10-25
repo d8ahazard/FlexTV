@@ -120,16 +120,17 @@ function getPreference($table, $rows = false, $default = false, $selector = fals
 		$data = $default;
 	}
 
-	if ($single) {
-		if (is_array($data) && count($data) === 1) {
-			foreach ($data as $record) {
-				$data = $record;
-				break;
-			}
-		} else {
-			write_log("Okay, what's up wit dat: ".json_encode($data));
-		}
+	if ($table === 'general') {
+		$tmp = [];
+		foreach($data as $row) $tmp[$row['name']] = $row['value'];
+		$data = $tmp;
 	}
+
+	$rowName = "";
+	if (count($selector) == 1) $rowName = " ". $selector[0];
+	if ($single) $data = array_values($data)[0];;
+
+	write_log("Returning$rowName: ".json_encode($data), "INFO", false, false, true);
 	//write_log("Filtered output: ".json_encode($data),"INFO",false,false,true);
 	return $data;
 }
@@ -215,26 +216,9 @@ function checkDefaults() {
 	}
 
 	// Loading from General
-	$defaults = getPreference('general');
-	//write_log("Returned: ".json_encode($defaults),"INFO",false,true,true);
-	if ($defaults) {
-		$keys = $values = [];
-		foreach ($defaults as $value) {
-			foreach ($value as $id => $data) {
-				if ($id == 'name') {
-					array_push($keys, $data);
-				}
-				if ($id == 'value') {
-					if ($data === "true") $data = true;
-					if ($data === "false") $data = false;
-					array_push($values, $data);
-				}
-			}
-		}
-		$defaults = array_combine($keys, $values);
-	}
+	$defaults = getPreference('general', false, [], false, false);
 
-	if (!$defaults) {
+	if (empty($defaults)) {
 		write_log("Creating default values!", "ALERT");
 		$currentAddress = currentAddress();
 		$defaults = [
@@ -711,7 +695,7 @@ function fetchUserData($rescan = false) {
 }
 
 function fetchGeneralData() {
-	$data = getPreference('general');
+	$data = getPreference('general', false, [], false, false);
 	if ($data) {
 		$keys = $values = [];
 		foreach ($data as $value) {

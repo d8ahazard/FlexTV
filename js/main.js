@@ -1676,10 +1676,10 @@ function setListeners() {
 
     $(document).on('click', '#appFab', function () {
         addAppContainer(false);
+        saveAppContainers();
     });
 
     $(document).on('click', '#widgetFab', function () {
-        addAppContainer(false);
         $('#widgetAddList').slideToggle();
         $(this).toggleClass('open');
     });
@@ -1705,7 +1705,7 @@ function setListeners() {
     $(document).on('change', function ( event ) {
         var id = $(event.target).attr('id');
         if (id === undefined) id = "";
-        var classes = ['app-url', 'app-newtab', 'appSetter', 'btn-color'];
+        var classes = ['app-url', 'app-newtab', 'appSetter', 'appPicker', 'btn-color'];
         for (var className in classes) {
             if ($(event.target).hasClass(classes[className])) {
                 if (buildingApps !== true) {
@@ -2157,7 +2157,7 @@ function addAppContainer(data) {
                 '</div>' +
                 '<div class="row">' +
                     '<div class="col-auto">' +
-                        '<button class="btn btn-raised btn-icon" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"'+pressed+'></button>' +
+                        '<button class="btn btn-raised btn-icon appPicker" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"'+pressed+'></button>' +
                     '</div>' +
                     '<div class="col-6">' +
                         '<h4 class="card-title">' +

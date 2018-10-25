@@ -107,9 +107,8 @@ class FileConfig extends Database {
 				    if (is_string($columns)) $columns = [$columns];
 				    foreach ($columns as $row) {
 					    $data = $table->get($row)->toArray();
-					    $results = $data['value'] ?? null;
+					    $results[$row] = $data;
 				    }
-				    $results = [$results];
 			    }
 		    } else {
 			    $results = $table->getAll();
@@ -135,6 +134,7 @@ class FileConfig extends Database {
 	    	if ($value === "false") $value = false;
 	    	if ($value === "true") $value = true;
 	    }
+	    write_log("Returning: ".json_encode($results),"INFO", false, false, true);
 		return $results;
     }
 
