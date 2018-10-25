@@ -484,26 +484,6 @@ function upgradeDbTable($config) {
 		$addStrings = [];
 		$dbStrings = [
 			'plexClientName',
-			'ombiLabel',
-			'couchLabel',
-			'sickLabel',
-			'radarrLabel',
-			'sonarrLabel',
-			'lidarrLabel',
-			'headphonesLabel',
-			'watcherLabel',
-			'delugeLabel',
-			'downloadstationLabel',
-			'nzbhydraLabel',
-			'sabnzbdLabel',
-			'transmissionLabel',
-			'utorrentLabel',
-			'delugeUri',
-			'downloadstationUri',
-			'nzbhydraUri',
-			'sabnzbdUri',
-			'transmissionUri',
-			'utorrentUri',
 			"quietStart",
 			"quietStop"
 		];
@@ -514,43 +494,6 @@ function upgradeDbTable($config) {
 			}
 		}
 
-		$addBools = [];
-		$dbBools = [
-			'delugeEnabled',
-			'downloadstationEnabled',
-			'nzbhydraEnabled',
-			'sabnzbdEnabled',
-			'transmissionEnabled',
-			'utorrentEnabled',
-			'ombiNewtab',
-			'couchNewtab',
-			'sickNewtab',
-			'radarrNewtab',
-			'sonarrNewtab',
-			'lidarrNewtab',
-			'headphonesNewtab',
-			'watcherNewtab',
-			'delugeNewtab',
-			'downloadstationNewtab',
-			'nzbhydraNewtab',
-			'sabnzbdNewtab',
-			'transmissionNewtab',
-			'utorrentNewtab',
-			'ombiSearch',
-			'couchSearch',
-			'sickSearch',
-			'radarrSearch',
-			'sonarrSearch',
-			'lidarrSearch',
-			'headphonesSearch',
-			'watcherSearch'
-		];
-		foreach ($dbBools as $bool) {
-			if (!in_array($bool, $columns)) {
-				write_log("Bool $bool is missing.");
-				array_push($addBools, $bool);
-			}
-		}
 
 		$addLong = [];
 		$dbLong = ['appArray'];
@@ -560,15 +503,12 @@ function upgradeDbTable($config) {
 				array_push($addLong, $long);
 			}
 		}
-		if (count($addStrings) || count($addBools) || count($addLong)) {
+		if (count($addStrings) || count($addLong)) {
 			write_log("We've gotta add some stuff here.");
 			$query = "ALTER TABLE userdata" . PHP_EOL;
 			$items = [];
 			foreach ($addStrings as $item) {
 				$items[] = "ADD COLUMN $item text NOT NULL";
-			}
-			foreach ($addBools as $item) {
-				$items[] = "ADD COLUMN $item tinyint(1) NOT NULL";
 			}
 			foreach ($addLong as $item) {
 				$items[] = "ADD COLUMN $item longtext NOT NULL";
