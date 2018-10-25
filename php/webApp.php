@@ -188,11 +188,11 @@ function installUpdate() {
 function scriptDefaults() {
     $errorLogPath = file_build_path(dirname(__FILE__),'..', 'logs', 'Phlex_error.log.php');
 	ini_set("log_errors", 1);
-	ini_set("display_errors", 1);
+	ini_set("display_errors", 0);
 	ini_set("display_startup_errors", 0);
 	ini_set('max_execution_time', 300);
 	ini_set("error_log", $errorLogPath);
-	error_reporting(E_ALL);
+	error_reporting(E_ERROR);
 	date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
 }
 

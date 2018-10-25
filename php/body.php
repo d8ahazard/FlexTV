@@ -470,8 +470,7 @@ function makeBody($defaults) {
 				                    <span class="material-icons addIcon">add</span>
 								</div>  
 		                    </div>
-	                    </div>
-                    
+	                    
 	                    <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
 	                        <div class="tableContainer">
 								<div id="appList" class="row">
