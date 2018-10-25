@@ -126,6 +126,8 @@ function getPreference($table, $rows = false, $default = false, $selector = fals
 				$data = $record;
 				break;
 			}
+		} else {
+			write_log("Okay, what's up wit dat: ".json_encode($data));
 		}
 	}
 	//write_log("Filtered output: ".json_encode($data),"INFO",false,false,true);
@@ -597,6 +599,7 @@ function upgradeDbTable($config) {
 
 function checkSetDeviceID() {
 	$deviceId = getPreference('general', ['value'], 'foo', ['name' => 'deviceId']);
+	if (is_array($deviceId)) $deviceId = $deviceId[0];
 	return $deviceId;
 }
 
