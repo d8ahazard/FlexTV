@@ -9,13 +9,12 @@ class DbConfig {
     /**
      * DbConfig constructor.
      * @param string $configFile
-     * @throws ConfigException
      */
     public function __construct($configFile)
 	{
 		$this->connection = $this->connect($configFile);
 		if ($this->connection === false) {
-		   throw new ConfigException("Error connecting to database!!");
+		   write_log("Error connecting to database!!", "ERROR");
 		}
 	}
 
@@ -32,14 +31,13 @@ class DbConfig {
     /**
      * @param $configFile
      * @return bool|mysqli
-     * @throws ConfigException
      */
     protected function connect($configFile) {
 		$config = parse_ini_file($configFile);
 		$host = $config['dburi'] ?? 'localhost';
 		$mysqli = new mysqli($host,$config['username'],$config['password'],$config['dbname']);
 		if ($mysqli->connect_errno) {
-		    throw new ConfigException("ERROR CONNECTING: ".$mysqli->connect_errno);
+		    write_log("ERROR CONNECTING: ".$mysqli->connect_errno, "ERROR");
 		}
 
 		/* check if server is alive */
@@ -148,7 +146,7 @@ class DbConfig {
 		$result = $this-> connection -> query($query);
 		if(($result === false) || (! is_object($result))) {
             $error = mysqli_error($this->connection);
-            trigger_error("Possible select error: $error",E_USER_WARNING);
+            write_log("Possible select error: $error","ERROR");
 			return $result;
 		}
 		while ($row = $result -> fetch_assoc()) {
