@@ -88,7 +88,7 @@ function initConfig() {
         $error = true;
     }
     if (!$error) {
-    	write_log("Using config at $config");
+    	//write_log("Using config at $config");
         $configObject = $config->ConfigObject;
     }
 
