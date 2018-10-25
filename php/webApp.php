@@ -517,7 +517,9 @@ function upgradeDbTable($config) {
 			'nzbhydraUri',
 			'sabnzbdUri',
 			'transmissionUri',
-			'utorrentUri'
+			'utorrentUri',
+			"quietStart",
+			"quietStop"
 		];
 		foreach ($dbStrings as $string) {
 			if (!in_array($string, $columns)) {
