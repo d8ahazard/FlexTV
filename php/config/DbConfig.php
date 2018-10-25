@@ -106,6 +106,7 @@ class DbConfig {
 	    write_log("Select query is '$query'");
         $data = $this->select($query);
         if (empty($data)) write_log("Error, no data fetched for query '$query'", "ERROR", false, false, true);
+        write_log("Returning: ".json_encode($data));
         return $data;
     }
 
