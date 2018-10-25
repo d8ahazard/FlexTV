@@ -898,7 +898,11 @@ function hasGzip() {
 function headerHtml() {
     $string = "<div id='X-Plex-Data' class='hidden'";
     foreach(plexHeaders() as $key => $value) {
-        $string .= " data-$key='$value'";
+    	if (is_string($value)) {
+		    $string .= " data-$key='$value'";
+	    } else {
+    		write_log("Value is an array: ".json_encode($value));
+	    }
     }
     $string .="></div>";
     return $string;

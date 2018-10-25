@@ -143,7 +143,7 @@ function showError() {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Flex TV CSS Files-->
     <link href="./css/main.css" rel="stylesheet">
-    <?php if ($_SESSION['darkTheme']) echo '<link href="css/darkTheme.css" rel="stylesheet">' .PHP_EOL?>
+    <?php if ($_SESSION['darkTheme'] ?? false) echo '<link href="css/darkTheme.css" rel="stylesheet">' .PHP_EOL ?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
