@@ -75,10 +75,10 @@ function initConfig() {
     $configObject = false;
     $error = false;
     $dbConfig = dirname(__FILE__) . "/../rw/db.conf.php";
-    $dbDir = __DIR__ . "/../rw/db";
+    $dbDir = dirname(__FILE__) . "/../rw/db";
     $type = file_exists($dbConfig) ? 'db' : 'file';
     $config = file_exists($dbConfig) ? $dbConfig : $dbDir;
-    //write_log("Creating session config object.");
+    write_log("Creating session $type config using path of $config.");
     if ($type === 'db') checkDefaultsDb($config);
     try {
         $config = new digitalhigh\appConfig($config, $type);
@@ -87,6 +87,7 @@ function initConfig() {
         $error = true;
     }
     if (!$error) {
+    	write_log("Using config at $config");
         $configObject = $config->ConfigObject;
     }
 
@@ -484,7 +485,6 @@ function upgradeDbTable($config) {
 	$db = $config['dbname'];
 	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
 	if ($mysqli->select_db($db)) {
-		write_log("DB Selected.");
 		$checkQuery = "DESCRIBE userdata;";
 		$columns = [];
 		$results = $mysqli->query($checkQuery);
@@ -493,7 +493,6 @@ function upgradeDbTable($config) {
 				$columns[] = $row['Field'];
 			}
 		}
-		write_log("Columns: " . json_encode($columns));
 
 		$addStrings = [];
 		$dbStrings = [
