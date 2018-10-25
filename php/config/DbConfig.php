@@ -97,12 +97,13 @@ class DbConfig {
      * @return array|bool
      */
     public function get($section, $keys=false, $selector=false) {
+    	$key = $value = false;
         if (is_string($keys)) $keys = [$keys];
         $keys = $keys ? join(", ",$keys) : "*";
         $query = "SELECT $keys FROM $section";
-	    $value = reset($selector);
-	    $key = key($selector);
-	    if ($selector) $query .= " WHERE $key LIKE ".$this->quote($value);
+	    if ($selector) $value = reset($selector);
+	    if ($selector) $key = key($selector);
+	    if ($selector && $value && $key) $query .= " WHERE $key LIKE ".$this->quote($value);
         $data = $this->select($query);
         return $data;
     }
