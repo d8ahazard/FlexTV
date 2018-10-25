@@ -79,7 +79,6 @@ function initConfig() {
     $dbDir = dirname(__FILE__) . "/../rw/db";
     $type = file_exists($dbConfig) ? 'db' : 'file';
     $config = file_exists($dbConfig) ? $dbConfig : $dbDir;
-    write_log("Creating session $type config using path of $config.");
     if ($type === 'db') checkDefaultsDb($config);
     try {
         $config = new digitalhigh\appConfig($config, $type);
@@ -88,7 +87,6 @@ function initConfig() {
         $error = true;
     }
     if (!$error) {
-    	//write_log("Using config at $config");
         $configObject = $config->ConfigObject;
     }
 

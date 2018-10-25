@@ -83,10 +83,9 @@ class DbConfig {
         $keys = join(", ",$keys);
         $values = join(", ",$values);
         $query = "INSERT INTO $table ($keys) VALUES ($values) ON DUPLICATE KEY UPDATE $strings";
-        write_log("Query is '$query'");
         $result = $this->query($query);
         if (!$result) {
-            write_log("Error saving record: ".$this->error(),"ERROR");
+            write_log("Error saving record from query 'query': ".$this->error(),"ERROR", false, false, true);
         }
     }
 
@@ -105,6 +104,7 @@ class DbConfig {
 	    if ($selector) $key = key($selector);
 	    if ($selector && $value && $key) $query .= " WHERE $key LIKE ".$this->quote($value);
         $data = $this->select($query);
+        if (empty($data)) write_log("Error, no data fetched for query '$query'", "ERROR", false, false, true);
         return $data;
     }
 
@@ -147,7 +147,7 @@ class DbConfig {
 		$result = $this-> connection -> query($query);
 		if(($result === false) || (! is_object($result))) {
             $error = mysqli_error($this->connection);
-            write_log("Possible select error: $error","ERROR");
+            write_log("Select error executing query '${query}': $error","ERROR", false, false, true);
 			return $result;
 		}
 		while ($row = $result -> fetch_assoc()) {

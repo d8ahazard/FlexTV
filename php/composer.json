@@ -7,6 +7,7 @@
 		"kryptonit3/couchpotato": "1.0.0",
 		"filebase/filebase": "2.0.x-dev",
       	"ext-json": "*",
-		"ext-curl": "*"
+		"ext-curl": "*",
+      "ext-simplexml": "*"
     }
 }
