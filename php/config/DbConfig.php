@@ -85,9 +85,10 @@ class DbConfig {
         $keys = join(", ",$keys);
         $values = join(", ",$values);
         $query = "INSERT INTO $table ($keys) VALUES ($values) ON DUPLICATE KEY UPDATE $strings";
+        write_log("Query is '$query'");
         $result = $this->query($query);
         if (!$result) {
-            trigger_error("Error saving record: ".$this->error(),E_USER_ERROR);
+            write_log("Error saving record: ".$this->error(),"ERROR");
         }
     }
 
