@@ -4,14 +4,8 @@ require_once dirname(__FILE__) . "/php/webApp.php";
 require_once dirname(__FILE__) . '/php/util.php';
 require_once dirname(__FILE__) . "/api.php";
 write_log("-------NEW REQUEST RECEIVED-------", "ALERT");
-$errorLogPath = file_build_path(dirname(__FILE__), 'logs', 'Phlex_error.log.php');
-ini_set("log_errors", 1);
-ini_set("display_errors", 0);
-ini_set("display_startup_errors", 0);
-ini_set('max_execution_time', 300);
-ini_set("error_log", $errorLogPath);
-error_reporting(E_ERROR);
-date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
+scriptDefaults();
+
 $defaults = checkDefaults();
 if ($defaults['migrated'] ?? false) header("Refresh:0");
 $forceSSL = $defaults['forceSSL'] ?? false;

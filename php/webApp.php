@@ -3,6 +3,7 @@ require_once dirname(__FILE__). '/util.php';
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/git/GitUpdate.php';
 require_once dirname(__FILE__) . '/config/appConfig.php';
+scriptDefaults();
 checkFiles();
 use digitalhigh\GitUpdate;
 use Filebase\Database;
