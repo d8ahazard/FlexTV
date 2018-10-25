@@ -134,7 +134,7 @@ function getPreference($table, $rows = false, $default = false, $selector = fals
 	return $data;
 }
 
-function deletePrefrence($table, $selector) {
+function deletePreference($table, $selector) {
 	$config = initConfig();
 	write_log("Got a command to delete from $table using: " . json_encode($selector));
 	$result = $config->delete($table, $selector);
@@ -598,13 +598,12 @@ function upgradeDbTable($config) {
 }
 
 function checkSetDeviceID() {
-	$deviceId = getPreference('general', ['value'], 'foo', ['name' => 'deviceId']);
-	if (is_array($deviceId)) $deviceId = $deviceId[0];
+	$deviceId = getPreference('general', ['value'], 'foo', ['name' => 'deviceId'],true);
 	return $deviceId;
 }
 
 function checkSSL() {
-	$forceSSL = getPreference('general', ['value'], false, ['name' => 'forceSSL']);
+	$forceSSL = getPreference('general', ['value'], false, ['name' => 'forceSSL'], true);
 	return $forceSSL;
 }
 
