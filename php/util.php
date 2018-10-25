@@ -389,7 +389,7 @@ function curlGet($url, $headers = false, $timeout = 4, $decode = true, $log = tr
 	if ($headers) {
 		if (is_string($headers)) $headers = [$headers];
 		if (is_array($headers)) {
-			if ($log) write_log("Setting headers.", "INFO", false, true);
+			if ($log) write_log("Setting headers: ".json_encode($headers), "INFO", false, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		}
 	}
