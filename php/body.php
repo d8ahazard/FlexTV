@@ -1,15 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/../api.php';
-$errorLogPath = file_build_path(dirname(__FILE__),'..', 'logs', 'Phlex_error.log.php');
-ini_set("log_errors", 1);
-ini_set("display_errors", 0);
-ini_set("display_startup_errors", 0);
-ini_set('max_execution_time', 300);
-ini_set("error_log", $errorLogPath);
-error_reporting(E_ERROR);
-date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
-
+scriptDefaults();
 
 function makeBody($defaults) {
 	if (!defined('LOGGED_IN')) {
@@ -437,10 +429,10 @@ function makeBody($defaults) {
 	                </div>
 		                <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="homeSettingsTab">     
 	                        <div class="tableContainer">
-								<div id="widgetList" class="row">
+								<div id="widgetList" class="queryWrap">
 				                </div>
-				                <div id="widgetAddList" class="row">
-				                <div class="card bg-dark text-white shadow col-xl-5 col-lg-5-5 col-md-12 sampleCard">
+				                <div id="widgetAddList" class="queryWrap">
+				                <div class="card bg-dark text-white shadow col-xl-5 col-lg-5-5 col-md-12 sampleCard" id="sample1">
 									<h4 class="card-header card-header-primary text-center px-2 statHeader">Statistics</h4>
 									
 									<ul id="serverInformation" class="list-group list-group-flush">
@@ -454,6 +446,20 @@ function makeBody($defaults) {
 									Current Activity <button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><svg class="svg-inline--fa fa-sync-alt fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><!-- <i class="fas fa-fw fa-sync-alt fa-spin"></i> --></button>
 									</span>
 									<span id="currentActivitySampleStreamCount">1 Stream <span id="currentActivityBandwidth" title="3.9 Mbps / 11 Mbps" data-toggle="tooltip"><svg class="svg-inline--fa fa-info-circle fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg><!-- <i class="fas fa-fw fa-info-circle"></i> --></span></span>
+									</li>
+									</ul>
+									</div>
+				                </div>
+				                <div class="card bg-dark text-white shadow col-xl-5 col-lg-5-5 col-md-12 sampleCard" id="sample2">
+									<h4 class="card-header card-header-primary text-center px-2 statHeader">Users</h4>
+									
+									<ul id="userInformation" class="list-group list-group-flush">
+									
+									<!-- Check if Plex Server is online -->
+									<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: '.$_SESSION['plexUserName'].' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
+									
+									
+									<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
 									</li>
 									</ul>
 									</div>

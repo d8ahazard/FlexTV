@@ -137,6 +137,7 @@ $(function () {
 
 	// We do need to embed this in the page, just for the first query back to the server
 	apiToken = $('#apiTokenData').data('token');
+	console.log("ApiToken is " + apiToken);
 
 	bgs = $('.bg');
 	logLevel = "ALL";
@@ -518,10 +519,8 @@ function initGrid() {
     });
 
     Sortable.create(document.getElementById('widgetAddList'), {
-        group: "localStorage-example",
+        group: { name: "localStorage-example", pull: 'clone', put: true },
         handle: ".sampleCard",
-        pull: 'clone',
-        put: false,
         animation: 250,
         onAdd: function() {
             console.log("onEnd called...");
@@ -595,7 +594,6 @@ function drawerClick(element) {
                 var frame = $('#logFrame');
 
                 if (linkVal === 'logTab') {
-                    apiToken = $('#apiTokenData').data('token');
                     $('.load-barz').show();
                     frame.attr('src',"log.php?noHeader=true&apiToken=" + apiToken);
                 } else {

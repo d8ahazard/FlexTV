@@ -244,11 +244,9 @@ a:hover:not(#executeButton) {
 }
 
 #widgetList {
-    position: fixed;
-    height: 100%;
     width: 100%;
-    top: 64px;
-    left: 16px;
+    min-height: 30%;
+
 }
 
 #widgetAddList {
