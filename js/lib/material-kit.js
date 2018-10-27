@@ -17,6 +17,17 @@
 
 var big_image;
 
+function debounce(a, r, i) {
+    var n;
+    return function() {
+        var e = this,
+            t = arguments;
+        clearTimeout(n), n = setTimeout(function() {
+            n = null, i || a.apply(e, t)
+        }, r), i && !n && a.apply(e, t)
+    }
+}
+
 function materialInit() {
   BrowserDetect.init();
 
@@ -167,7 +178,22 @@ materialKit = {
         $('.navbar-color-on-scroll').addClass('navbar-transparent');
       }
     }
-  }, 17)
+  }, 70),
+    
+      initRotateCard: debounce(function() {
+    $(".rotating-card-container .card-rotate").each(function() {
+        var e = $(this),
+            t = $(this).parent().width();
+        $(this).find(".front .card-body").outerHeight();
+        e.parent().css({
+            "margin-bottom": "30px"
+        }), e.find(".front").css({
+            width: t + "px"
+        }), e.find(".back").css({
+            width: t + "px"
+        })
+    })
+}, 50)
 };
 
 // Returns a function, that, as long as it continues to be invoked, will not

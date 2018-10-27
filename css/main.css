@@ -220,6 +220,10 @@ a:hover:not(#executeButton) {
     padding: 10px 0;
 }
 
+#widgetFab {
+    display: none;
+}
+
 #appFab, #widgetFab {
     position: fixed;
     bottom: 20px;
@@ -228,6 +232,20 @@ a:hover:not(#executeButton) {
     transition: .3s;
     z-index: 10;
     background-color: var(--theme-accent-dark);
+}
+
+.card [class*="header-"], .card[class*="bg-"] {
+    color: #fff;
+    z-index: 6;
+}
+
+.front.front-background {
+    background-color: var(--theme-primary-75);
+}
+
+.back.back-background {
+    display: none;
+    background-color: var(--theme-primary-75);
 }
 
 #appFab:hover, #widgetFab:hover {
@@ -246,19 +264,61 @@ a:hover:not(#executeButton) {
 #widgetList {
     width: 100%;
     min-height: 30%;
-
 }
 
-#widgetAddList {
+#widgetDrawer {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background: var(--theme-primary-inverse);
-    left: 16px;
+    background: var(--theme-primary-inverse-75);
+    left: 0;
     height: 50%;
     display: none;
     box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149);
+}
 
+#homeBtn:hover i {
+    color: var(--theme-primary-inverse-75) !important;
+}
+
+#homeEditBtn {
+    position: absolute;
+    top: 4px;
+    width: 30px;
+    right: 10px;
+    height: 30px;
+}
+
+#homeEditBtn.active {
+    background: var(--theme-primary-inverse-25);
+}
+
+#homeEditBtn.active:hover {
+    background: var(--theme-primary-inverse-50);
+}
+
+#homeEditBtn.active i {
+    color: var(--theme-primary) !important;
+}
+
+#homeEditBtn i {
+    position: absolute;
+    top: 7px;
+    left: 8px;
+    font-size: 15px;
+    color: transparent !important;
+}
+
+#homeEditBtn:hover {
+    background: transparent;
+}
+
+#homeEditBtn:hover i {
+    color: var(--theme-primary-inverse-50);
+}
+
+.widgetWrap {
+    margin: 0 auto;
 }
 
 #appFab.add {

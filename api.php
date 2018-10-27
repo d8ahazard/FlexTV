@@ -178,10 +178,6 @@ function initialize() {
 		}
 		if (preg_match("/Path/", $id)) if ((substr($value, 0, 1) != "/") && (trim($value) !== "")) $value = "/" . $value;
 
-		if ($id === 'appArray') {
-			$value = base64_encode($value);
-		}
-
 		if ($valid) {
 			if ($id === 'forceSSL' || $id === 'noNewUsers' || $id === 'cleanLogs') {
 				$data = ['name' => $id, 'value' => $value];
@@ -378,61 +374,50 @@ function triggerRescan() {
 
 function getUiData($force = false) {
 	$result = [];
-	$playerStatus = fetchPlayerStatus();
 	$devices = selectDevices(scanDevices(false));
-	$deviceText = json_encode($devices);
-	$settingData = array_merge(fetchGeneralData(), fetchUserData());
-	foreach ($settingData as $key => &$value) {
-		if (preg_match("/List/", $key) && $key !== 'deviceList') {
-			$value = fetchList(str_replace("List", "", $key));
-		}
-		$staticBools = [
-			'darkTheme',
-			'forceSSL',
-			'hasPlugin',
-			'isWebApp',
-			'noNewUsers',
-			'plexDvrNewAirings',
-			'plexDvrReplaceLower',
-			'plexPassUser',
-			'shortAnswers',
-			'masterUser',
-			'notifyUpdate',
-			'alertPlugin',
-			'autoUpdate'
-		];
-		if (preg_match("/Enabled/", $key) || preg_match("/Newtab/", $key) || preg_match("/Search/", $key) || in_array($key, $staticBools)) {
-			$value = boolval($value);
-			if ($value == "0") $value = false;
-			if ($value == "1") $value = true;
-		}
-	}
-
-	$appArray = $settingData['appArray'] ?? [];
-	$oldArray = $_SESSION['appArray'] ?? [];
-	if (json_encode($appArray) !== json_encode($oldArray) || $force) {
-		writeSession('appArray', $appArray);
-	} else {
-		unset($settingData['appArray']);
-	}
-
-	$commands = fetchCommands();
-	if ($playerStatus) {
-		$result['playerStatus'] = $playerStatus;
-	}
 
 	if ($force) {
-		$result['devices'] = $devices;
-		$result['userData'] = $settingData;
-		$result['commands'] = $commands;
+		$devices['Server'] = [];
+		$devices['Dvr'] = [];
+		$widgets = getPreference('userdata', ['appList'], [], ['apiToken'=>$_SESSION['apiToken']], true);
 		$lang = checkSetLanguage();
-		$result['strings'] = $lang['javaStrings'] ?? [];
-		writeSessionArray([
-			'commandArray' => $commands,
-			'devices'      => $deviceText
-		]);
+		$result = [
+			'devices' => $devices,
+			'strings' => $lang['javaStrings'] ?? [],
+			'widgets' => $widgets
+		];
+		return $result;
 	} else {
-		$updated = [];
+		$playerStatus = fetchPlayerStatus();
+		$deviceText = json_encode($devices);
+		$settingData = array_merge(fetchGeneralData(), fetchUserData());
+		foreach ($settingData as $key => &$value) {
+			if (preg_match("/List/", $key) && $key !== 'deviceList') {
+				$value = fetchList(str_replace("List", "", $key));
+			}
+			$staticBools = [
+				'darkTheme',
+				'forceSSL',
+				'hasPlugin',
+				'isWebApp',
+				'noNewUsers',
+				'plexDvrNewAirings',
+				'plexDvrReplaceLower',
+				'plexPassUser',
+				'shortAnswers',
+				'masterUser',
+				'notifyUpdate',
+				'alertPlugin',
+				'autoUpdate'
+			];
+			if (preg_match("/Enabled/", $key) || preg_match("/Newtab/", $key) || preg_match("/Search/", $key) || in_array($key, $staticBools)) {
+				$value = boolval($value);
+				if ($value == "0") $value = false;
+				if ($value == "1") $value = true;
+			}
+		}
+
+	$updated = [];
 		foreach ($settingData as $key => $value) {
 			$ogVal = $value;
 			if (is_array($value)) {
@@ -453,26 +438,6 @@ function getUiData($force = false) {
 		if ($deviceUpdated) {
 			$result['devices'] = $devices;
 			writeSession('devices', $deviceText);
-		}
-		$sessionCommands = $_SESSION['commandArray'] ?? [];
-		$commandData = [];
-
-		foreach ($commands as $command) {
-			$exists = false;
-			foreach ($sessionCommands as $session) {
-				if ($command['timeStamp'] == $session['timeStamp']) {
-					$exists = true;
-				}
-			}
-			if (!$exists) {
-				array_push($commandData, $command);
-			}
-		}
-		if (count($commandData)) {
-			write_log("Sending " . count($commandData) . " new command cards...", "ALERT", false, true);
-			$result['commands'] = $commandData;
-			foreach ($commandData as $command) array_push($sessionCommands, $command);
-			writeSession('commandArray', $sessionCommands);
 		}
 	}
 
@@ -1174,7 +1139,7 @@ function setSelectedDevice($type, $id) {
 		write_log("Going to select " . $selected['Name']);
 		writeSessionArray([['deviceList' => $list, 'deviceUpdated' => true]]);
 		if ($type == 'Client' && isset($_SESSION['volume'])) writeSession('volume', "", true);
-		$push['dlist'] = base64_encode(json_encode($list));
+		$push['dlist'] = json_encode($list);
 		$push["plex$type" . "Id"] = $selected['Id'];
 		updateUserPreferenceArray($push);
 	} else {
@@ -1317,7 +1282,7 @@ function updateDeviceCache($data) {
 	write_log("Diff: " . json_encode(array_diff_assoc_recursive($list, $devices)));
 	writeSession('deviceList', $devices);
 	writeSession('deviceUpdated', true);
-	$string = base64_encode(json_encode($devices));
+	$string = json_encode($devices);
 	$prefs = [
 		'lastScan' => $now,
 		'dlist'    => $string
@@ -3241,7 +3206,7 @@ function buildCards($cards) {
 		$title = $card['title'];
 		$year = $card['year'] ?? false;
 		if (is_array($year)) $year = $year[0];
-
+		$subTitle = false;
 		switch ($card['type']) {
 			case 'episode':
 				$showName = $card['seriesTitle'] ?? $card['grandparentTitle'] ?? false;
@@ -3262,7 +3227,7 @@ function buildCards($cards) {
 				break;
 		}
 
-		$subTitle = $subTitle ?? $card['tagline'] ?? $card['description'] ?? '';
+		$subTitle = $subTitle ? $subTitle : $card['tagline'] ?? $card['description'] ?? '';
 		$formattedText = $card['summary'] ?? $card['description'] ?? '';
 		$image = $card['art'] ?? $card['thumb'] ?? '';
 		if (preg_match("/library\/metadata/", $image)) {

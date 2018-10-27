@@ -104,33 +104,43 @@ function setPreference($section, $data, $selector = false) {
 
 /**
  * @param $table
- * @param bool | array $rows - An array of row names to select. Not setting returns all data
+ * @param bool | array $what - An array of row names to select. Not setting returns all data
  * @param bool | mixed $default - The default value to return if none exists
- * @param bool | array $selector - An array of key/value pairs to match in a WHERE statement
+ * @param bool | array $where - An array of key/value pairs to match in a WHERE statement
  * @param bool $single | Return the first row of data, or all rows (when selecting commands)
  * @return array|bool|mixed
  */
-function getPreference($table, $rows = false, $default = false, $selector = false, $single = true) {
+function getPreference($table, $what = false, $default = false, $where = false, $single = true) {
+	write_log("Incoming: ". json_encode(['table'=>$table, 'what'=>$what, 'where'=>$where, 'single'=>$single]));
 	$config = initConfig();
 
-	$data = $config->get($table, $rows, $selector);
-	$ignore = false;
+	$data = $config->get($table, $what, $where);
 
-	if (empty($data) && !$ignore) {
-		$data = $default;
+	if (empty($data) && !is_array($data)) {
+		write_log("Returning default value...");
+		return $default;
 	}
 
 	if ($table === 'general') {
 		$tmp = [];
 		foreach($data as $row) $tmp[$row['name']] = $row['value'];
-		$data = $tmp;
+		$data = [$tmp];
+		if ($single && is_array($where)) $what = [$where['name']];
+		write_log("What is ".json_encode($what). ", data: ".json_encode($data));
 	}
 
-	$rowName = "";
-	if (count($selector) == 1) $rowName = " ". $selector[0];
-	if ($single) $data = array_values($data)[0];;
+	if ($single && count($data)) {
+		write_log("Single.");
+		$data = $data[0];
+		write_log("Data is now: ".json_encode($data));
+		if ($what && count($what) === 1) {
+			write_log("Returning single value.");
+			$data = $data[$what[0]] ?? $default;
+		}
+	}
 
-	write_log("Returning$rowName: ".json_encode($data), "INFO", false, false, true);
+	$column = is_array($what) ? join(", ", $what) : " * ";
+	write_log("Returning $column from $table: ".json_encode($data), "INFO", false, false, true);
 	//write_log("Filtered output: ".json_encode($data),"INFO",false,false,true);
 	return $data;
 }
@@ -216,7 +226,7 @@ function checkDefaults() {
 	}
 
 	// Loading from General
-	$defaults = getPreference('general', false, [], false, false);
+	$defaults = getPreference('general', false, [], false, true);
 
 	if (empty($defaults)) {
 		write_log("Creating default values!", "ALERT");
@@ -415,7 +425,7 @@ function checkDefaultsDb($config) {
  `notifyUpdate` tinyint(1) NOT NULL DEFAULT '0',
  `masterUser` tinyint(1) NOT NULL DEFAULT '0',
  `autoUpdate` tinyint(1) NOT NULL DEFAULT '0',
- `dlist` longtext NOT NULL,
+ `dlist` JSON NOT NULL,
  `plexPassUser` tinyint(1) NOT NULL,
  `plexServerId` tinytext NOT NULL,
  `plexDvrId` tinytext NOT NULL,
@@ -496,7 +506,7 @@ function upgradeDbTable($config) {
 
 
 		$addLong = [];
-		$dbLong = ['appArray'];
+		$dbLong = ['appArray', 'widgetArray'];
 		foreach ($dbLong as $long) {
 			if (!in_array($long, $columns)) {
 				write_log("Long $long is missing.");
@@ -518,6 +528,10 @@ function upgradeDbTable($config) {
 			write_log("Final query is '$query'");
 			$mysqli->query($query);
 		}
+
+		// Convert lists to proper JSON items
+		$query = "ALTER TABLE `userdata` CHANGE `dlist` `dlist` JSON NOT NULL, CHANGE `widgetArray` `widgetArray` JSON NOT NULL, CHANGE `appArray` `appArray` JSON NOT NULL;";
+		$mysqli->query($query);
 	}
 }
 
@@ -560,30 +574,11 @@ function serverAddress() {
 }
 
 function fetchCommands($limit = false) {
-	$commands = getPreference('commands', ['data', 'stamp'], [], ['apiToken' => $_SESSION['apiToken']], false);
-	$out = [];
-	foreach ($commands as $command) {
-		if (isset($command['data'])) {
-			$data = json_decode($command['data'], true);
-			$data['stamp'] = $command['stamp'];
-			array_push($out, $data);
-		}
-	}
-	usort($out, function ($a, $b) {
-		if ($a['timecode'] == $b['timecode']) {
-			return 0;
-		}
-		return ($a['timecode'] < $b['timecode']) ? 1 : -1;
-	});
-	if ($limit) {
-		$out = array_reverse($out);
-		if ($limit <= count($out)) {
-			$out = array_slice($out, 0, $limit);
-		}
-		$out = array_reverse($out);
-
-	};
-	return $out;
+	$commands = getPreference('userdata', ['commands'], [], ['apiToken' => $_SESSION['apiToken']], true);
+	if (is_string($commands)) $commands = json_decode($commands, true);
+	write_log("Fetched commands: ".json_encode($commands));
+	if ($limit) $commands = array_slice($commands, 0, $limit);
+	return $commands;
 }
 
 function fetchDeviceCache() {
@@ -591,7 +586,8 @@ function fetchDeviceCache() {
 	$keys = ['dlist', 'plexServerId', 'plexDvrId', 'plexClientId'];
 	$cache = getPreference('userdata', $keys, false, ['apiToken' => $_SESSION['apiToken']]);
 	if (is_array($cache) && count($cache)) {
-		$list = json_decode(base64_decode($cache['dlist']), true);
+		write_log("Dlist: " . $cache['dlist']);
+		$list = is_string($cache['dlist']) ? json_decode($cache['dlist'], true) : $cache['dlist'];
 		unset($cache['dlist']);
 		writeSessionArray($cache);
 	}
@@ -599,10 +595,8 @@ function fetchDeviceCache() {
 }
 
 function fetchappArray() {
-	$list = [];
-	$keys = ['appArray'];
 	$data = getPreference('userdata', ['appArray'], false, ['apiToken' => $_SESSION['apiToken']]);
-	if ($data) $data = json_decode(base64_decode($data), true);
+	if (is_string($data)) $data = json_decode($data, true);
 	return $data;
 }
 
@@ -616,7 +610,7 @@ function fetchUser($userData) {
 }
 
 function fetchUserData($rescan = false) {
-	$temp = getPreference('userdata', false, false, ['apiToken' => $_SESSION['apiToken']]);
+	$temp = getPreference('userdata', false, false, ['apiToken' => $_SESSION['apiToken']],true);
 	$data = [];
 	foreach ($temp as $key => $value) {
 		if (isJSON($value)) $value = json_decode($value, true);
@@ -625,9 +619,12 @@ function fetchUserData($rescan = false) {
 	}
 	$dlist = $data['dlist'] ?? false;
 	$aList = $data['appArray'] ?? false;
-	if ($aList) $aList = json_decode(base64_decode($aList), true);
+//	if ($aList) {
+//		if (is_string($dlist)) $aList = json_decode($aList, true);
+//	}
 	$data['appArray'] = $aList;
-	$devices = json_decode(base64_decode($dlist), true);
+	$devices = is_string($dlist) ? json_decode($dlist, true) : $dlist;
+	write_log("Devices and dList: ". json_encode([$devices, $dlist]));
 	if ($rescan || !$devices) $devices = scanDevices(true);
 	if (isset($data['dlist'])) unset($data['dlist']);
 	$data['deviceList'] = $devices;
@@ -635,67 +632,40 @@ function fetchUserData($rescan = false) {
 }
 
 function fetchGeneralData() {
-	$data = getPreference('general', false, [], false, false);
-	if ($data) {
-		$keys = $values = [];
-		foreach ($data as $value) {
-			foreach ($value as $id => $data) {
-				if ($id == 'name') {
-					array_push($keys, $data);
-				}
-				if ($id == 'value') {
-					if ($data === "true") $data = true;
-					if ($data === "false") $data = false;
-					array_push($values, $data);
-				}
-			}
-		}
-		$data = array_combine($keys, $values);
-	}
+	$data = getPreference('general', false, [], false, true);
+
 	return $data;
 }
 
 function logCommand($resultObject) {
+
 	if (isset($_GET['noLog'])) {
 		write_log("UI command, not logging.");
 		return;
 	}
-	$now = date("Y-m-d h:m:s");
-	$resultObject = (!is_array($resultObject)) ? json_decode($resultObject, true) : $resultObject;
-	$stamp = $resultObject['timeStamp'];
-	write_log("Logging command, stamp is $now: " . json_encode($resultObject));
 
-	$speech = ucwords($resultObject['speech'] ?? "");
-	$initial = ucwords($resultObject['initialCommand'] ?? "");
-	write_log("Final response for request of '$initial' is '$speech'", "ALERT");
-	$commands = $_SESSION['newCommand'] ?? [];
-	array_push($commands, $resultObject);
-	writeSession('newCommand', $commands);
-	if (isset($_GET['say'])) echo json_encode($resultObject);
+	$resultObject = (!is_array($resultObject)) ? json_decode($resultObject, true) : $resultObject;
+
+	$initial = $resultObject['initialCommand'] ?? "";
+	$speech = $resultObject['speech'] ?? "";
+
+	$logItem = [
+		'speech' => $speech,
+		'initialCommand' => $initial,
+		'cards' => $resultObject['cards'] ?? [],
+		'stamp' => date("Y-m-d h:m:s")
+	];
+
+	write_log("Final response for request of '$initial' is '$speech': ".json_encode($logItem), "ALERT");
+	if (isset($_GET['say'])) echo json_encode($logItem);
 
 	$apiToken = $_SESSION['apiToken'];
-	unset($resultObject['media']);
-	unset($resultObject['meta']);
-	$data = json_encode($resultObject);
-	if (trim($apiToken) && trim($data)) {
-		#TODO: Verify that the commands are in the right order here
-		$rows = getPreference('commands', ['data', 'stamp'], [], ['apiToken', $_SESSION['apiToken']], false);
-		if (is_array($rows)) $rows = array_reverse($rows);
-		$i = 1;
-		$stamps = [];
-		foreach ($rows as $row) {
-			if ($i >= 20) {
-				array_push($stamps, $row['stamp']);
-			}
-			$i++;
-		}
-		if (count($stamps)) {
-			foreach ($stamps as $stamp) {
-				$result = deletePrefrence('commands', ['apiToken' => $apiToken, 'stamp' => $stamp]);
-				write_log("Delete result is $result");
-			}
-		}
-		setPreference('commands', ['stamp' => $stamp, 'apiToken' => $apiToken, 'data' => $data]);
+	if (trim($apiToken) && count($resultObject)) {
+		$commands = fetchCommands();
+		$commands = array_reverse($commands);
+		array_push($commands, $logItem);
+		$commands = array_slice($commands, 0, 10);
+		updateUserPreference('commands',array_reverse($commands));
 	} else {
 		write_log("No token or data, skipping log.", "WARNING");
 	}
@@ -746,8 +716,11 @@ function newUser($user) {
 
 function popCommand($id) {
 	write_log("Popping it like it's hot.");
-	$result = deletePrefrence('commands', ['apiToken' => $_SESSION['apiToken'], 'stamp' => $id]);
-	write_log("Result of popping it like it's hot is $result");
+	$commands = fetchCommands();
+	if (($key = array_search($commands, $id)) !== false) {
+		unset($commands[$key]);
+		updateUserPreference('commands',json_encode($commands));
+	}
 }
 
 function validateIp($address) {

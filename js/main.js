@@ -25,6 +25,8 @@ var scrolling = false;
 var scaling = false;
 var backgroundTimer = false;
 
+var widgetTable;
+
 var lastUpdate = [];
 var devices = "foo";
 var staticCount = 0;
@@ -132,12 +134,15 @@ var PROFILE_APPS = [
 
 // Initialize global variables, special classes
 $(function () {
+    console.log("Fired jquery load function.");
+    apiToken = $('#apiTokenData').data('token');
+    console.log("ApiToken is " + apiToken);
+
     $(".select").dropdown({"optionClass": "withripple"});
 	$("#mainWrap").css({"top": 0});
-
+	// One for the money
+    fetchData();
 	// We do need to embed this in the page, just for the first query back to the server
-	apiToken = $('#apiTokenData').data('token');
-	console.log("ApiToken is " + apiToken);
 
 	bgs = $('.bg');
 	logLevel = "ALL";
@@ -150,29 +155,12 @@ $(function () {
 
 // This fires after the page is completely ready
 $(window).on("load", function() {
-    var backgrounds = $('.backgrounds');
-    var modals = $('.modals');
-    backgrounds.first().append(backgrounds.last().children());
-    backgrounds.not(':first').remove();
-
-    modals.last().append(modals.first().children());
-    modals.first().remove();
-
+    console.log("Fired window load function.");
+    mergeSections();
+    // Two for the show
     fetchData();
-
-    getServerStatus();
-    getCurrentActivityViaPlex();
-    // getLibraryStats();
-    // getPopularMovies('30', '5');
-    // getPopularTvShows('30', '5');
-    // getTopPlatforms('30', '5');
-    // getTopContentRatings(['movie', 'show'], [], 6);
-    // getTopGenres(['movie', 'show'], [], 6);
-
-    // getTopTag() is definitely a work in progress
-    //getTopTag('contentRating');
-    //getTopTag('genre');
-    //getTopTag('year');
+    fetchStatData();
+    setListeners();
 });
 
 // Scale the dang diddly-ang slider to the correct width, as it doesn't like to be responsive by itself
@@ -205,36 +193,6 @@ function fetchData() {
         $.get(uri, function (data) {
             if (data !== null) {
                 parseData(data);
-                for (var app in PROFILE_APPS) {
-                    app = PROFILE_APPS[app];
-                    var list = app + "List";
-                    var profile = app + "Profile";
-                    var element = $('#' + list);
-
-                    if (window.hasOwnProperty(list) && window.hasOwnProperty(profile)) {
-                        list = window[list];
-                        profile = window[profile];
-                        if (list && profile) {
-                            var index = 0;
-                            if (list.hasOwnProperty(profile)){
-                                for(var i = 0; i < list.length; i++) {
-                                    for(var key in list[i] ) {
-                                        if (key === 'profile') index = i;
-                                    }
-                                }
-                                var value = list[profile];
-                                if (element.length) {
-                                    var oldVal = element.val();
-                                    if (oldVal !== value) {
-                                        element.val(value);
-                                        console.log("Setting profile for " + app + " to " + value);
-                                        console.log("Old value is " + oldVal);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
             polling = false;
             firstPoll = false;
@@ -247,8 +205,24 @@ function fetchData() {
             polling = false;
         }
     }
-
 }
+
+function fetchStatData() {
+    getServerStatus();
+    getCurrentActivityViaPlex();
+    // getLibraryStats();
+    // getPopularMovies('30', '5');
+    // getPopularTvShows('30', '5');
+    // getTopPlatforms('30', '5');
+    // getTopContentRatings(['movie', 'show'], [], 6);
+    // getTopGenres(['movie', 'show'], [], 6);
+
+    // getTopTag() is definitely a work in progress
+    //getTopTag('contentRating');
+    //getTopTag('genre');
+    //getTopTag('year');
+}
+
 
 function parseData(data) {
     var force = (firstPoll !== false);
@@ -259,9 +233,11 @@ function parseData(data) {
         buildSettingsPages(data);
     }
 
-
-
     if (data.hasOwnProperty('userData')) {
+        var ud = data['userData'];
+        if (ud.hasOwnProperty('commands')) {
+            updateCommands(ud['commands'], !force);
+        }
         updateUi(data['userData']);
         delete data['userData'];
     }
@@ -284,9 +260,6 @@ function parseData(data) {
                 case "dologout":
                     if (val === true || val === "true") document.getElementById('logout').click();
                     break;
-                case "commands":
-                    updateCommands(val, !force);
-                    break;
                 case "messages":
                     for (var i = 0, l = val.length; i < l; i++) {
                         var msg = val[i];
@@ -308,6 +281,37 @@ function parseData(data) {
                     break;
                 default:
                     console.log("Unknown value: " + propertyName);
+            }
+        }
+    }
+
+    for (var app in PROFILE_APPS) {
+        app = PROFILE_APPS[app];
+        var list = app + "List";
+        var profile = app + "Profile";
+        var element = $('#' + list);
+
+        if (window.hasOwnProperty(list) && window.hasOwnProperty(profile)) {
+            list = window[list];
+            profile = window[profile];
+            if (list && profile) {
+                var index = 0;
+                if (list.hasOwnProperty(profile)){
+                    for(var j = 0; i < list.length; j++) {
+                        for(var key in list[j] ) {
+                            if (key === 'profile') index = j;
+                        }
+                    }
+                    var value = list[profile];
+                    if (element.length) {
+                        var oldVal = element.val();
+                        if (oldVal !== value) {
+                            element.val(value);
+                            console.log("Setting profile for " + app + " to " + value);
+                            console.log("Old value is " + oldVal);
+                        }
+                    }
+                }
             }
         }
     }
@@ -410,7 +414,18 @@ function buildUiDeferred() {
 
     }, 500);
 
-	$('.formpop').popover();
+    progressSlider = document.getElementById('progressSlider');
+    noUiSlider.create(progressSlider, {
+        start: 40,
+        connect: [true,false],
+        range: {
+            min: 0,
+            max: 100
+        }
+    });
+
+
+    $('.formpop').popover();
 
 	if (messages !== "" && messages !== undefined) {
 		messages = decodeURIComponent(messages.replace(/\+/g, '%20'));
@@ -421,7 +436,6 @@ function buildUiDeferred() {
 		messageArray = [];
 	}
 
-	setListeners();
 	checkUpdate();
 	fetchWeather();
     startBackgroundTimer();
@@ -440,7 +454,7 @@ function buildUiDeferred() {
 
 	setInterval(function() {
 		setTime();
-	}, 1000)
+	}, 1000);
 
 }
 
@@ -485,10 +499,11 @@ function initGrid() {
         }
     });
 
-    Sortable.create(document.getElementById('widgetList'), {
+    widgetTable = Sortable.create(document.getElementById('widgetList'), {
         group: "localStorage-example",
-        handle: ".sampleCard",
+        handle: ".widgetCol",
         animation: 250,
+        disabled: true,
         onEnd: function() {
             var afIcon = $('#widgetFab .material-icons');
             console.log("onEnd called...");
@@ -511,7 +526,7 @@ function initGrid() {
 
     Sortable.create(document.getElementById('widgetDeleteList'), {
         group: "localStorage-example",
-        handle: ".sampleCard",
+        handle: ".widgetCol",
         animation: 250,
         onAdd: function() {
             console.log("onEnd called...");
@@ -519,12 +534,13 @@ function initGrid() {
     });
 
     Sortable.create(document.getElementById('widgetAddList'), {
-        group: { name: "localStorage-example", pull: 'clone', put: true },
-        handle: ".sampleCard",
+        group: { name: "localStorage-example", pull: 'clone', put: false },
+        handle: ".widgetCol",
         animation: 250,
         onAdd: function() {
             console.log("onEnd called...");
-        }
+        },
+        sort: false
     });
 
 }
@@ -995,15 +1011,6 @@ function updatePlayerStatus(data) {
 			var resultSummary = mr["summary"];
 			var tagline = mr["tagline"];
 			var vs = $('#volumeSlider');
-            progressSlider = document.getElementById('progressSlider');
-            noUiSlider.create(progressSlider, {
-                start: 40,
-                connect: [true,false],
-                range: {
-                    min: 0,
-                    max: 100
-                }
-            });
 
 			// vs.on("change", function() {
 			// 	apiToken = $('#apiTokenData').data('token');
@@ -1199,6 +1206,9 @@ function recurseJSON(json) {
 
 
 function buildCards(value, i) {
+    if (value === "gg") {
+
+    }
 	var cardBg = false;
 	var timeStamp = (value.hasOwnProperty('timeStamp') ? $.trim(value.timeStamp) : '');
 	var title = '';
@@ -1353,6 +1363,16 @@ function ucFirst(str) {
     return strVal
 }
 
+function mergeSections() {
+    var backgrounds = $('.backgrounds');
+    var modals = $('.modals');
+    backgrounds.first().append(backgrounds.last().children());
+    backgrounds.not(':first').remove();
+
+    modals.last().append(modals.first().children());
+    modals.first().remove();
+}
+
 function notify() {
 }
 
@@ -1494,36 +1514,29 @@ function setTime() {
 }
 
 function setListeners() {
+    console.log("Setting listeners");
 	var id;
 
-	// Set up other listeners - shouldn't be rendering stuff here
-
-	// progressSlider.noUiSlider.on('end', function (values, handle) {
-	// 	var value = values[handle];
-	// 	apiToken = $('#apiTokenData').data('token');
-	// 	var newOffset = Math.round((resultDuration * (value * .01)));
-	// 	var url = 'api.php?control&command=seek&value=' + newOffset + "&apiToken=" + apiToken;
-	// 	$.get(url);
-	// });
-	//
-
-    $('.view-tab').on('scroll', chk_scroll);
-
-
     $('#alertModal').on('hidden.bs.modal', function () {
-		loopMessages();
-	});
+        loopMessages();
+    });
 
-    $('#cardModalBody').on('click', function() {
+    $(document).on('click', "#hamburger", function () {
+        console.log("Hanga-burger...");
+        openDrawer();
+    });
+
+    $(document).on( 'scroll', '.view-tab', chk_scroll);
+
+    $(document).on('click', '#cardModalBody', function() {
     	$('#cardModal').modal('hide');
 	});
 
-	$("#hamburger").on('click', function () {
-    	openDrawer();
+    $(document).on('click', '#homeTab', function() {
+        $('#widgetDrawer').slideUp();
     });
 
-    var checkbox = $(':checkbox');
-	checkbox.on('change', function () {
+    $(document).on('change', ':checkbox', function () {
 		var label = $("label[for='" + $(this).attr('id') + "']");
 		var checked = ($(this).is(':checked'));
 		if ($(this).data('app') === 'autoUpdate') {
@@ -1547,7 +1560,7 @@ function setListeners() {
 		}
 	});
 
-	$('.avatar').on('click', function() {
+	$(document).on( 'click', '.avatar', function() {
 		staticCount++;
 		if (staticCount >= 14 && cv==="") {
 			cv="&cage=true";
@@ -1556,16 +1569,7 @@ function setListeners() {
 		}
 	});
 
-	checkbox.each(function () {
-		var label = $("label[for='" + $(this).attr('id') + "']");
-		if ($(this).is(':checked')) {
-			label.css("color", "#003792");
-		} else {
-			label.css("color", "#A1A1A1");
-		}
-	});
-
-	$('#logout').on('click', function () {
+	$(document).on( 'click', '#logout', function () {
 		var bgs = $('.bg');
 		$('#results').css({"top": "-2000px", "max-height": 0, "overflow": "hidden"});
 		$.snackbar({content: "Logging out."});
@@ -1585,11 +1589,24 @@ function setListeners() {
 
 	});
 
-	$("#recentBtn").on('click', function() {
+	$(document).on( 'click', "#recentBtn", function() {
 		$("#recent").click();
 	});
 
-	$(".btn").on('click', function () {
+    $(document).on( 'click', "#homeEditBtn", function() {
+        var wf = $('#widgetFab');
+        var tableState = widgetTable.option("disabled");
+        widgetTable.option("disabled", !tableState);
+        wf.slideToggle();
+        $('.back').toggle();
+        $('.spinCard').toggleClass('rotating-card-container');
+            var wd = $('#widgetDrawer');
+            if (wd.css('display') === 'block') {
+                wd.slideUp();
+            }
+    });
+
+	$(document).on( 'click', ".btn", function () {
         var serverAddress = $("#publicAddress").val();
 		var value, regUrl;
 		if ($(this).hasClass("copyInput")) {
@@ -1667,7 +1684,6 @@ function setListeners() {
 		}
 	});
 
-
 	$(document).on('click', '.client-item', function () {
 		var clientId = $(this).data('id');
 		updateDevice('Client', clientId);
@@ -1680,7 +1696,7 @@ function setListeners() {
     });
 
     $(document).on('click', '#widgetFab', function () {
-        $('#widgetAddList').slideToggle();
+        $('#widgetDrawer').slideToggle();
         $(this).toggleClass('open');
     });
 
@@ -1735,7 +1751,6 @@ function setListeners() {
             .show();
     });
 
-
     $(document).on('click', '.btn-color', function () {
         var target = $(this).data('for');
         console.log("CLICKED for " + target);
@@ -1748,7 +1763,6 @@ function setListeners() {
         console.log("Color changed to " + newColor + ", coloring " + myId);
         $('*[data-id="'+ myId +'"]').css('color',newColor);
     });
-
 
     $(document).on('click', '.drawer-item', function () {
 	    clickCount++;
@@ -1814,7 +1828,7 @@ function setListeners() {
 		$.get('api.php?apiToken=' + apiToken, {id: service, value: index});
 	});
 
-	$("#appLanguage").on('change', function () {
+	$(document).on('change', "#appLanguage", function () {
 		var lang = $(this).find('option:selected').data('value');
 		apiToken = $('#apiTokenData').data('token');
 
@@ -1826,10 +1840,14 @@ function setListeners() {
 	});
 
 	// This handles sending and parsing our result for the web UI.
-	$("#sendBtn").on('click', function () {
+	$(document).on("#sendBtn", 'click', function () {
 		$('.load-barz').show();
 		var command = $('#commandTest').val();
 		if (command !== '') {
+		    if (command === 'I am a golden god.') {
+		        buildCards('gg');
+		        return true;
+            }
 			command = command.replace(/ /g, "+");
 			var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
 			apiToken = $('#apiTokenData').data('token');
@@ -1844,7 +1862,7 @@ function setListeners() {
 		}
 	});
 
-    $("#smallSendBtn").on('click', function () {
+    $(document).on( 'click', "#smallSendBtn", function () {
         $('.load-barz').show();
         var command = $('#commandTest').val();
         if (command !== '') {
@@ -1862,23 +1880,19 @@ function setListeners() {
         }
     });
 
-
-    $('.clientBtn').on('click', function () {
+    $(document).on( 'click', '.clientBtn', function () {
 		toggleClientList();
 	});
 
-
-	$(".expandWrap").on('click', function () {
+	$(document).on( 'click', ".expandWrap", function () {
 		$(this).children('.expand').slideToggle();
 	});
 
-	$("#sendLog").on('click', function () {
-		apiToken = $('#apiTokenData').data('token');
-
+	$(document).on( 'click',"#sendLog", function () {
 		$.get('api.php?sendlog&apiToken=' + apiToken);
 	});
 
-	$('#commandTest').on('keypress', function (event) {
+	$(document).on( 'keypress', '#commandTest', function (event) {
 		if (event.keyCode === 13) {
 			$('.sendBtn').each(function(){
 			    if ($(this).is(":visible")) $(this).trigger('click');
@@ -1886,7 +1900,7 @@ function setListeners() {
 		}
 	});
 
-    $(document).keypress(function(event) {
+    $(document).on('keypress', function(event) {
         if (event.keyCode === 92 || event.keyCode === 93) {
             var last = false;
             console.log("Keycode is " + event.keyCode);
@@ -1896,32 +1910,30 @@ function setListeners() {
         }
     });
 
-	$('#plexServerEnabled').on('change', function () {
+	$(document).on( 'change', '#plexServerEnabled', function () {
 		$('#plexGroup').toggle();
 	});
 
-	$('#apiEnabled').on('change', function () {
+	$(document).on( 'change', '#apiEnabled', function () {
 		$('.apiGroup').toggle();
 	});
 
-
-	$('#resolution').on('change', function () {
-		apiToken = $('#apiTokenData').data('token');
-
+	$(document).on( 'change', '#resolution', function () {
 		var res = $(this).find('option:selected').data('value');
 		$.get('api.php?apiToken=' + apiToken, {id: 'plexDvrResolution', value: res});
 	});
 
-	$('#checkUpdates').on('click', function () {
+	$(document).on( 'click', '#checkUpdates', function () {
 		checkUpdate();
 	});
 
-	$('#installUpdates').on('click', function () {
+	$(document).on( 'click', '#installUpdates', function () {
 		console.log("Trying to install...");
 		installUpdate();
 	});
 
 	document.addEventListener('DOMContentLoaded', function () {
+	    console.log("When and why did I add a DOM content listener???");
 		if (!Notification) {
 			alert('Desktop notifications not available in your browser. Try Chromium.');
 			return;
@@ -1933,7 +1945,7 @@ function setListeners() {
 
 	// Update our status every 10 seconds?  Should this be longer?  Shorter?  IDK...
 
-	$('.controlBtn').on('click', function () {
+	$(document).on( 'click', '.controlBtn', function () {
 		var myId = $(this).attr("id");
 		myId = myId.replace("Btn", "");
 		if (myId === "play") {
@@ -2000,8 +2012,8 @@ function setListeners() {
 
 		if (id.indexOf('Uri') > -1) {
 			console.log("IP Address changed for " + id);
-			var app = id.replace("Uri","");
-			$('#' + app +'Btn').data('src',value);
+			var appz = id.replace("Uri","");
+			$('#' + appz +'Btn').data('src',value);
 		}
 
         if (id.indexOf('Label') > -1) {
@@ -2041,6 +2053,7 @@ function setListeners() {
 		});
 
 	});
+	console.log("Okay, the listeners are loaded...");
 }
 
 function addAppGroup(app) {
@@ -2468,8 +2481,14 @@ function colorItems(color, element) {
 	element.attr('style', 'background-color: ' + color + " !important");
     $('.dd-selected').attr('style', 'background-color: ' + color + " !important");
     $('.colorBg').attr('style','background-color: ' + color);
-
-
+    $(':checkbox').each(function () {
+        var label = $("label[for='" + $(this).attr('id') + "']");
+        if ($(this).is(':checked')) {
+            label.css("color", color);
+        } else {
+            label.css("color", "#A1A1A1");
+        }
+    });
 }
 
 
