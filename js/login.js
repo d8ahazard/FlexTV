@@ -3,7 +3,7 @@ var deviceId, product, version, platform, platformVersion, device, deviceName, d
 var ov = false;
 var staticCount = 0;
 $(function ($) {
-    materialInit();
+	materialInit();
 	bg = $('.bg');
 	bodyWrap = $('#bodyWrap');
 	loginBox = $('.login-box');
@@ -23,11 +23,12 @@ $(function ($) {
 	listCookies();
 
 	messageArray = [];
-	if (mainwrap.length === 0) {
-		bg.fadeIn(1000);
-		loginBox.css({"top": "50%"});
-		$('body').addClass('loaded');
-	}
+	$.when(setBackground()).done(function() {
+		if (mainwrap.length === 0) {
+			loginBox.css({"top": "50%"});
+			$('body').addClass('loaded');
+		}
+    });
 	var success = false;
 
 	loginButton.click(function () {

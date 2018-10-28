@@ -65,7 +65,7 @@ if ($code || $apiToken || $getToken) {
 			require_once dirname(__FILE__) . '/php/body.php';
 			write_log("Making body!");
 			$defaults['token'] = $token;
-			$bodyData = makeBody($defaults);
+			$bodyData = mainBody($defaults);
 			$body = $bodyData[0];
 			$_SESSION['darkTheme'] = $bodyData[1];
 			$bodyData = $body;
@@ -160,8 +160,8 @@ function showError() {
         <link rel="stylesheet" href="css/font/font-muximux.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
         <link href="css/lib/bootstrap-iconpicker.min.css" rel="stylesheet">
-
     </noscript>
+
 	<div class="backgrounds">
         <div id="bgwrap">
 
@@ -176,15 +176,7 @@ function showError() {
             <div id="revision" class="meta"><?php echo checkRevision(true) ?></div>
         </div>
     </div>
-    <script>
-        var elem = document.createElement("div");
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        var url = "https://img.phlexchat.com?new=true&height=" + h + "&width=" + w + "&v=" + (Math.floor(Math.random() * (1084)));
-        elem.className += "bg bgLoaded";
-        document.getElementById("bgwrap").appendChild(elem);
-        elem.style.backgroundImage = 'url(' + url + ')';
-    </script>
+
 
     <?php
         // Body data goes here
@@ -245,6 +237,84 @@ function showError() {
 
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
+    <!-- These are some early-stage functions that we want available right away,
+    even if the DOM doesn't fully load for some reason. -->
+
+    <script type="text/javascript">
+        var messageBox = [];
+        // We call this inside the login window if necessary, or main.js. Ignore lint warnings.
+        function loopMessages(messages) {
+            console.log("Function fired.");
+            var messageArray = messages;
+            messageBox = messages;
+            $.each(messageArray, function () {
+                if (messageArray[0] === undefined) return false;
+                var keepLooping = showMessage(messageArray[0].title, messageArray[0].message, messageArray[0].url);
+                messageBox.splice(0, 1);
+                if (!keepLooping) return false;
+            })
+        }
+
+        function showMessage(title, message, url) {
+            if (Notification.permission === 'granted') {
+                var notification = new Notification(title, {
+                    icon: './img/avatar.png',
+                    body: message
+                });
+                if (url) {
+                    notification.onclick = function () {
+                        window.open(url);
+                    };
+                }
+                return true;
+
+            } else {
+                if (url !== "") {
+                    message = "<a href='" + url + "'>"+message+"</a>";
+                } else {
+                    message = "<p>" + message + "</p>";
+                }
+                if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(function (result) {
+                        if ((result === 'denied') || (result === 'default')) {
+                            $('#alertTitle').text(title);
+                            $('#alertBody').html(message);
+                            $('#alertModal').modal('show');
+                        }
+                    });
+                } else {
+                    $('#alertTitle').text(title);
+                    $('#alertBody').html(message);
+                    $('#alertModal').modal('show');
+                }
+                return false;
+            }
+        }
+
+        // Ignore the IDE when it says this is unused, it's lying
+        function setBackground(last) {
+            var cv="";
+            $('#bgwrap').append("<div class='bg hidden'></div>");
+            var imgUrl = "https://img.phlexchat.com?new=true"+(last ? "&last" : "")+"&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
+            console.log("Setting image source to " + imgUrl);
+
+            var newDiv = $('.bg').last();
+
+            var img = $('<img src="'+imgUrl+'" class="bgImg"/>').on('load', function(){
+                console.log("Image loaded.");
+
+                $.when(newDiv.fadeIn(500)).done(function() {
+                    console.log("Fading in...");
+                    newDiv.removeClass('hidden');
+                    $("#bgwrap div:not(:last-child)").remove();
+                })
+            });
+
+            newDiv.append(img);
+        }
+
+    </script>
+
     <?php
         if ($GLOBALS['login']) {
             echo '<script type="text/javascript" src="./js/login.js" async></script>';
@@ -271,57 +341,7 @@ function showError() {
 			window.history.pushState({}, "Hide", '<?php echo $_SERVER['PHP_SELF'];?>');
 		}
 
-		var messageBox = [];
-		// We call this inside the login window if necessary, or main.js. Ignore lint warnings.
-		function loopMessages(messages) {
-			console.log("Function fired.");
-			var messageArray = messages;
-			messageBox = messages;
-			$.each(messageArray, function () {
-				if (messageArray[0] === undefined) return false;
-				var keepLooping = showMessage(messageArray[0].title, messageArray[0].message, messageArray[0].url);
-				messageBox.splice(0, 1);
-				if (!keepLooping) return false;
-			})
-		}
-
-		function showMessage(title, message, url) {
-			if (Notification.permission === 'granted') {
-				var notification = new Notification(title, {
-					icon: './img/avatar.png',
-					body: message
-				});
-				if (url) {
-					notification.onclick = function () {
-						window.open(url);
-					};
-				}
-				return true;
-
-			} else {
-                if (url !== "") {
-                    message = "<a href='" + url + "'>"+message+"</a>";
-                } else {
-                    message = "<p>" + message + "</p>";
-                }
-				if (Notification.permission !== 'denied') {
-					Notification.requestPermission().then(function (result) {
-						if ((result === 'denied') || (result === 'default')) {
-						    $('#alertTitle').text(title);
-							$('#alertBody').html(message);
-							$('#alertModal').modal('show');
-						}
-					});
-				} else {
-					$('#alertTitle').text(title);
-					$('#alertBody').html(message);
-					$('#alertModal').modal('show');
-				}
-				return false;
-			}
-		}
-
-		// Load CSS deferred, because we went down the Lighthouse Audit rabbithole again...
+        // Load CSS deferred, because we went down the Lighthouse Audit rabbithole again...
         var loadDeferredStyles = function() {
             var addStylesNode = document.getElementById("deferred-styles");
             var replacement = document.createElement("div");

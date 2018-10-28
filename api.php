@@ -191,6 +191,9 @@ function initialize() {
 			} else {
 				updateUserPreference($id, $value);
 				writeSession($id, $value);
+				if (is_array($value)) $checkVal = json_encode($value); else $checkVal = $value;
+				if (!isset($_SESSION['settings'])) $_SESSION['settings'] = [];
+				$_SESSION['settings'][$id] = $checkVal;
 			}
 			if ((trim($id) === 'useCast') || (trim($id) === 'noLoop')) scanDevices(true);
 			if ($id == "appLanguage") checkSetLanguage($value);
@@ -205,6 +208,11 @@ function initialize() {
 		bye();
 	}
 
+	foreach(['App", "Widget", "Fetcher'] as $type) {
+		if (isset($_GET["json${type}Array"])) {
+			write_log("Got an array for $type");
+		}
+	}
 
 	if (isset($_GET['castLogs'])) {
 		downloadCastLogs();
@@ -375,23 +383,31 @@ function triggerRescan() {
 function getUiData($force = false) {
 	$result = [];
 	$devices = selectDevices(scanDevices(false));
+	$apps = fetchAppArray();
 
 	if ($force) {
 		$devices['Server'] = [];
 		$devices['Dvr'] = [];
-		$widgets = getPreference('userdata', ['appList'], [], ['apiToken'=>$_SESSION['apiToken']], true);
+		$widgets = getPreference('userdata', ['jsonWidgetArray'], [], ['apiToken'=>$_SESSION['apiToken']], true);
+
 		$lang = checkSetLanguage();
 		$result = [
 			'devices' => $devices,
 			'strings' => $lang['javaStrings'] ?? [],
-			'widgets' => $widgets
+			'widgets' => $widgets,
+			'apps' => $apps
 		];
 		return $result;
 	} else {
 		$playerStatus = fetchPlayerStatus();
 		$deviceText = json_encode($devices);
 		$settingData = array_merge(fetchGeneralData(), fetchUserData());
-		foreach ($settingData as $key => &$value) {
+		// Temporarily do this until we're sure nobody's got base64 lists anymore
+		$settingData['jsonAppArray'] = $apps;
+
+		$updated = [];
+
+		foreach ($settingData as $key => $value) {
 			if (preg_match("/List/", $key) && $key !== 'deviceList') {
 				$value = fetchList(str_replace("List", "", $key));
 			}
@@ -415,10 +431,6 @@ function getUiData($force = false) {
 				if ($value == "0") $value = false;
 				if ($value == "1") $value = true;
 			}
-		}
-
-	$updated = [];
-		foreach ($settingData as $key => $value) {
 			$ogVal = $value;
 			if (is_array($value)) {
 				$value = json_encode($value);
@@ -430,39 +442,46 @@ function getUiData($force = false) {
 			}
 		}
 
+		$removes = ['appArray', 'jsonAppArray', 'appList', 'jsonWidgetArray', 'commands', 'fetchers'];
+		$widgets = $settingData['jsonWidgetArray'] ?? [];
+		$apps = $updated['jsonAppArray'] ?? [];
+		$commands = $updated['commands'] ?? [];
+		$fetchers = $updated['fetchers'] ?? [];
+		if (count($apps)) $result['apps'] = $apps;
+		if (count($widgets)) $result['widgets'] = $widgets;
+		if (count($commands)) $result['commands'] = $commands;
+		if (count($fetchers)) $result['fetchers'] = $commands;
+		foreach ($removes as $remove) if (isset($updated[$remove])) unset($updated[$remove]);
+
 		if (count($updated)) {
 			$result['userData'] = $updated;
 			writeSession('updated', false, true);
 		}
+
 		$deviceUpdated = $_SESSION['devices'] !== $deviceText;
+
 		if ($deviceUpdated) {
 			$result['devices'] = $devices;
 			writeSession('devices', $deviceText);
 		}
+
+		if ($playerStatus) {
+			$lastStatus = $_SESSION['lastStatus'] ?? "<NODATA>..";
+			if (json_encode($playerStatus) !== $lastStatus) {
+				$results['playerStatus'] = $playerStatus;
+				writeSession('lastStatus', json_encode($playerStatus));
+			}
+		}
 	}
 
 	if ($_SESSION['dologout'] ?? false) $result['dologout'] = true;
-	if (isset($_SESSION['messages'])) {
-		$result['messages'] = $_SESSION['messages'];
-		writeSession('messages', null, true);
-	}
 
 	$messages = $_SESSION['messages'] ?? false;
 	if ($messages) {
 		$result['messages'] = $_SESSION['messages'];
 		writeSession('messages', false);
 	}
-	$userData = $result['userData'] ?? [];
-	$ud2 = [];
-	foreach ($userData as $key => $value) {
-		if (preg_match("/List/", $key)) {
-			$target = str_replace("List", "", $key);
-			$value = fetchList($target);
-		}
-		$ud2[$key] = $value;
-	}
-	unset($result['userData']);
-	$result['userData'] = $ud2;
+
 	return $result;
 }
 
@@ -1139,7 +1158,7 @@ function setSelectedDevice($type, $id) {
 		write_log("Going to select " . $selected['Name']);
 		writeSessionArray([['deviceList' => $list, 'deviceUpdated' => true]]);
 		if ($type == 'Client' && isset($_SESSION['volume'])) writeSession('volume', "", true);
-		$push['dlist'] = json_encode($list);
+		$push['jsonDeviceArray'] = json_encode($list);
 		$push["plex$type" . "Id"] = $selected['Id'];
 		updateUserPreferenceArray($push);
 	} else {
@@ -1285,7 +1304,7 @@ function updateDeviceCache($data) {
 	$string = json_encode($devices);
 	$prefs = [
 		'lastScan' => $now,
-		'dlist'    => $string
+		'jsonDeviceArray'    => $string
 	];
 	updateUserPreferenceArray($prefs);
 }

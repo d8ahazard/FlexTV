@@ -1,29 +1,36 @@
 <?php
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/../api.php';
+require_once dirname(__FILE__) . "/webApp.php";
+
 scriptDefaults();
 
-function makeBody($defaults) {
-	if (!defined('LOGGED_IN')) {
-		write_log("Dying because not logged in?", "ERROR");
-		die();
+if (isset($_GET['apiToken']) && isset($_GET['bodyType'])) {
+	if (verifyApiToken($_GET['apiToken'])) {
+		$user = fetchUser(['apiToken' => $_GET['apiToken']]);
+		$type = $_GET['bodyType'] ?? 'sections';
+		header('Content-type: text/html');
+		echo deferredContent($user, $type);
 	}
+}
+
+function deferredContent($user, $type = 'sections') {
+
+	$masterUser = $usee['masterUser'] ?? false;
 	$lang = checkSetLanguage();
 	$defaults['lang'] = $lang;
 	$hide = $defaults['isWebApp'];
+
 	$hidden = $hide ? " remove" : "";
-	$useGit = $hide ? false : checkGit();
 	$webAddress = serverAddress();
-	$lang = $defaults['lang'];
-	$apiToken = $_SESSION['apiToken'];
-	$masterUser = $_SESSION['masterUser'] ?? false;
+	$apiToken = $user['apiToken'];
 
-	$ombiAddress = $_SESSION['ombiUri'] ?? "./ombi";
-	$homeBase = file_get_contents(dirname(__FILE__) . "/homeBase/index.html");
-	$homeBase = str_replace('<OMBI_URL>', $ombiAddress, $homeBase);
-	$recentPage = file_get_contents(dirname(__FILE__) . "/homeBase/recentlyadded/recently_added.html");
+	$useGit = $hide ? false : checkGit();
 
-	$gitDiv = $useGit ? '<div class="appContainer card updateDiv' . $hidden . '">
+	$gitDiv = "";
+	if ($useGit) {
+		$gitDiv = '
+				<div class="appContainer card updateDiv' . $hidden . '">
 			        <div class="card-body">
 			            <h4 class="card-title">' . $lang['uiSettingUpdates'] . '</h4>
 			            <div class="form-group bmd-form-group">
@@ -51,11 +58,10 @@ function makeBody($defaults) {
 			                </div>
 			            </div>
 			        </div>
-			    </div>' : "";
+			    </div>';
+	}
 
-
-	$masterBtn = "";
-	$masterDiv = "";
+	$masterBtn = $masterDiv = "";
 
 	if ($masterUser) {
 		$masterBtn = '
@@ -134,250 +140,7 @@ function makeBody($defaults) {
 		';
 	}
 
-
-	$bodyText = '
-			
-			<div class="backgrounds">
-				<div class="wrapperArt"></div>
-				<div class="castArt">
-					<div class="background-container">
-						<div class="ccWrapper">
-							<div class="fade1 ccBackground">
-							</div>
-						</div>
-					</div>      
-				</div>
-			</div>
-			
-			<div id="body" class="container">
-				<!-- This needs to be loaded right away -->
-				<div id="topBar" class="row testGrp justify-content-between">
-					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="leftGrp">
-						<div class="row testGrp">
-							<div class="col-12 col-md-6 col-lg-4 center-block">
-								<div class="btn btn-sm navIcon center-block" id="hamburger">
-									<span class="material-icons colorItem">menu</span>
-								</div>
-							</div>
-							<div class="col-0 col-md-6 col-lg-4 center-block">
-								<div class="btn btn-sm navIcon center-block" id="refresh">
-									<span class="material-icons colorItem">refresh</span>
-								</div>
-							</div>
-							<div class="col"></div>
-						</div>
-					</div>
-					<div class="col-8 col-sm-10 col-md-9 col-lg-8 wrapper">
-						<div class="searchWrap" id="queryCard">
-				            <div class="query">
-				            	<div class="form-group bmd-form-group bmd-form-group" id="queryGroup">
-                                    <label for="commandTest" id="actionLabel" class="bmd-label-floating">' . $lang['uiGreetingDefault'] . '</label>
-                                    <input type="text" class="form-control" id="commandTest">
-                                    <div class="load-barz colorBg" id="loadbar">
-										<div class="barz"></div>
-										<div class="barz colorBg"></div>
-										<div class="barz"></div>
-										<div class="barz"></div>
-									</div>
-			        				<div class="btn btn-sm navIcon sendBtn" id="sendBtn">
-            							<span class="material-icons colorItem">message</span>
-									</div>
-                                </div>
-					        </div>
-				        </div>
-					</div>
-					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="rightGrp">
-						<div class="row testGrp">
-							<div class="col-md-0 col-lg-8 col-xl-8">
-								<div id="sectionLabel" class="colorItem">
-									Home
-								</div>
-							</div>
-							<div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 center-block">
-								<div class="btn btn-sm navIcon clientBtn center-block" data-position="right" id="client">
-	            					<span class="material-icons colorItem">cast</span>
-	            					<div class="ddLabel"></div>
-            					</div>
-            					<div class="btn btn-sm navIcon sendBtn" id="smallSendBtn">
-            						<span class="material-icons colorItem">message</span>
-								</div>	
-							</div>
-						</div>
-					</div>
-				</div>
-				
-		        <div id="results">
-	                <div id="results-content" class="row">
-				        <div class="view-tab active col-md-9 col-lg-10 col-xl-8" id="homeTab">     
-	                        <div class="tableContainer">
-								<div id="widgetList" class="queryWrap widgetList">
-				                </div>
-	                    	</div>
-                           <div id="widgetDrawer" class="queryWrap">
-	                            <div class="col-md-9 col-lg-10 col-xl-8 widgetWrap">
-			                        <div id="widgetAddList" class="queryWrap">
-						                    <!-- This is a sample flippy card -->
-											<div class="col-md-6 ml-auto mr-auto widgetCol">
-											    <div class="spinCard">
-											        <div class="card card-rotate card-background">
-											            <!-- This is the UI side. -->
-											            <div class="front front-background">
-										                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Statistics</h4>
-															<ul id="serverInformation" class="list-group list-group-flush">
-																<li id="serverStatusSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">Server Status: Online 
-																	<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;">
-																		<g transform="translate(256 256)">
-																			<g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)">
-																				<path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)">
-																				</path>
-																			</g>
-																		</g>
-																	</svg>
-																	<!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> -->
-																</li>
-																
-																<!-- Check Current Activity -->
-																<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
-																	<span class="d-flex align-items-center">Current Activity 
-																		<button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><svg class="svg-inline--fa fa-sync-alt fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><!-- <i class="fas fa-fw fa-sync-alt fa-spin"></i> -->
-																		</button>
-																	</span>
-																	<span id="currentActivitySampleStreamCount">1 Stream 
-																		<span id="currentActivityBandwidth" title="3.9 Mbps / 11 Mbps" data-toggle="tooltip">
-																			<svg class="svg-inline--fa fa-info-circle fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
-																				<path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z">
-																				</path>
-																			</svg><!-- <i class="fas fa-fw fa-info-circle"></i> -->
-																		</span>
-																	</span>
-																</li>
-															</ul>
-											            </div>
-														<!-- These are the settings -->
-											            <div class="back card-rotate back-background">
-											                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-										                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-										                        <li>
-										                            <input type="text" class=""/>
-										                        </li>
-										                        <li>
-										                            <input type="select" class=""/>
-										                        </li>
-										                    </ul>
-											            </div>
-											        </div>
-											    </div>
-										    </div>
-											
-											<!-- User widget -->
-											
-											<div class="col-md-6 ml-auto mr-auto widgetCol">
-											    <div class="spinCard">
-											        <div class="card card-rotate card-background">
-											            <!-- This is the UI side. -->
-											            <div class="front front-background">
-										                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Users</h4>
-																													<ul id="userInformation" class="list-group list-group-flush">
-														
-														<!-- Check if Plex Server is online -->
-														<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
-														
-														
-														<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
-														</li>
-														</ul>
-
-											            </div>
-														<!-- These are the settings -->
-											            <div class="back card-rotate back-background">
-											                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-										                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-										                        <li>
-										                            <input type="text" class=""/>
-										                        </li>
-										                        <li>
-										                            <input type="select" class=""/>
-										                        </li>
-										                    </ul>
-											            </div>
-											        </div>
-											    </div>
-										    </div>
-
-											<!-- Another widget -->
-											<div class="col-md-6 ml-auto mr-auto widgetCol">
-											    <div class="spinCard">
-											        <div class="card card-rotate card-background">
-											            <!-- This is the UI side. -->
-											            <div class="front front-background">
-										                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Popular</h4>
-																													<ul id="userInformation" class="list-group list-group-flush">
-														
-														<!-- Check if Plex Server is online -->
-														<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
-														
-														
-														<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
-														</li>
-														</ul>
-
-											            </div>
-														<!-- These are the settings -->
-											            <div class="back card-rotate back-background">
-											                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-										                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-										                        <li>
-										                            <input type="text" class=""/>
-										                        </li>
-										                        <li>
-										                            <input type="select" class=""/>
-										                        </li>
-										                    </ul>
-											            </div>
-											        </div>
-											    </div>
-										    </div>
-											
-											<!-- No header -->
-											<div class="col-md-6 ml-auto mr-auto widgetCol">
-											    <div class="spinCard" data-endpoint="popular" data-section="1">
-											        <div class="card card-rotate card-background">
-											            <!-- This is the UI side. -->
-											            <div class="front front-background">
-										                   <h4 class="card-title text-center px-2 statHeader">Popular</h4>
-															<ul id="popularList" class="list-group list-group-flush">
-																<li>Sample1</li>
-																<li>Sample2</li>
-																<li>Sample3</li>
-																<li>Sample4</li>
-																<li>Sample5</li>
-																<li>Sample6</li>
-																<li>Sample7</li>
-																<li>Sample8</li>
-															</ul>
-
-											            </div>
-														<!-- These are the settings -->
-											            <div class="back card-rotate back-background">
-											                <h4 class="card-title text-center px-2 statHeader">Settings</h4>
-								                            <input type="text" class=""/>
-								                            <input type="select" class=""/>
-											            </div>
-											        </div>
-											    </div>
-										    </div>
-										</div>
-							                
-						                <div id="widgetDeleteList">
-						                </div>
-				                    </div>
-								</div>
-							</div>
-                         	<div id="widgetFab" class="btn btn-fab-lg">
-			                    <span class="material-icons addIcon">add</span>
-							</div>  
-                        </div>
-	                    <div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
+	$content = '<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
 	                        <div class="tableContainer">
 								<div id="appList" class="row">
 				                </div>
@@ -388,7 +151,6 @@ function makeBody($defaults) {
 								</div>  
 		                    </div>
 	                    </div>
-                    
 		            	<div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="plexSettingsTab">
 				            <div class="gridBox">
 			                    <div class="appContainer card">
@@ -489,8 +251,6 @@ function makeBody($defaults) {
 							
 							</div>
 						</div>
-					</div>
-				</div>
 				        <div class="view-tab fade" id="recentStats">
 			            	<!-- Populated by js -->
 						</div>
@@ -514,7 +274,7 @@ function makeBody($defaults) {
 			                        </div>
 			                        <div class="form-group bmd-form-group' . $hidden . '">
 			                            <label for="apiToken" class="appLabel bmd-label-floating">' . $lang['uiSettingApiKey'] . '</label>
-			                            <input id="apiToken" class="appInput form-control" type="text" value="' . $_SESSION["apiToken"] . '" readonly="readonly"/>
+			                            <input id="apiToken" class="appInput form-control" type="text" value="' . $apiToken . '" readonly="readonly"/>
 			                            <span class="bmd-help">Your API Token can be used to access FlexTV from other services.</span>
 			                        </div>
 			                        <div class="form-group bmd-form-group' . ($hide ? ' hidden' : '') . '">
@@ -708,10 +468,9 @@ function makeBody($defaults) {
 				                </div>
 				            </div>
 			            </div>	                    
-	                </div>
-	                	
-			</div>
-				
+	                </div>';
+
+	$content2 = '
 			<div id="ghostDiv"></div>
 					
 			<div class="modals">
@@ -796,11 +555,11 @@ function makeBody($defaults) {
 		                <div class="drawer-header container">
 			                <div class="userWrap row justify-content-around">
 			                    <div class="col-3">
-			                        <img class="avatar" src="' . $_SESSION['plexAvatar'] . '"/>
+			                        <img class="avatar" src="' . $user['plexAvatar'] . '"/>
 			                    </div>
 			                    <div class="col-9">
-				                    <p class="userHeader">' . ucfirst($_SESSION['plexUserName']) . '</p>
-				                    <p class="userEmail">' . $_SESSION['plexEmail'] . '</p>
+				                    <p class="userHeader">' . ucfirst($user['plexUserName']) . '</p>
+				                    <p class="userEmail">' . $user['plexEmail'] . '</p>
 			                    </div>
 			                </div>
 		                </div>
@@ -874,9 +633,6 @@ function makeBody($defaults) {
 				</div>
             </div>
             
-	        <div id="metaTags">
-			    <meta id="apiTokenData" data-token="' . $_SESSION["apiToken"] . '"/>
-			</div>
 			
 			<datalist id=colorList>
 			    <option>#36c6f4</option>
@@ -893,8 +649,311 @@ function makeBody($defaults) {
 			    <option>#ff0046</option>			    
 			    <option>#a7401c</option>
 			    <option>#b90900</option>
-            </datalist>
-					';
+            </datalist>';
+	return ($type === 'sections') ? $content : $content2;
+}
+
+function mainBody($defaults) {
+	if (!defined('LOGGED_IN')) {
+		write_log("Dying because not logged in?", "ERROR");
+		die();
+	}
+	$lang = checkSetLanguage();
+	$defaults['lang'] = $lang;
+
+	$bodyText = '
+			<div class="backgrounds">
+				<div class="wrapperArt"></div>
+				<div class="castArt">
+					<div class="background-container">
+						<div class="ccWrapper">
+							<div class="fade1 ccBackground">
+							</div>
+						</div>
+					</div>      
+				</div>
+			</div>
+			
+			<div id="body" class="container">
+				<!-- This needs to be loaded right away -->
+				<div id="topBar" class="row testGrp justify-content-between">
+					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="leftGrp">
+						<div class="row testGrp">
+							<div class="col-12 col-md-6 col-lg-4 center-block">
+								<div class="btn btn-sm navIcon center-block" id="hamburger">
+									<span class="material-icons colorItem">menu</span>
+								</div>
+							</div>
+							<div class="col-0 col-md-6 col-lg-4 center-block">
+								<div class="btn btn-sm navIcon center-block" id="refresh">
+									<span class="material-icons colorItem">refresh</span>
+								</div>
+							</div>
+							<div class="col"></div>
+						</div>
+					</div>
+					<div class="col-8 col-sm-10 col-md-9 col-lg-8 wrapper">
+						<div class="searchWrap" id="queryCard">
+				            <div class="query">
+				            	<div class="form-group bmd-form-group bmd-form-group" id="queryGroup">
+                                    <label for="commandTest" id="actionLabel" class="bmd-label-floating">' . $lang['uiGreetingDefault'] . '</label>
+                                    <input type="text" class="form-control" id="commandTest">
+                                    <div class="load-barz colorBg" id="loadbar">
+										<div class="barz"></div>
+										<div class="barz colorBg"></div>
+										<div class="barz"></div>
+										<div class="barz"></div>
+									</div>
+			        				<div class="btn btn-sm navIcon sendBtn" id="sendBtn">
+            							<span class="material-icons colorItem">message</span>
+									</div>
+                                </div>
+					        </div>
+				        </div>
+					</div>
+					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="rightGrp">
+						<div class="row testGrp">
+							<div class="col-md-0 col-lg-8 col-xl-8">
+								<div id="sectionLabel" class="colorItem">
+									Home
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 center-block">
+								<div class="btn btn-sm navIcon clientBtn center-block" data-position="right" id="client">
+	            					<span class="material-icons colorItem">cast</span>
+	            					<div class="ddLabel"></div>
+            					</div>
+            					<div class="btn btn-sm navIcon sendBtn" id="smallSendBtn">
+            						<span class="material-icons colorItem">message</span>
+								</div>	
+							</div>
+						</div>
+					</div>
+				</div>
+				
+		        <div id="results">
+	                <div id="results-content" class="row">
+				        <div class="view-tab active col-md-9 col-lg-10 col-xl-8" id="homeTab">
+				        	<div class="tableContainer" id="addContainer">
+								<div id="widgetList" class="queryWrap widgetList">
+				                </div>
+	                    	</div>
+                           <div id="widgetDrawer" class="queryWrap">
+	                            <div class="col-md-9 col-lg-10 col-xl-8 widgetWrap">
+			                        <div id="widgetAddList" class="queryWrap">
+			                            <!-- Original card -->
+			                            
+										<div class="col-sm-12 col-lg-4 mb-4" data-type="serverStats" data-target="SOME_SERVER_ID">
+											<div class="spinCard">
+												<div class="card h-100 bg-dark text-white shadow">
+													<div class="front front-background">
+														<h4 class="card-header text-center px-2">Statistics</h4>
+														
+														<ul id="serverInformation" class="list-group list-group-flush">
+														
+														<!-- Check if Plex Server is online -->
+														<li id="serverStatus" class="list-group-item d-flex justify-content-between align-items-center list-group-item-success">Server Status: Online <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
+														
+														<!-- Check Current Activity -->
+														<li id="currentActivity" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
+															<span class="d-flex align-items-center">
+															Current Activity <button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><svg class="svg-inline--fa fa-sync-alt fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><!-- <i class="fas fa-fw fa-sync-alt fa-spin"></i> --></button>
+															</span>
+															<span id="currentActivityStreamCount">1 Stream <span id="currentActivityBandwidth" title="" data-toggle="tooltip" data-original-title="4 Mbps / 25 Mbps"><svg class="svg-inline--fa fa-info-circle fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg><!-- <i class="fas fa-fw fa-info-circle"></i> --></span></span>
+														</li>
+														
+														<li class="list-group-item d-flex justify-content-between bg-dark"><span>Movies</span><span class="text-right">1,542</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>TV Shows</span><span class="text-right">552</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>TV Episodes</span><span class="text-right">27,685</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>Monthly Active Users</span><span id="montlyActiveUsers" class="text-right">21<span class="text-muted"> / 26</span></span></li></ul>
+													</div>
+													<div class="back card-rotate back-background">
+										                <div class="widgetHandle btn">
+															<h4 class="card-header text-center px-2">Settings</h4>
+														 </div>
+									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
+									                        <li>
+									                            <input type="text" class=""/>
+									                        </li>
+									                        <li>
+									                            <input type="select" class=""/>
+									                        </li>
+									                    </ul>
+										            </div>
+												</div><!-- card -->
+											</div>
+										</div>
+										
+					                    <!-- This is a sample flippy card -->
+										<div class="col-md-6 ml-auto mr-auto widgetCol">
+										    <div class="spinCard">
+										        <div class="card card-rotate card-background">
+										            <!-- This is the UI side. -->
+										            <div class="front front-background">
+									                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Statistics</h4>
+														<ul id="serverInformation" class="list-group list-group-flush">
+															<li id="serverStatusSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">Server Status: Online 
+																<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;">
+																	<g transform="translate(256 256)">
+																		<g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)">
+																			<path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)">
+																			</path>
+																		</g>
+																	</g>
+																</svg>
+																<!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> -->
+															</li>
+															
+															<!-- Check Current Activity -->
+															<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
+																<span class="d-flex align-items-center">Current Activity 
+																	<button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><svg class="svg-inline--fa fa-sync-alt fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><!-- <i class="fas fa-fw fa-sync-alt fa-spin"></i> -->
+																	</button>
+																</span>
+																<span id="currentActivitySampleStreamCount">1 Stream 
+																	<span id="currentActivityBandwidth" title="3.9 Mbps / 11 Mbps" data-toggle="tooltip">
+																		<svg class="svg-inline--fa fa-info-circle fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
+																			<path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z">
+																			</path>
+																		</svg><!-- <i class="fas fa-fw fa-info-circle"></i> -->
+																	</span>
+																</span>
+															</li>
+														</ul>
+										            </div>
+													<!-- These are the settings -->
+										            <div class="back card-rotate back-background">
+										                <div class="widgetHandle btn">
+															<h4 class="card-header text-center px-2">Settings</h4>
+														 </div>
+									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
+									                        <li>
+									                            <input type="text" class=""/>
+									                        </li>
+									                        <li>
+									                            <input type="select" class=""/>
+									                        </li>
+									                    </ul>
+										            </div>
+										        </div>
+										    </div>
+									    </div>
+										
+										<!-- User widget -->
+										
+										<div class="col-md-6 ml-auto mr-auto widgetCol">
+										    <div class="spinCard">
+										        <div class="card card-rotate card-background">
+										            <!-- This is the UI side. -->
+										            <div class="front front-background">
+									                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Users</h4>
+																												<ul id="userInformation" class="list-group list-group-flush">
+													
+													<!-- Check if Plex Server is online -->
+													<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
+													
+													
+													<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
+													</li>
+													</ul>
+
+										            </div>
+													<!-- These are the settings -->
+										            <div class="back card-rotate back-background">
+										                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
+									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
+									                        <li>
+									                            <input type="text" class=""/>
+									                        </li>
+									                        <li>
+									                            <input type="select" class=""/>
+									                        </li>
+									                    </ul>
+										            </div>
+										        </div>
+										    </div>
+									    </div>
+
+										<!-- Another widget -->
+										<div class="col-md-6 ml-auto mr-auto widgetCol">
+										    <div class="spinCard">
+										        <div class="card card-rotate card-background">
+										            <!-- This is the UI side. -->
+										            <div class="front front-background">
+									                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Popular</h4>
+														<ul id="userInformation" class="list-group list-group-flush">
+													
+													<!-- Check if Plex Server is online -->
+													<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
+													
+													
+													<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
+													</li>
+													</ul>
+
+										            </div>
+													<!-- These are the settings -->
+										            <div class="back card-rotate back-background">
+										            <div class="appHandle btn">
+                    									<span class="material-icons">drag_handle</span>
+                									</div>
+										                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
+									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
+									                        <li>
+									                            <input type="text" class=""/>
+									                        </li>
+									                        <li>
+									                            <input type="select" class=""/>
+									                        </li>
+									                    </ul>
+										            </div>
+										        </div>
+										    </div>
+									    </div>
+										
+										<!-- No header -->
+										<div class="col-md-6 ml-auto mr-auto widgetCol">
+										    <div class="spinCard" data-endpoint="popular" data-section="1">
+										        <div class="card card-rotate card-background">
+										            <!-- This is the UI side. -->
+										            <div class="front front-background">
+									                   <h4 class="card-title text-center px-2 statHeader">Popular</h4>
+														<ul id="popularList" class="list-group list-group-flush">
+															<li>Sample1</li>
+															<li>Sample2</li>
+															<li>Sample3</li>
+															<li>Sample4</li>
+															<li>Sample5</li>
+															<li>Sample6</li>
+															<li>Sample7</li>
+															<li>Sample8</li>
+														</ul>
+
+										            </div>
+													<!-- These are the settings -->
+										            <div class="back card-rotate back-background">
+										                <h4 class="card-title text-center px-2 statHeader">Settings</h4>
+							                            <input type="text" class=""/>
+							                            <input type="select" class=""/>
+										            </div>
+										        </div>
+										    </div>
+									    </div>
+						                
+				                    </div>
+								</div>
+							</div>
+							<div id="widgetDeleteList">
+							</div>			
+							<div id="widgetFab" class="btn btn-fab-lg">
+			                    <span class="material-icons addIcon">add</span>
+							</div>  
+                        </div>
+					</div>
+				</div>
+			</div>	
+			
+	        <div id="metaTags">
+			    <meta id="apiTokenData" data-token="' . $_SESSION["apiToken"] . '"/>
+			</div>
+			';
 
 
 	return [$bodyText, $_SESSION['darkTheme']];

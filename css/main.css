@@ -196,7 +196,12 @@ a:hover:not(#executeButton) {
     top: -5px;
     left: 0;
     width: 100%;
-    height: 20px;
+    height: 24px !important;
+    border-radius: 5px;
+}
+
+.widgetHandle {
+    width: 100%;
     border-radius: 5px;
 }
 
@@ -222,6 +227,10 @@ a:hover:not(#executeButton) {
 
 #widgetFab {
     display: none;
+}
+
+#widgetAddList {
+    overflow-y: scroll;
 }
 
 #appFab, #widgetFab {
@@ -798,6 +807,16 @@ html {
     position: fixed;
     top: 0;
     left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden
+}
+
+.bg img {
+    flex-shrink: 0;
+    min-width: 100%;
+    min-height: 100%
 }
 
 .scrollContainer {
@@ -1706,12 +1725,21 @@ span.toggle {
 }
 
 #weatherDiv {
+    display: none;
     position: fixed;
     bottom: 35px;
     right: 13px;
     text-align: right;
     mix-blend-mode: difference;
     color: var(--theme-primary-inverse);
+}
+
+.imageArt {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .meta {

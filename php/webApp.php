@@ -425,7 +425,7 @@ function checkDefaultsDb($config) {
  `notifyUpdate` tinyint(1) NOT NULL DEFAULT '0',
  `masterUser` tinyint(1) NOT NULL DEFAULT '0',
  `autoUpdate` tinyint(1) NOT NULL DEFAULT '0',
- `dlist` JSON NOT NULL,
+ `jsonDeviceArray` JSON NOT NULL,
  `plexPassUser` tinyint(1) NOT NULL,
  `plexServerId` tinytext NOT NULL,
  `plexDvrId` tinytext NOT NULL,
@@ -530,7 +530,7 @@ function upgradeDbTable($config) {
 		}
 
 		// Convert lists to proper JSON items
-		$query = "ALTER TABLE `userdata` CHANGE `dlist` `dlist` JSON NOT NULL, CHANGE `widgetArray` `widgetArray` JSON NOT NULL, CHANGE `appArray` `appArray` JSON NOT NULL;";
+		$query = "ALTER TABLE `userdata` CHANGE `jsonDeviceArray` `jsonDeviceArray` JSON NOT NULL, CHANGE `widgetArray` `widgetArray` JSON NOT NULL, CHANGE `appArray` `appArray` JSON NOT NULL;";
 		$mysqli->query($query);
 	}
 }
@@ -583,29 +583,48 @@ function fetchCommands($limit = false) {
 
 function fetchDeviceCache() {
 	$list = [];
-	$keys = ['dlist', 'plexServerId', 'plexDvrId', 'plexClientId'];
+	$keys = ['jsonDeviceArray', 'plexServerId', 'plexDvrId', 'plexClientId'];
 	$cache = getPreference('userdata', $keys, false, ['apiToken' => $_SESSION['apiToken']]);
 	if (is_array($cache) && count($cache)) {
-		write_log("Dlist: " . $cache['dlist']);
-		$list = is_string($cache['dlist']) ? json_decode($cache['dlist'], true) : $cache['dlist'];
-		unset($cache['dlist']);
+		write_log("jsonDeviceArray: " . $cache['jsonDeviceArray']);
+		$list = is_string($cache['jsonDeviceArray']) ? json_decode($cache['jsonDeviceArray'], true) : $cache['jsonDeviceArray'];
+		unset($cache['jsonDeviceArray']);
 		writeSessionArray($cache);
 	}
 	return $list;
 }
 
-function fetchappArray() {
-	$data = getPreference('userdata', ['appArray'], false, ['apiToken' => $_SESSION['apiToken']]);
+function fetchAppArray() {
+	$data = getPreference('userdata', ['jsonAppArray'], [], ['apiToken' => $_SESSION['apiToken']], true);
+	$data2 = getPreference('userdata', ['appArray'], [], ['apiToken' => $_SESSION['apiToken']], true);
 	if (is_string($data)) $data = json_decode($data, true);
+	if ($data2) {
+		$oldData = false;
+		try {
+			$oldData = base64_decode(json_decode($data2, true));
+		} catch (Exception $e) {
+
+		}
+		if (is_array($oldData) && empty($data)) {
+			write_log("Converting and storing old format app array...");
+			$data = $oldData;
+			updateUserPreference('jsonAppArray',$data);
+			updateUserPreference('appArray',false);
+		}
+	}
 	return $data;
 }
 
 function fetchUser($userData) {
-	$email = $userData['plexEmail'];
+	if (isset($userData['apiToken'])) {
+		$selector = ['apiToken' => $userData['apiToken']];
+	} else {
+		$selector = ['plexEmail' => $userData['plexEmail']];
+	}
 	$keys = [
 		'plexUserName', 'plexEmail', 'apiToken', 'plexAvatar', 'plexPassUser', 'plexToken', 'apiToken', 'appLanguage'
 	];
-	$data = getPreference('userdata', $keys, false, ['plexEmail' => $email]);
+	$data = getPreference('userdata', $keys, false, $selector);
 	return $data;
 }
 
@@ -617,16 +636,16 @@ function fetchUserData($rescan = false) {
 		$value = scrubBools($value, $key);
 		$data[$key] = $value;
 	}
-	$dlist = $data['dlist'] ?? false;
+	$jsonDeviceArray = $data['jsonDeviceArray'] ?? false;
 	$aList = $data['appArray'] ?? false;
 //	if ($aList) {
-//		if (is_string($dlist)) $aList = json_decode($aList, true);
+//		if (is_string($jsonDeviceArray)) $aList = json_decode($aList, true);
 //	}
 	$data['appArray'] = $aList;
-	$devices = is_string($dlist) ? json_decode($dlist, true) : $dlist;
-	write_log("Devices and dList: ". json_encode([$devices, $dlist]));
+	$devices = is_string($jsonDeviceArray) ? json_decode($jsonDeviceArray, true) : $jsonDeviceArray;
+	write_log("Devices and jsonDeviceArray: ". json_encode([$devices, $jsonDeviceArray]));
 	if ($rescan || !$devices) $devices = scanDevices(true);
-	if (isset($data['dlist'])) unset($data['dlist']);
+	if (isset($data['jsonDeviceArray'])) unset($data['jsonDeviceArray']);
 	$data['deviceList'] = $devices;
 	return $data;
 }
