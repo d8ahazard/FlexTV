@@ -229,9 +229,6 @@ a:hover:not(#executeButton) {
     display: none;
 }
 
-#widgetAddList {
-    overflow-y: scroll;
-}
 
 #appFab, #widgetFab {
     position: fixed;
@@ -249,12 +246,11 @@ a:hover:not(#executeButton) {
 }
 
 .front.front-background {
-    background-color: var(--theme-primary-75);
+    border-radius: 6px;
 }
 
 .back.back-background {
     display: none;
-    background-color: var(--theme-primary-75);
 }
 
 #appFab:hover, #widgetFab:hover {
@@ -284,6 +280,7 @@ a:hover:not(#executeButton) {
     height: 50%;
     display: none;
     box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149);
+    overflow-y:scroll;
 }
 
 #homeBtn:hover i {
@@ -363,7 +360,7 @@ a:hover:not(#executeButton) {
     to { background-color: #960000; }
 }
 
-#appDeleteList {
+#appDeleteList, #widgetDeleteList {
     position: fixed;
     bottom: 14px;
     margin: 0 auto;

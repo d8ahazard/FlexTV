@@ -24,6 +24,7 @@ var winHeight = 0;
 var forceUpdate = true;
 
 var scrolling = false;
+var editingWidgets = false;
 var scaling = false;
 var backgroundTimer = false;
 
@@ -168,12 +169,14 @@ $(window).on("load", function() {
     fetchStatData();
     buildUiDeferred();
     setListeners();
+    initGrid();
 
 });
 
 // This is what should fetch data from the Server and build the UI
 function fetchData(firstLoad) {
     console.log("Fetching data.");
+    if (firstLoad) console.log("First load...");
     if (!polling) {
         polling = true;
         pollcount = 1;
@@ -222,43 +225,57 @@ function parseData(data) {
         var propertyName = properties[property];
         if (data.hasOwnProperty(propertyName)) {
             var dataItem = data[propertyName];
-            console.log("Loading data for " + propertyName, dataItem);
-            switch (propertyName) {
-                case "strings":
-                    javaStrings = dataItem;
-                    break;
-                case "messages":
-                    for (var msg in dataItem) {
-                        if (dataItem.hasOwnProperty(msg)) var msgItem = dataItem[msg];
-                        showMessage(msgItem.title,msgItem.message,msgItem.url);
-                    }
-                    break;
-                case "dologout":
-                    doLogout();
-                    break;
-                case "widgets":
-                    loadWidgetContainers(dataItem);
-                    break;
-                case "apps":
-                    loadAppContainers(dataItem);
-                    break;
-                case "userData":
-                    // MERGE THESE TWO FUNCTIONS
-                    updateUi(data['userData']);
-                    break;
-                case "fetchers":
-                    updateFetchers(dataItem);
-                    break;
-                case "devices":
-                    updateDevices(dataItem);
-                    break;
-                case "playerStatus":
-                    updatePlayerStatus(dataItem);
-                    break;
-                case "commands":
-                    updateCommands(dataItem);
-                    break;
+            if (window.hasOwnProperty(propertyName)) {
+                var oldVals = window[propertyName];
+            } else {
+                oldVals = "<NOVAL>..";
+            }
+            var checkType = dataItem;
+            if ($.isArray(dataItem)) checkType = JSON.stringify(dataItem);
+            if (oldVals !== checkType) {
 
+                console.log("Loading data for " + propertyName, dataItem);
+                switch (propertyName) {
+                    case "strings":
+                        javaStrings = dataItem;
+                        break;
+                    case "messages":
+                        for (var msg in dataItem) {
+                            if (dataItem.hasOwnProperty(msg)) var msgItem = dataItem[msg];
+                            showMessage(msgItem.title,msgItem.message,msgItem.url);
+                        }
+                        break;
+                    case "dologout":
+                        doLogout();
+                        break;
+                    case "widgets":
+                        loadWidgetContainers(dataItem);
+                        break;
+                    case "apps":
+                        loadAppContainers(dataItem);
+                        break;
+                    case "userData":
+                        // MERGE THESE TWO FUNCTIONS
+                        updateUi(data['userData']);
+                        break;
+                    case "fetchers":
+                        updateFetchers(dataItem);
+                        break;
+                    case "devices":
+                        updateDevices(dataItem);
+                        break;
+                    case "playerStatus":
+                        updatePlayerStatus(dataItem);
+                        break;
+                    case "commands":
+                        console.log("Data hab sum commands...");
+                        updateCommands(dataItem, true);
+                        break;
+
+                }
+                var checkVal2 = dataItem;
+                if ($.isArray(dataItem)) var checkVal2 = JSON.stringify(dataItem);
+                window[propertyName] = checkVal2;
             }
         }
     }
@@ -420,7 +437,6 @@ function buildUiDeferred() {
 	setTime();
 	fetchWeather();
     startBackgroundTimer();
-    initGrid();
 
 
     setInterval(function () {
@@ -502,20 +518,21 @@ function initGrid() {
         }
     });
 
+    // Widget lists
     widgetTable = Sortable.create(document.getElementById('widgetList'), {
-        group: "localStorage-example",
-        handle: ".widgetHandle",
+        group: "widgetGroup",
+        handle: ".widgetCard",
         animation: 250,
         disabled: true,
         onEnd: function() {
             var afIcon = $('#widgetFab .material-icons');
-            console.log("onEnd called...");
+            console.log("onEnd called for widgetList...");
             saveAppContainers();
             afIcon.html('add');
             $('#widgetFab').toggleClass('add');
             afIcon.toggleClass('addIcon');
             afIcon.toggleClass('delIcon');
-
+            saveWidgetContainers();
         },
         onStart: function() {
             var afIcon = $('#widgetFab .material-icons');
@@ -523,29 +540,35 @@ function initGrid() {
             $('#widgetFab').toggleClass('add');
             afIcon.toggleClass('addIcon');
             afIcon.toggleClass('delIcon');
+        },
+        onAdd: function() {
+            saveWidgetContainers();
         }
+
 
     });
 
     Sortable.create(document.getElementById('widgetDeleteList'), {
-        group: "localStorage-example",
-        handle: ".widgetHandle",
+        group: "widgetGroup",
+        handle: ".widgetCard",
         animation: 250,
         onAdd: function() {
-            console.log("onEnd called...");
+            console.log("onEnd called for widget delete list...");
+            $('#widgetDeleteList').html("");
+            saveWidgetContainers();
         }
     });
 
     Sortable.create(document.getElementById('widgetAddList'), {
-        group: { name: "localStorage-example", pull: 'clone', put: false },
-        handle: ".widgetHandle",
+        group: { name: "widgetGroup", pull: 'clone', put: false },
+        handle: ".widgetCard",
         animation: 250,
         onAdd: function() {
-            console.log("onEnd called...");
+            console.log("onAdd called for widget add list...");
+            saveWidgetContainers();
         },
         sort: false
     });
-
 }
 
 function drawerClick(element) {
@@ -905,6 +928,7 @@ function toggleDrawer(expandDrawer, element) {
 }
 
 function toggleClientList() {
+    console.log("Toggling a client list?");
     var pc = $("#plexClient");
     if (!pc.hasClass('open')) {
         $('#ghostDiv').show();
@@ -917,6 +941,7 @@ function toggleClientList() {
         }, 200);
         $('#ghostDiv').hide();
     }
+    $('#ClientDrawer').toggleClass('collapsed');
     pc.slideToggle();
 }
 
@@ -1616,14 +1641,19 @@ function setListeners() {
     $(document).on( 'click', "#homeEditBtn", function() {
         var wf = $('#widgetFab');
         var tableState = widgetTable.option("disabled");
+        console.log("Setting widget table option to " + !tableState);
         widgetTable.option("disabled", !tableState);
+        editingWidgets = !editingWidgets;
         wf.slideToggle();
         $('.back').toggle();
         $('.spinCard').toggleClass('rotating-card-container');
-            var wd = $('#widgetDrawer');
-            if (wd.css('display') === 'block') {
-                wd.slideUp();
-            }
+        var wd = $('#widgetDrawer');
+        if (wd.css('display') === 'block') {
+            wd.slideUp();
+        }
+        if (!editingWidgets) {
+            saveWidgetContainers();
+        }
     });
 
 	$(document).on( 'click', ".btn", function () {
@@ -1851,7 +1881,6 @@ function setListeners() {
 
 	$(document).on('change', "#appLanguage", function () {
 		var lang = $(this).find('option:selected').data('value');
-		apiToken = $('#apiTokenData').data('token');
 
 		$.get('api.php?apiToken=' + apiToken, {id: "appLanguage", value: lang});
 		$.snackbar({content: "Language changed, reloading page."});
@@ -1861,7 +1890,8 @@ function setListeners() {
 	});
 
 	// This handles sending and parsing our result for the web UI.
-	$(document).on("#sendBtn", 'click', function () {
+	$(document).on(".sendBtn", 'click', function () {
+	    console.log("Send button click.");
 		$('.load-barz').show();
 		var command = $('#commandTest').val();
 		if (command !== '') {
@@ -1871,13 +1901,15 @@ function setListeners() {
             }
 			command = command.replace(/ /g, "+");
 			var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
-			apiToken = $('#apiTokenData').data('token');
 			waiting = true;
 			setTimeout(function()  {
 				clearLoadBar();
 			},10000);
-			$.get(url, function () {
+			$.get(url, function (data) {
 				$('#loadBar').hide();
+				if (data.hasOwnProperty('commands')) {
+				    console.log("Data has commands...USE IT.");
+                }
 				waiting = false;
 			});
 		}
@@ -1901,7 +1933,8 @@ function setListeners() {
         }
     });
 
-    $(document).on( 'click', '.clientBtn', function () {
+    $(document).on( 'click', '#clientBtn', function () {
+        console.log("Client btn click?");
 		toggleClientList();
 	});
 
@@ -1913,14 +1946,6 @@ function setListeners() {
 		$.get('api.php?sendlog&apiToken=' + apiToken);
 	});
 
-	$(document).on( 'keypress', '#commandTest', function (event) {
-		if (event.keyCode === 13) {
-			$('.sendBtn').each(function(){
-			    if ($(this).is(":visible")) $(this).trigger('click');
-            });
-		}
-	});
-
     $(document).on('keypress', function(event) {
         if (event.keyCode === 92 || event.keyCode === 93) {
             var last = false;
@@ -1928,6 +1953,13 @@ function setListeners() {
             if (event.keyCode=== 93) last = true;
             setBackground(last);
             startBackgroundTimer();
+        }
+        if (event.keyCode === 13) {
+            console.log("Enter!");
+            $('.sendBtn').each(function(){
+                // console.log("CLICK");
+                if ($(this).is(":visible")) $(this).trigger('click');
+            });
         }
     });
 
@@ -2254,10 +2286,6 @@ function loadAppContainers(data) {
 
 }
 
-function loadWidgetContainers(data) {
-
-}
-
 function saveAppContainers() {
     var appList = [];
     $('#appList').children().each(function() {
@@ -2291,6 +2319,66 @@ function saveAppContainers() {
 
     });
 }
+
+function loadWidgetContainers(data) {
+    console.log("Loading widget containers...", data);
+    $('#widgetList').html("");
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) addWidget(data[key]);
+    }
+}
+
+function saveWidgetContainers() {
+    var widgets = $('#widgetList').find('.widgetCard');
+    var widgetData = [];
+    $.each(widgets, function() {
+        var elemData = $(this).data();
+        console.log("Widget Data: ", elemData);
+        widgetData.push(elemData);
+    });
+    var widgetString = JSON.stringify(widgetData);
+    var fetchUrl = './api.php?id=jsonWidgetArray&value=' + encodeURIComponent(widgetString) + "&apiToken=" + apiToken;
+    console.log("Saving widget container: ", widgetData);
+    var oldWidgetString = "<NODATA>..";
+    if (window.hasOwnProperty('widgets')) oldWidgetString = window['widgets'];
+    if (oldWidgetString !== widgetString) {
+        console.log("Widget strang really changed, saving.");
+        window['widgets'] = widgetString;
+        $.get(fetchUrl, function (data) {
+            console.log("Fetch completed.");
+        });
+    } else {
+        console.log("Widget string is identical, nothing to save.");
+    }
+}
+
+function addWidget(widget) {
+    var result = false;
+    var addAppList = $('#widgetAddList');
+    if (widget.hasOwnProperty('type')) {
+        var type = widget['type'];
+        var source = addAppList.find('[data-type="'+type+'"]');
+        if (source.length) {
+            console.log("Cloning!");
+            var clone = source.clone();
+            delete widget['type'];
+            clone.data(widget);
+            for (var propertyName in widget) {
+                if (widget.hasOwnProperty(propertyName) && propertyName !== "type") {
+                    var inputItem = '.' + type + propertyName + "Input";
+                    var inputTarget = clone.find(inputItem);
+                    if (inputTarget.length) inputTarget.val(widget[propertyName]);
+                }
+            }
+            result = true;
+            source.clone().appendTo($('#widgetList'));
+        }
+    } else {
+        console.log("Widget data doesn't have a type...");
+    }
+    return result;
+}
+
 
 function updateFetchers(userData) {
     console.log("Building settings pages.");

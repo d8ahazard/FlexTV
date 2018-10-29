@@ -384,12 +384,11 @@ function getUiData($force = false) {
 	$result = [];
 	$devices = selectDevices(scanDevices(false));
 	$apps = fetchAppArray();
-
+	$widgets = fetchWidgetArray();
 	if ($force) {
+		write_log("Sending forced data.","ALERT",false,true);
 		$devices['Server'] = [];
 		$devices['Dvr'] = [];
-		$widgets = getPreference('userdata', ['jsonWidgetArray'], [], ['apiToken'=>$_SESSION['apiToken']], true);
-
 		$lang = checkSetLanguage();
 		$result = [
 			'devices' => $devices,
@@ -404,7 +403,7 @@ function getUiData($force = false) {
 		$settingData = array_merge(fetchGeneralData(), fetchUserData());
 		// Temporarily do this until we're sure nobody's got base64 lists anymore
 		$settingData['jsonAppArray'] = $apps;
-
+		$settingData['widgets'] = $widgets;
 		$updated = [];
 
 		foreach ($settingData as $key => $value) {
@@ -437,22 +436,27 @@ function getUiData($force = false) {
 			}
 			$oldValue = $_SESSION['settings'][$key] ?? "<NODATA>..";
 			if ($oldValue !== $value) {
+				if ($key === 'widgets') write_log("Pushing widgets because updated?","ALERT", false, true);
 				$updated[$key] = $ogVal;
 				$_SESSION['settings'][$key] = $value;
 			}
 		}
 
-		$removes = ['appArray', 'jsonAppArray', 'appList', 'jsonWidgetArray', 'commands', 'fetchers'];
-		$widgets = $settingData['jsonWidgetArray'] ?? [];
+		$removes = ['appArray', 'jsonAppArray', 'appList', 'jsonWidgetArray', 'commands', 'fetchers', 'widgets'];
 		$apps = $updated['jsonAppArray'] ?? [];
 		$commands = $updated['commands'] ?? [];
 		$fetchers = $updated['fetchers'] ?? [];
+		$widgets = $updated['widgets'] ?? [];
 		if (count($apps)) $result['apps'] = $apps;
-		if (count($widgets)) $result['widgets'] = $widgets;
+		if (count($widgets)) {
+			$result['widgets'] = $widgets;
+		}
 		if (count($commands)) $result['commands'] = $commands;
 		if (count($fetchers)) $result['fetchers'] = $commands;
-		foreach ($removes as $remove) if (isset($updated[$remove])) unset($updated[$remove]);
-
+		foreach ($removes as $remove) if (isset($updated[$remove])){
+			if ($remove === 'widgets') write_log("Removing widgets from data??","ALERT", false, true);
+			unset($updated[$remove]);
+		}
 		if (count($updated)) {
 			$result['userData'] = $updated;
 			writeSession('updated', false, true);

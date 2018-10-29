@@ -615,6 +615,14 @@ function fetchAppArray() {
 	return $data;
 }
 
+function fetchWidgetArray() {
+	$data = getPreference('userdata', ['jsonWidgetArray'], [], ['apiToken' => $_SESSION['apiToken']], true);
+	write_log("Retrieved data: " . $data,"INFO", false, true, true);
+	if (is_string($data)) $data = json_decode($data, true);
+
+	return $data;
+}
+
 function fetchUser($userData) {
 	if (isset($userData['apiToken'])) {
 		$selector = ['apiToken' => $userData['apiToken']];
@@ -676,7 +684,7 @@ function logCommand($resultObject) {
 	];
 
 	write_log("Final response for request of '$initial' is '$speech': ".json_encode($logItem), "ALERT");
-	if (isset($_GET['say'])) echo json_encode($logItem);
+	if (isset($_GET['say'])) echo json_encode(['commands' => $logItem]);
 
 	$apiToken = $_SESSION['apiToken'];
 	if (trim($apiToken) && count($resultObject)) {
