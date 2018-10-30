@@ -175,7 +175,6 @@ $(window).on("load", function() {
 
 // This is what should fetch data from the Server and build the UI
 function fetchData(firstLoad) {
-    console.log("Fetching data.");
     if (firstLoad) console.log("First load...");
     if (!polling) {
         polling = true;
@@ -183,9 +182,8 @@ function fetchData(firstLoad) {
         var uri = 'api.php?fetchData&force=' + firstPoll + '&apiToken=' + apiToken;
         if (firstLoad) uri += "&force=true";
         $.get(uri, function (data) {
-            console.log("Data retrieved...");
             if (data !== null) {
-                parseData(data);
+                parseData(data, firstLoad);
             }
             polling = false;
             firstPoll = false;
@@ -216,10 +214,10 @@ function fetchStatData() {
     //getTopTag('year');
 }
 
-function parseData(data) {
-    console.log("Parse data called.", data);
+function parseData(data, firstLoad) {
+    if (data.length || firstLoad) console.log("Parse data called.", data);
     // Check for these items, in order of priority, and "do stuff" with them
-    var properties = ["strings", "messages", "dologout", "widgets", "apps", "fetchers", "userData", "devices", "playerStatus", "commands"];
+    var properties = ["strings", "messages", "dologout", "apps", "widgets", "fetchers", "userData", "devices", "playerStatus", "commands"];
 
     for (var property in properties) {
         var propertyName = properties[property];
@@ -233,16 +231,17 @@ function parseData(data) {
             var checkType = dataItem;
             if ($.isArray(dataItem)) checkType = JSON.stringify(dataItem);
             if (oldVals !== checkType) {
-
-                console.log("Loading data for " + propertyName, dataItem);
+                console.log("Fetched new data for " + propertyName, dataItem);
                 switch (propertyName) {
                     case "strings":
                         javaStrings = dataItem;
                         break;
                     case "messages":
                         for (var msg in dataItem) {
-                            if (dataItem.hasOwnProperty(msg)) var msgItem = dataItem[msg];
-                            showMessage(msgItem.title,msgItem.message,msgItem.url);
+                            if (dataItem.hasOwnProperty(msg)) {
+                                var msgItem = dataItem[msg];
+                                showMessage(msgItem.title,msgItem.message,msgItem.url);
+                            }
                         }
                         break;
                     case "dologout":
@@ -252,29 +251,29 @@ function parseData(data) {
                         loadWidgetContainers(dataItem);
                         break;
                     case "apps":
-                        loadAppContainers(dataItem);
+                        loadAppContainers(dataItem, firstLoad);
                         break;
                     case "userData":
                         // MERGE THESE TWO FUNCTIONS
-                        updateUi(data['userData']);
+                        updateUi(data['userData'], firstLoad);
                         break;
                     case "fetchers":
                         updateFetchers(dataItem);
                         break;
                     case "devices":
-                        updateDevices(dataItem);
+                        updateDevices(dataItem, firstLoad);
                         break;
                     case "playerStatus":
                         updatePlayerStatus(dataItem);
                         break;
                     case "commands":
                         console.log("Data hab sum commands...");
-                        updateCommands(dataItem, true);
+                        updateCommands(dataItem, firstLoad);
                         break;
 
                 }
                 var checkVal2 = dataItem;
-                if ($.isArray(dataItem)) var checkVal2 = JSON.stringify(dataItem);
+                if ($.isArray(dataItem)) checkVal2 = JSON.stringify(dataItem);
                 window[propertyName] = checkVal2;
             }
         }
@@ -415,14 +414,14 @@ function buildUiDeferred() {
 
 	//Initialize sliders
     progressSlider = document.getElementById('progressSlider');
-    noUiSlider.create(progressSlider, {
-        start: 40,
-        connect: [true,false],
-        range: {
-            min: 0,
-            max: 100
-        }
-    });
+    // noUiSlider.create(progressSlider, {
+    //     start: 40,
+    //     connect: [true,false],
+    //     range: {
+    //         min: 0,
+    //         max: 100
+    //     }
+    // });
 
     // Initialize popover
     $('.formpop').popover();
@@ -458,7 +457,7 @@ function buildUiDeferred() {
         $('#results').css({"top": "64px", "max-height": "100%"});
         $('.userWrap').show();
         $('.avatar').show();
-    }, 500);
+    }, 1000);
 
 }
 
@@ -541,7 +540,9 @@ function initGrid() {
             afIcon.toggleClass('addIcon');
             afIcon.toggleClass('delIcon');
         },
-        onAdd: function() {
+        onAdd: function(evt) {
+            var itemEl = $(evt.item);
+            initWidget(itemEl);
             saveWidgetContainers();
         }
 
@@ -563,12 +564,50 @@ function initGrid() {
         group: { name: "widgetGroup", pull: 'clone', put: false },
         handle: ".widgetCard",
         animation: 250,
-        onAdd: function() {
-            console.log("onAdd called for widget add list...");
-            saveWidgetContainers();
-        },
         sort: false
     });
+}
+
+function initWidget(target) {
+    console.log("ItemEL: ", target);
+    var type = target.data('type');
+    var targetId = target.data('target');
+    var id = false;
+    console.log("Type is " + type, "target is " + targetId);
+    if (type === 'statusMonitor') {
+        if (target.data('target') === undefined) {
+            id = $('#AppzDrawer').find(".drawer-item").attr("id").replace("Btn","");
+            console.log("No defined target, using " + id);
+        } else {
+            id = target.data('target');
+            console.log("using target ID of " + id);
+        }
+        console.log("Target id is  " + id, target);
+
+        var targetBtn = $('#' + id + 'Btn');
+        var dataSet = targetBtn.data();
+        console.log("Dataset: ", dataSet);
+        if (dataSet !== undefined) {
+            var icon = dataSet['icon'];
+            var label = dataSet['label'];
+            var url = dataSet['url'];
+            var color = dataSet['color'];
+            var color2 = shadeColor(color, -30);
+            var colString = "background: linear-gradient(60deg, "+color+", "+color2+");";
+            console.log("Motherfucker...");
+            target.attr('data-target', id);
+            target.attr('data-icon', icon);
+            target.attr('data-label', label);
+            target.attr('data-color', color);
+            target.attr('data-url', url);
+
+            target.find('.service-icon').attr('class', 'service-icon ' + icon);
+            target.find('.statTitle').text(label);
+            target.find('.offline-indicator').show();
+            target.find('.online-indicator').hide();
+            target.find(".card.m-0.service-status").attr('style', colString);
+        }
+    }
 }
 
 function drawerClick(element) {
@@ -592,13 +631,14 @@ function drawerClick(element) {
             default:
                 var label = element.data("label");
                 var activeItem = $('.drawer-item.active');
-                if (typeof element.data('src') !== 'undefined') {
-                    var frameSrc = element.data('src');
+                if (typeof element.data('url') !== 'undefined') {
+                    var frameSrc = element.data('url');
                     var newTabPop = (element.attr("data-newtab") === "true");
                     if (newTabPop) {
                         console.log("Opening link in new tab.");
                         window.open(frameSrc, '_blank');
                     } else {
+                        console.log("Setting frame source to " + frameSrc);
                         var frameTarget = $('#' + element.data('frame'));
                         if (frameTarget.attr('src') !== frameSrc) {
                             frameTarget.attr('src', frameSrc);
@@ -682,6 +722,8 @@ function deviceHtml(type, deviceData) {
                         clientSpan + "</div>";
                 }
             } else {
+
+                if (type === 'StatServer' && !device['HasPlugin']) skip = true;
                 string = "<option data-type='" + type + "' value='" + id + "'" + selected + ">" + name + "</option>";
             }
             if (device.hasOwnProperty('Product')) {
@@ -723,7 +765,7 @@ function doLogout() {
     window.location.href = "?logout";
 }
 
-function updateDevices(newDevices) {
+function updateDevices(newDevices, firstScan) {
 	$(".remove").remove();
 	var newString = JSON.stringify(newDevices);
 	if (newString !== devices) {
@@ -736,15 +778,21 @@ function updateDevices(newDevices) {
             $('.ddLabel').html(selected.text());
             colorItems(appColor, selected);
         }
-        if (newDevices.hasOwnProperty("Server")) $('#serverList').html(deviceHtml('Server', newDevices["Server"]));
+        if (newDevices.hasOwnProperty("Server")) {
+            $('#serverList').html(deviceHtml('Server', newDevices["Server"]));
+            $('.statTarget').html(deviceHtml('StatServer', newDevices["Server"]));
+        }
         if (newDevices.hasOwnProperty("Dvr")) {
             var dvrGroup = $('#dvrGroup');
-            if (newDevices["Dvr"].length > 0) {
-                dvrGroup.show();
-            } else {
-                dvrGroup.hide();
+            if (firstScan) {
+                if (newDevices["Dvr"].length > 0) {
+                    dvrGroup.show();
+                } else {
+                    dvrGroup.hide();
+                }
+
+                $('#dvrList').html(deviceHtml('Dvr', newDevices.Dvr));
             }
-            $('#dvrList').html(deviceHtml('Dvr', newDevices.Dvr));
         }
 		devices = JSON.stringify(newDevices);
 	}
@@ -770,7 +818,7 @@ function updateDevice(type, id) {
         device: type,
         id: id
     }, function (data) {
-        updateDevices(data);
+        updateDevices(data, false);
         if (id === 'rescan') {
             $.snackbar({content: "Device rescan completed."});
             $('#loadbar').hide();
@@ -778,6 +826,20 @@ function updateDevice(type, id) {
 
     });
 }
+
+function UrlExists(url, cb){
+    jQuery.ajax({
+        url:      url,
+        dataType: 'text',
+        type:     'GET',
+        headers: {  'Access-Control-Allow-Origin': '*' },
+        complete:  function(xhr){
+            if(typeof cb === 'function')
+                cb.apply(this, [xhr.status]);
+        }
+    });
+}
+
 
 function scaleElements() {
 	var winWidth = $(window).width();
@@ -789,14 +851,39 @@ function scaleElements() {
 	$('#logFrame').height(($(window).height()/3) * 2);
 }
 
-function resetApiUrl(newUrl) {
-	if (newUrl.substring(0, 4) !== 'http') {
-		newUrl = document.location.protocol + '://' + newUrl;
-	}
-	return newUrl;
+function shadeColor(col, amt) {
+
+    var usePound = false;
+
+    if (col[0] == "#") {
+        col = col.slice(1);
+        usePound = true;
+    }
+
+    var num = parseInt(col,16);
+
+    var r = (num >> 16) + amt;
+
+    if (r > 255) r = 255;
+    else if  (r < 0) r = 0;
+
+    var b = ((num >> 8) & 0x00FF) + amt;
+
+    if (b > 255) b = 255;
+    else if  (b < 0) b = 0;
+
+    var g = (num & 0x0000FF) + amt;
+
+    if (g > 255) g = 255;
+    else if (g < 0) g = 0;
+
+    return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
+
 }
 
-function updateUi(data) {
+
+
+function updateUi(data, firstLoad) {
     console.log("Update UI fired.");
     var appItems = {
         ignore: ["plexUserName", "plexEmail", "plexAvatar", "plexPassUser", "lastScan", "appLanguage", "hasPlugin", "masterUser", "alertPlugin", "plexClientId", "plexServerId", "plexDvrId", "ombiUrl", "ombiAuth", "deviceId", "isWebApp", "deviceName", "revision", "updates","quietEnd"],
@@ -818,12 +905,12 @@ function updateUi(data) {
                 if (propertyName === 'apps') {
                     if (window.hasOwnProperty(propertyName)) {
                         if (window[propertyName] !== JSON.stringify(value)) {
-                            loadAppContainers(value);
+                            loadAppContainers(value, firstLoad);
                         } else {
                             console.log("Skipping reload of apps...");
                         }
                     } else {
-                        loadAppContainers(value);
+                        loadAppContainers(value, firstLoad);
                     }
                     window[propertyName] = value;
                 }
@@ -1334,7 +1421,6 @@ function startBackgroundTimer() {
     }
     if (!backgroundTimer) {
         backgroundTimer = setInterval(function () {
-            console.log("Starting background time...");
             setBackground(false);
         }, 1000 * 60);
     }
@@ -1790,6 +1876,16 @@ function setListeners() {
         }
     });
 
+    $(document).on('change', '.serviceList', function() {
+        console.log("Service list changed, we need to do some magic...");
+        var target = $(this).closest('.widgetCard');
+        var selection = $(this).find(":selected").val();
+        target.data('target', selection);
+        console.log("Current value " + selection, target);
+        initWidget(target);
+        saveWidgetContainers();
+    });
+
     $(document).on('blur', '.blur', function () {
         console.log("Blurring?");
         $(this)
@@ -1933,7 +2029,7 @@ function setListeners() {
         }
     });
 
-    $(document).on( 'click', '#clientBtn', function () {
+    $(document).on( 'click', '.clientBtn', function () {
         console.log("Client btn click?");
 		toggleClientList();
 	});
@@ -2110,6 +2206,7 @@ function setListeners() {
 }
 
 function addAppGroup(app) {
+
     console.log("Adding app groups.");
     var container = $("#results");
     var appDrawer = $("#AppzDrawer");
@@ -2137,16 +2234,16 @@ function addAppGroup(app) {
 			btnSpan.append(btnIcon);
 			btnDiv.append(btnSpan);
 			btnDiv.append(appLabel);
-            appDrawer.append(btnDiv);
+			appDrawer.append(btnDiv);
 
             btnDiv = $("#" + key + "Btn");
-            btnDiv.attr('data-src', appUrl);
             btnDiv.attr('data-frame', appId + "Frame");
             btnDiv.attr('data-link', key + "Div");
-            btnDiv.attr('data-label', appLabel);
             btnDiv.attr('data-color', appColor);
-            btnDiv.attr("data-newtab", appNewTab);
-
+            btnDiv.attr('data-icon', appIcon);
+            btnDiv.attr('data-newtab', appNewTab);
+            btnDiv.attr('data-label', appLabel);
+            btnDiv.attr("data-url", appUrl);
 
             $('<div>', {
                 class: 'view-tab fade frameDiv',
@@ -2154,7 +2251,7 @@ function addAppGroup(app) {
             }).appendTo(container);
 
             var newDiv = $('#' + appId + "Div");
-            newDiv.attr("data-uri", appUrl);
+            newDiv.attr("data-url", appUrl);
             newDiv.attr("data-target", appId + "Frame");
             newDiv.attr("data-label", appLabel);
 
@@ -2180,6 +2277,48 @@ function reloadAppGroups(appList, force) {
         addAppGroup(appList[app]);
         if (force) addAppContainer(appList[app])
     }
+}
+
+function reloadServiceLists() {
+    var appIds = [];
+    $('#appList').children().each(function() {
+        var appLabel = $(this).find('.blur').val();
+        if (appLabel === "") {
+            appLabel = $(this).find('.appSetter').text();
+        }
+        if (appLabel === "") appLabel = "Click Me";
+        var appId = $(this).find('.appSetter').data('id');
+        appIds[appId] = appLabel;
+    });
+    var sl = $('.serviceList');
+    $.each(sl, function() {
+        var target = $(this).closest('.widgetCard');
+        var targetId = false;
+        if (target.data('target') !== undefined) targetId = target.data('target');
+        var i = 0;
+        var selString = "";
+        for (var appId in appIds) if (appIds.hasOwnProperty(appId)) {
+            var label = appIds[appId];
+            var selected = "";
+            if (targetId) {
+                if (targetId === appId) {
+                    selected = " selected";
+                }
+            } else {
+                if (i === 0) {
+                    targetId = appId;
+                    selected = " selected";
+                }
+            }
+
+            selString += "<option value='" + appId + "'" + selected + ">" + label + "</option>";
+            i++;
+        }
+
+        $(this).html(selString);
+
+    });
+
 }
 
 function removeAppGroup(appId) {
@@ -2268,20 +2407,22 @@ function addAppContainer(data) {
     $('button[role="iconpicker"],div[role="iconpicker"]').iconpicker();
 }
 
-function loadAppContainers(data) {
-    console.log("Loading app containers.");
+function loadAppContainers(data, firstLoad) {
     $('#appList').html("");
     $('#AppzDrawer').html("");
     buildingApps = true;
-    console.log("Building apps is ", buildingApps);
-    for (var app in data) if (data.hasOwnProperty(app)) {
-        console.log("Adding an app: ",data[app]);
-        addAppContainer(data[app]);
-        addAppGroup(data[app]);
+    if (!$('#customSettingsTab').hasClass('fade') || firstLoad) {
+        for (var app in data) {
+            if (data.hasOwnProperty(app)) {
+                addAppContainer(data[app]);
+                addAppGroup(data[app]);
+            }
+        }
     }
+
+   reloadServiceLists();
     setTimeout(function() {
         buildingApps = false;
-        console.log("Building apps is ", buildingApps);
     },1000);
 
 }
@@ -2289,8 +2430,7 @@ function loadAppContainers(data) {
 function saveAppContainers() {
     var appList = [];
     $('#appList').children().each(function() {
-
-        var appLabel = $(this).find('.blur').val();
+    var appLabel = $(this).find('.blur').val();
         if (appLabel === "") {
             appLabel = $(this).find('.appSetter').text();
         }
@@ -2312,9 +2452,10 @@ function saveAppContainers() {
         appList.push(item);
     });
     console.log("Saving app List: ", appList);
+    reloadServiceLists();
     reloadAppGroups(appList, false);
     window['jsonAppArray'] = JSON.stringify(appList);
-    var url = "./api.php?apiToken=" + apiToken + "&id=jsonAppArray&value=" + encodeURIComponent(JSON.stringify(appList));
+    var url = "./api.php?apiToken=" + apiToken + "&jsonAppArray=" + encodeURIComponent(JSON.stringify(appList));
     $.get(url,function(data) {
 
     });
@@ -2326,25 +2467,27 @@ function loadWidgetContainers(data) {
     for (var key in data) {
         if (data.hasOwnProperty(key)) addWidget(data[key]);
     }
+    reloadServiceLists();
+    updateStatusMonitors();
 }
 
 function saveWidgetContainers() {
     var widgets = $('#widgetList').find('.widgetCard');
     var widgetData = [];
     $.each(widgets, function() {
-        var elemData = $(this).data();
+        var elemData = $(this).info();
         console.log("Widget Data: ", elemData);
         widgetData.push(elemData);
     });
     var widgetString = JSON.stringify(widgetData);
-    var fetchUrl = './api.php?id=jsonWidgetArray&value=' + encodeURIComponent(widgetString) + "&apiToken=" + apiToken;
+    var fetchUrl = './api.php?jsonWidgetArray=' + encodeURIComponent(widgetString) + "&apiToken=" + apiToken;
     console.log("Saving widget container: ", widgetData);
     var oldWidgetString = "<NODATA>..";
     if (window.hasOwnProperty('widgets')) oldWidgetString = window['widgets'];
     if (oldWidgetString !== widgetString) {
         console.log("Widget strang really changed, saving.");
         window['widgets'] = widgetString;
-        $.get(fetchUrl, function (data) {
+        $.get(fetchUrl, function () {
             console.log("Fetch completed.");
         });
     } else {
@@ -2359,10 +2502,10 @@ function addWidget(widget) {
         var type = widget['type'];
         var source = addAppList.find('[data-type="'+type+'"]');
         if (source.length) {
-            console.log("Cloning!");
             var clone = source.clone();
-            delete widget['type'];
-            clone.data(widget);
+            for (var key in widget) if (widget.hasOwnProperty(key)) {
+                clone.attr('data-' + key, widget[key]);
+            }
             for (var propertyName in widget) {
                 if (widget.hasOwnProperty(propertyName) && propertyName !== "type") {
                     var inputItem = '.' + type + propertyName + "Input";
@@ -2371,10 +2514,14 @@ function addWidget(widget) {
                 }
             }
             result = true;
-            source.clone().appendTo($('#widgetList'));
+            clone.appendTo($('#widgetList'));
+            if (type === 'statusMonitor') {
+                reloadServiceLists();
+                updateStatusMonitors();
+            }
         }
     } else {
-        console.log("Widget data doesn't have a type...");
+        console.error("Widget data doesn't have a type...");
     }
     return result;
 }
@@ -2539,6 +2686,54 @@ function updateFetchers(userData) {
 
 }
 
+function updateStatusMonitors() {
+    $("div[data-type='statusMonitor']").each(function() {
+        var target = $(this);
+        if ($(this).data('target') === undefined || $(this).data('color') === undefined) {
+            var id = $('#AppzDrawer').find(".drawer-item").attr("id").replace("Btn","");
+            console.log("No defined target, using " + id);
+            var targetBtn = $('#' + id + 'Btn');
+            var icon = "muximux-foo";
+            var label = "Click Me";
+            var color = "#FFFFFF";
+            var url = false;
+            var dataSet = targetBtn.data();
+            var online = false;
+        } else {
+            var id = $(this).data('target');
+            var dataSet = $(this).data();
+        }
+
+        if (dataSet !== undefined) {
+            icon = dataSet['icon'];
+            label = dataSet['label'];
+            color = dataSet['color'];
+            url = dataSet['url'];
+            online = dataSet['online'];
+        }
+
+
+        target.find('.service-icon').attr('class', 'service-icon ' + icon);
+        target.find('.statTitle').text(label);
+        if (online) {
+            target.find('.offline-indicator').hide();
+            target.find('.online-indicator').show();
+        } else {
+            target.find('.offline-indicator').show();
+            target.find('.online-indicator').hide();
+        }
+        var color2 = shadeColor(color, -30);
+        var colString = "background: linear-gradient(60deg, "+color+", "+color2+");";
+        var ss = target.find(".card.m-0.service-status");
+        ss.attr('style', colString);
+        target.attr('data-target', id);
+    });
+}
+
+function setMonitorIcon(target) {
+
+}
+
 function clearLoadBar() {
 	if (waiting) {
 		$('.load-barz').hide();
@@ -2604,6 +2799,19 @@ function colorItems(color, element) {
         }
     });
 }
+
+$.fn.info = function () {
+    var data = {};
+    [].forEach.call(this.get(0).attributes, function (attr) {
+        if (/^data-/.test(attr.name)) {
+            var camelCaseName = attr.name.substr(5).replace(/-(.)/g, function ($0, $1) {
+                return $1.toUpperCase();
+            });
+            data[camelCaseName] = attr.value;
+        }
+    });
+    return data;
+};
 
 
 

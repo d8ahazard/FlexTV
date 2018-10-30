@@ -7,9 +7,11 @@ require_once dirname(__FILE__) . '/php/body.php';
 require_once dirname(__FILE__) . '/php/JsonXmlElement.php';
 require_once dirname(__FILE__) . '/php/dialogFlow/DialogFlow.php';
 require_once dirname(__FILE__) . '/php/multiCurl.php';
+require_once dirname(__FILE__) . '/php/widget/widget.php';
 
 use digitalhigh\DialogFlow\DialogFlow;
 use digitalhigh\multiCurl;
+use digitalhigh\widget;
 use Kryptonit3\SickRage\SickRage;
 use Kryptonit3\Sonarr\Sonarr;
 
@@ -208,10 +210,29 @@ function initialize() {
 		bye();
 	}
 
-	foreach(['App", "Widget", "Fetcher'] as $type) {
-		if (isset($_GET["json${type}Array"])) {
-			write_log("Got an array for $type");
+	if (isset($_GET['jsonWidgetArray'])) {
+		$widgets = json_decode($_GET['jsonWidgetArray'], true);
+		write_log("JSON WIDGET ARRAY: ".json_encode($widgets), "ALERT", false, true, true);
+		$widgetArray = [];
+		$widgetData = [];
+		foreach ($widgets as $widget) {
+			$widgetObject = false;
+			try {
+				$widgetObject = new widget($widget['type'],$widget);
+			} catch (\digitalhigh\widgetException $e) {
+				write_log("Something went WRONG - '$e'.","ERROR");
+			}
+			if ($widgetObject) {
+				array_push($widgetData, $widgetObject->serialize());
+			}
 		}
+		updateUserPreference('jsonWidgetArray', $widgetData);
+	}
+
+	if (isset($_GET['jsonAppArray'])) {
+		$apps = json_decode($_GET['jsonAppArray'], true);
+		write_log("JSON APP ARRAY: ".json_encode($apps));
+		updateUserPreference('jsonAppArray', $apps);
 	}
 
 	if (isset($_GET['castLogs'])) {
@@ -339,6 +360,10 @@ function plexApi() {
 
 }
 
+function pingMonitor($urls) {
+	
+}
+
 
 function setSessionData($rescan = true) {
 	$data = fetchUserData($rescan);
@@ -385,27 +410,28 @@ function getUiData($force = false) {
 	$devices = selectDevices(scanDevices(false));
 	$apps = fetchAppArray();
 	$widgets = fetchWidgetArray();
+	write_log("Widgets fetched: ".json_encode($widgets));
 	if ($force) {
+		$widgetData = buildWidgets($widgets, false);
 		write_log("Sending forced data.","ALERT",false,true);
-		$devices['Server'] = [];
-		$devices['Dvr'] = [];
 		$lang = checkSetLanguage();
 		$result = [
 			'devices' => $devices,
 			'strings' => $lang['javaStrings'] ?? [],
-			'widgets' => $widgets,
+			'widgets' => $widgetData,
 			'apps' => $apps
 		];
+		$_SESSION['settings'] = [];
 		return $result;
 	} else {
+		$widgetData = buildWidgets($widgets, true);
 		$playerStatus = fetchPlayerStatus();
 		$deviceText = json_encode($devices);
 		$settingData = array_merge(fetchGeneralData(), fetchUserData());
 		// Temporarily do this until we're sure nobody's got base64 lists anymore
 		$settingData['jsonAppArray'] = $apps;
-		$settingData['widgets'] = $widgets;
+		$settingData['widgets'] = $widgetData;
 		$updated = [];
-
 		foreach ($settingData as $key => $value) {
 			if (preg_match("/List/", $key) && $key !== 'deviceList') {
 				$value = fetchList(str_replace("List", "", $key));
@@ -436,7 +462,9 @@ function getUiData($force = false) {
 			}
 			$oldValue = $_SESSION['settings'][$key] ?? "<NODATA>..";
 			if ($oldValue !== $value) {
-				if ($key === 'widgets') write_log("Pushing widgets because updated?","ALERT", false, true);
+				if ($key === 'widgets') {
+					write_log("Pushing widgets because updated?", "ALERT", false, true);
+				}
 				$updated[$key] = $ogVal;
 				$_SESSION['settings'][$key] = $value;
 			}
@@ -447,6 +475,7 @@ function getUiData($force = false) {
 		$commands = $updated['commands'] ?? [];
 		$fetchers = $updated['fetchers'] ?? [];
 		$widgets = $updated['widgets'] ?? [];
+
 		if (count($apps)) $result['apps'] = $apps;
 		if (count($widgets)) {
 			$result['widgets'] = $widgets;
@@ -454,7 +483,6 @@ function getUiData($force = false) {
 		if (count($commands)) $result['commands'] = $commands;
 		if (count($fetchers)) $result['fetchers'] = $commands;
 		foreach ($removes as $remove) if (isset($updated[$remove])){
-			if ($remove === 'widgets') write_log("Removing widgets from data??","ALERT", false, true);
 			unset($updated[$remove]);
 		}
 		if (count($updated)) {
@@ -934,6 +962,7 @@ function scanDevices($force = false) {
 			if ($res) {
 				$castLocal = $res['Client'];
 				$dvrs = $res['Dvr'];
+				$servers = $res['Server'];
 				//Push local devices first
 				foreach ($castLocal as $client) {
 					if ($client['Product'] !== 'Cast') {
@@ -997,13 +1026,14 @@ function scrapeServers($serverArray) {
 	$hasPlugin = $_SESSION['hasPlugin'] ?? false;
 	if ($results) {
 		write_log("Results: " . json_encode($results));
-		foreach ($serverArray as $device) {
+		foreach ($serverArray as &$device) {
 			$name = $device["Name"];
 			$id = $device['Id'];
 			$token = $device['Token'];
 			$cast = $results["${id}_cast"] ?? false;
 			$dvr = $results["${id}_dvr"]['MediaContainer']['Dvr'] ?? false;
 			if ($cast) {
+				$device['hasPlugin'] = true;
 				write_log("Cast devices found for $name: " . json_encode($cast));
 				$devVersion = $cast['version'] ?? false;
 				if ($devVersion) {
@@ -1016,20 +1046,20 @@ function scrapeServers($serverArray) {
 					if (isset($castDevice['name'])) {
 						$type = $castDevice['type'];
 						$type = ($type == 'audio' || $type == 'group' || $type == 'cast') ? 'Cast' : $type;
-						$device = [
-							'Name'    => $castDevice['name'],
-							'Id'      => $castDevice['id'],
+						$newDevice = [
+							'Name' => $castDevice['name'],
+							'Id' => $castDevice['id'],
 							'Product' => $type,
-							'Type'    => $castDevice['type'],
-							'Token'   => $token,
-							'Parent'  => $id,
-							'Uri'     => $castDevice['uri']
+							'Type' => $castDevice['type'],
+							'Token' => $token,
+							'Parent' => $id,
+							'Uri' => $castDevice['uri']
 						];
-						array_push($clients, $device);
+						array_push($clients, $newDevice);
 					}
 				}
-
 			}
+
 
 			if ($dvr) {
 				write_log("DVR for $name: " . json_encode($dvr));
@@ -1073,7 +1103,8 @@ function scrapeServers($serverArray) {
 	if (count($clients) || count($dvrs)) {
 		$returns = [
 			'Client' => $clients,
-			'Dvr'    => $dvrs
+			'Dvr'    => $dvrs,
+			'Server' => $serverArray
 		];
 	} else $returns = false;
 	$clientCount = count($clients);
@@ -1252,6 +1283,7 @@ function sortDevices($input) {
 						if (is_array($extras['Stations'])) {
 							$new['Stations'] = json_encode($extras['Stations']);
 						}
+						$new['HasPlugin'] = $device['hasPlugin'] ?? false;
 					}
 					if (($class !== "Dvr") && (isset($device['localUri']))) $new['localUri'] = $device['localUri'];
 				}
@@ -1272,7 +1304,7 @@ function updateDeviceCache($data) {
 		$removeCurrent = true;
 		$selected = $_SESSION["plex" . $section . "Id"];
 		$sectionOut = [];
-		$existing = $list["$section"] ?? [];
+		$existing = $list[$section] ?? [];
 		foreach ($devices as $device) {
 			$device['last_seen'] = $now;
 			$out = $device;
@@ -1611,7 +1643,7 @@ function fetchMediaExtra($ratingKey, $returnAll = false) {
 	return false;
 }
 
-function fetchNowPlaying() {
+function fetchNowPlaying($server=false) {
 	$result = $urls = [];
 	$servers = $_SESSION['deviceList']['Server'] ?? [];
 	foreach ($servers as $server) {
@@ -1853,7 +1885,6 @@ function fetchPlayerStatus() {
 			}
 		}
 	}
-	write_log("Status: " . json_encode($status));
 	$currentState = $_SESSION['playerStatus'] ?? 'idle';
 	if ($currentState !== $state || !(isset($_SESSION['volume']))) {
 		writeSession('playerStatus', $state);
@@ -4070,6 +4101,27 @@ function buildTitle($item) {
 			$string = $item['title'];
 	}
 	return $string;
+}
+
+function buildWidgets($widgets, $update=false) {
+	write_log("BUILDING WIDGETS", "ALERT");
+	$widgetData = [];
+	$_SESSION['widgetArray'] = [];
+	foreach ($widgets as $widget) {
+		write_log("WIDGET: ".json_encode($widget));
+		$widgetObject = false;
+		try {
+			$widgetObject = new digitalhigh\widget($widget['type'],$widget);
+		} catch (\digitalhigh\widgetException $e) {
+			write_log("Something went WRONG - $e.","ERROR");
+		}
+		if ($widgetObject) {
+			if ($update) $widgetObject->update();
+			array_push($widgetData, $widgetObject->serialize());
+		}
+	}
+	//write_log("Returning widget data: ".json_encode($widgetData), "INFO", false, true);
+	return $widgetData;
 }
 
 

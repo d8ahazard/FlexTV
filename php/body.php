@@ -167,6 +167,7 @@ function deferredContent($user, $type = 'sections') {
 			                                        <input id="returnItems" class="appInput form-control" type="number" min="1" max="20" value="' . $_SESSION["returnItems"] . '" />
 			                                    </label>
 			                                </div>
+			                                <br>
 			                                <div class="form-group text-center">
 			                                    <button class="btn btn-raised logBtn btn-primary" id="castLogs" data-action="castLogs">' . $lang['uiSettingCastLogs'] . '</button><br>
 			                                </div>
@@ -768,14 +769,11 @@ function mainBody($defaults) {
 										                <div class="widgetHandle btn">
 															<h4 class="card-header text-center px-2">Settings</h4>
 														 </div>
-									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-									                        <li>
-									                            <input type="text" class=""/>
-									                        </li>
-									                        <li>
-									                            <input type="select" class=""/>
-									                        </li>
-									                    </ul>
+									                    <div class="form-group bmd-form-group">
+			                                				<label class="appLabel" for="serverList">Server</label>
+			                                				<select class="form-control custom-select serverList statInput statTarget" data-for="target" title="' . $lang["uiSettingPlaybackServerHint"] . '">
+			                                				</select>
+			                            				</div>
 										            </div>
 												</div><!-- card -->
 											</div>
@@ -793,7 +791,6 @@ function mainBody($defaults) {
 															<!-- Check if Plex Server is online -->
 															<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
 															
-															
 															<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">Current activity:
 															</li>
 															<li id="currentViewsSample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">Most viewed:
@@ -804,22 +801,63 @@ function mainBody($defaults) {
 													<!-- These are the settings -->
 										            <div class="back card-rotate back-background">
 										                <h4 class="widgetHandle card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-									                        <li>
-									                            <input type="text" class=""/>
-									                        </li>
-									                        <li>
-									                            <input type="select" class=""/>
-									                        </li>
-									                    </ul>
+										                <div class="form-group bmd-form-group">
+										                <label class="appLabel" for="serverList">Label</label>
+									                    	<input type="text" class="statInput" data-for="label"/>
+									                    	<label class="appLabel" for="serverList">Server</label>
+								                           <input type="select" class="form-control custom-select serverList statInput statTarget" data-for="target"/>
+									                    </div>
 										            </div>
 										        </div>
 										    </div>
 									    </div>
 
+
+										<!-- Service Monitor -->
+										<div class="col-xs-12 col-md-4 mb-4 m-0 service-status service-online widgetCard" data-type="statusMonitor" data-user="" data-shared="">
+										    <div class="spinCard">
+										        <div class="card card-rotate card-background">
+										            <!-- This is the UI side. -->
+										            <div class="front front-background">
+										                <div class="">
+															<div class="card m-0 service-status service-online text-white transparent shadow">
+																<i class="muximux-sonarr service-icon"></i>
+																<div class="service-text p-3">
+																	<div class="row">
+																		<div class="col">
+																			<h4 class="card-title text-white my-0 statTitle"></h4>
+																		</div>
+																		<div class="col d-flex align-items-center justify-content-end">
+																			<h4 class="my-0">
+																			<span class="online-indicator">Online</span>
+																			<span class="offline-indicator">Offline</span>
+																			<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw online-indicator" title="Service Online" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-2" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-2">Sonarr Online</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg>
+																			
+																			<svg class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw offline-indicator" title="Service Offline" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-3" data-prefix="fas" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-3">Tautulli Offline</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z" transform="translate(-256 -256)"></path></g></g></svg>
+																			
+																			<!-- <i class="fas fa-fw fa-check-circle" title="Sonarr Online" data-fa-transform="grow-3"></i> --></h4>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+										            </div>
+													<!-- These are the settings -->
+										            <div class="back card-rotate back-background">
+										                <div class="form-group">
+			                                				<label class="appLabel" for="serverList">Target</label>
+			                                				<select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
+			                                				</select>
+			                            				</div>
+										            </div>
+										        </div>
+										    </div>
+									    </div>
+
+
 										<!-- Another widget -->
 										<div class="col-sm-12 col-lg-4 mb-4 widgetCard" data-type="popularStats" data-target="" data-user="" data-shared="">
-										    <div class="spinCard card h-100">
+										    <div class="spinCard">
 										        <div class="card card-rotate card-background">
 										            <!-- This is the UI side. -->
 										            <div class="front front-background">
@@ -837,18 +875,11 @@ function mainBody($defaults) {
 										            </div>
 													<!-- These are the settings -->
 										            <div class="back card-rotate back-background">
-										            <div class="widgetHandle btn">
-                    									<span class="material-icons">drag_handle</span>
-                									</div>
 										                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-									                    <ul id="serverInformationSettings" class="list-group list-group-flush">
-									                        <li>
-									                            <input type="text" class=""/>
-									                        </li>
-									                        <li>
-									                            <input type="select" class=""/>
-									                        </li>
-									                    </ul>
+										                <div class="form-group">
+								                            <input type="text" class="statInput"/>
+								                            <input type="select" class="statInput"/>
+							                            </div>
 										            </div>
 										        </div>
 										    </div>

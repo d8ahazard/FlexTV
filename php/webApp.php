@@ -111,13 +111,11 @@ function setPreference($section, $data, $selector = false) {
  * @return array|bool|mixed
  */
 function getPreference($table, $what = false, $default = false, $where = false, $single = true) {
-	write_log("Incoming: ". json_encode(['table'=>$table, 'what'=>$what, 'where'=>$where, 'single'=>$single]));
 	$config = initConfig();
 
 	$data = $config->get($table, $what, $where);
 
 	if (empty($data) && !is_array($data)) {
-		write_log("Returning default value...");
 		return $default;
 	}
 
@@ -126,22 +124,16 @@ function getPreference($table, $what = false, $default = false, $where = false, 
 		foreach($data as $row) $tmp[$row['name']] = $row['value'];
 		$data = [$tmp];
 		if ($single && is_array($where)) $what = [$where['name']];
-		write_log("What is ".json_encode($what). ", data: ".json_encode($data));
 	}
 
 	if ($single && count($data)) {
-		write_log("Single.");
 		$data = $data[0];
-		write_log("Data is now: ".json_encode($data));
 		if ($what && count($what) === 1) {
-			write_log("Returning single value.");
 			$data = $data[$what[0]] ?? $default;
 		}
 	}
 
-	$column = is_array($what) ? join(", ", $what) : " * ";
-	write_log("Returning $column from $table: ".json_encode($data), "INFO", false, false, true);
-	//write_log("Filtered output: ".json_encode($data),"INFO",false,false,true);
+
 	return $data;
 }
 
@@ -155,12 +147,10 @@ function deletePreference($table, $selector) {
 
 function checkUpdate() {
 	if (isWebApp()) return false;
-	write_log("Function fired!");
 	$updates = [];
 	$git = new GitUpdate\GitUpdate(dirname(__FILE__) . "/..");
 	if ($git->hasGit) {
 		$updates = $git->checkMissing();
-		write_log("Update data: " . json_encode($updates));
 		$refs = $updates['refs'];
 		writeSession('neededUpdates', $refs);
 	}
@@ -586,7 +576,6 @@ function fetchDeviceCache() {
 	$keys = ['jsonDeviceArray', 'plexServerId', 'plexDvrId', 'plexClientId'];
 	$cache = getPreference('userdata', $keys, false, ['apiToken' => $_SESSION['apiToken']]);
 	if (is_array($cache) && count($cache)) {
-		write_log("jsonDeviceArray: " . $cache['jsonDeviceArray']);
 		$list = is_string($cache['jsonDeviceArray']) ? json_decode($cache['jsonDeviceArray'], true) : $cache['jsonDeviceArray'];
 		unset($cache['jsonDeviceArray']);
 		writeSessionArray($cache);
@@ -617,7 +606,6 @@ function fetchAppArray() {
 
 function fetchWidgetArray() {
 	$data = getPreference('userdata', ['jsonWidgetArray'], [], ['apiToken' => $_SESSION['apiToken']], true);
-	write_log("Retrieved data: " . $data,"INFO", false, true, true);
 	if (is_string($data)) $data = json_decode($data, true);
 
 	return $data;
@@ -651,7 +639,6 @@ function fetchUserData($rescan = false) {
 //	}
 	$data['appArray'] = $aList;
 	$devices = is_string($jsonDeviceArray) ? json_decode($jsonDeviceArray, true) : $jsonDeviceArray;
-	write_log("Devices and jsonDeviceArray: ". json_encode([$devices, $jsonDeviceArray]));
 	if ($rescan || !$devices) $devices = scanDevices(true);
 	if (isset($data['jsonDeviceArray'])) unset($data['jsonDeviceArray']);
 	$data['deviceList'] = $devices;

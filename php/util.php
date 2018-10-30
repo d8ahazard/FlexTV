@@ -372,7 +372,7 @@ function numberToRoman($number) {
  * @param bool $log
  * @return bool|mixed
  */
-function curlGet($url, $headers = false, $timeout = 4, $decode = true, $log = true) {
+function curlGet($url, $headers = false, $timeout = 4, $decode = true, $log = false) {
 	$cert = getCert();
 	if ($log) write_log("GET url $url", "INFO", "curlGet");
 	$url = filter_var($url, FILTER_SANITIZE_URL);

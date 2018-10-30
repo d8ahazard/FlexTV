@@ -253,6 +253,10 @@ a:hover:not(#executeButton) {
     display: none;
 }
 
+.back div {
+    z-index: 6;
+}
+
 #appFab:hover, #widgetFab:hover {
     background-color: var(--theme-accent);
     transform: scale(1.1);
@@ -433,6 +437,18 @@ a:hover:not(#executeButton) {
 
 .sendBtn:hover {
     color: var(--theme-accent-dark) !important;
+}
+
+.service-icon {
+    font-size: 100px;
+    position: absolute;
+    top: 14%;
+    left: 14%;
+    opacity: 0.1;
+}
+
+.service-status {
+    overflow: hidden;
 }
 
 .btn:hover .colorItem {

@@ -134,8 +134,7 @@ class FileConfig extends Database {
 	    	if ($value === "false") $value = false;
 	    	if ($value === "true") $value = true;
 	    }
-	    write_log("Returning: ".json_encode($results),"INFO", false, false, true);
-		return $results;
+	    return $results;
     }
 
 	/**

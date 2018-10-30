@@ -14589,7 +14589,7 @@ textarea {
 }
 
 .rotating-card-container .card-rotate {
-    background: transparent;
+    background: var(--theme-primary-75);
     box-shadow: none
 }
 
@@ -14633,7 +14633,6 @@ textarea {
 
 .rotating-card-container .card .back {
     transform: rotateY(180deg);
-    z-index: 5;
     text-align: center;
     width: 100%;
     height: 100%
