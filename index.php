@@ -296,15 +296,12 @@ function showError() {
             var cv="";
             $('#bgwrap').append("<div class='bg hidden'></div>");
             var imgUrl = "https://img.phlexchat.com?new=true"+(last ? "&last" : "")+"&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
-            console.log("Setting image source to " + imgUrl);
 
             var newDiv = $('.bg').last();
 
             var img = $('<img src="'+imgUrl+'" class="bgImg"/>').on('load', function(){
-                console.log("Image loaded.");
 
                 $.when(newDiv.fadeIn(500)).done(function() {
-                    console.log("Fading in...");
                     newDiv.removeClass('hidden');
                     $("#bgwrap div:not(:last-child)").remove();
                 })
