@@ -744,7 +744,7 @@ function mainBody($defaults) {
 			                        <div id="widgetAddList" class="queryWrap">
 			                            <!-- Server status card -->
 			                            
-										<div class="col-sm-12 col-lg-4 mb-4 widgetCard" data-type="serverStatus" data-target="" data-user="" data-shared="">
+										<div class="col-sm-12 col-lg-4 widgetCard" data-type="serverStatus" data-target="" data-user="" data-shared="">
 											<div class="spinCard">
 												<div class="card h-100">
 													<div class="front front-background">
@@ -780,7 +780,7 @@ function mainBody($defaults) {
 										</div>
 										
 					                   <!-- User widget -->
-										<div class="col-sm-12 col-lg-4 mb-4 widgetCard" data-type="userActivity" data-target="" data-user="" data-shared="">
+										<div class="col-sm-12 col-lg-4 widgetCard" data-type="userActivity" data-target="" data-user="" data-shared="">
 										    <div class="spinCard">
 										        <div class="card card-rotate card-background">
 										            <!-- This is the UI side. -->
@@ -814,7 +814,7 @@ function mainBody($defaults) {
 
 
 										<!-- Service Monitor -->
-										<div class="col-xs-12 col-md-4 mb-4 m-0 service-status service-online widgetCard" data-type="statusMonitor" data-user="" data-shared="">
+										<div class="col-xs-12 col-md-4 m-0 service-status service-online widgetCard" data-type="statusMonitor" data-user="" data-shared="">
 										    <div class="spinCard">
 										        <div class="card card-rotate card-background">
 										            <!-- This is the UI side. -->
@@ -854,9 +854,8 @@ function mainBody($defaults) {
 										    </div>
 									    </div>
 
-
 										<!-- Another widget -->
-										<div class="col-sm-12 col-lg-4 mb-4 widgetCard" data-type="popularStats" data-target="" data-user="" data-shared="">
+										<div class="col-sm-12 col-lg-4 widgetCard" data-type="popularStats" data-target="" data-user="" data-shared="">
 										    <div class="spinCard">
 										        <div class="card card-rotate card-background">
 										            <!-- This is the UI side. -->
@@ -886,7 +885,7 @@ function mainBody($defaults) {
 									    </div>
 										
 										<!-- Here is another one -->
-										<div class="col-sm-12 col-lg-4 mb-4 widgetCard" data-type="user2Activity" data-target="" data-user="" data-shared="">
+										<div class="col-sm-12 col-lg-4 widgetCard" data-type="user2Activity" data-target="" data-user="" data-shared="">
 										    <div class="spinCard" data-endpoint="popular" data-section="1">
 										        <div class="card card-rotate card-background">
 										            <!-- This is the UI side. -->

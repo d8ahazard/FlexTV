@@ -211,22 +211,10 @@ function initialize() {
 	}
 
 	if (isset($_GET['jsonWidgetArray'])) {
-		$widgets = json_decode($_GET['jsonWidgetArray'], true);
-		write_log("JSON WIDGET ARRAY: ".json_encode($widgets), "ALERT", false, true, true);
-		$widgetArray = [];
-		$widgetData = [];
-		foreach ($widgets as $widget) {
-			$widgetObject = false;
-			try {
-				$widgetObject = new widget($widget['type'],$widget);
-			} catch (\digitalhigh\widgetException $e) {
-				write_log("Something went WRONG - '$e'.","ERROR");
-			}
-			if ($widgetObject) {
-				array_push($widgetData, $widgetObject->serialize());
-			}
-		}
-		updateUserPreference('jsonWidgetArray', $widgetData);
+		$widgetData = json_decode($_GET['jsonWidgetArray'], true);
+		write_log("JSON WIDGET ARRAY: ".json_encode($widgetData), "ALERT", false, true, true);
+		$widgets = buildWidgets($widgetData);
+		updateUserPreference('jsonWidgetArray', $widgets);
 	}
 
 	if (isset($_GET['jsonAppArray'])) {
@@ -409,10 +397,8 @@ function getUiData($force = false) {
 	$result = [];
 	$devices = selectDevices(scanDevices(false));
 	$apps = fetchAppArray();
-	$widgets = fetchWidgetArray();
-	write_log("Widgets fetched: ".json_encode($widgets));
 	if ($force) {
-		$widgetData = buildWidgets($widgets, false);
+		$widgetData = fetchWidgetArray();
 		write_log("Sending forced data.","ALERT",false,true);
 		$lang = checkSetLanguage();
 		$result = [
@@ -424,7 +410,7 @@ function getUiData($force = false) {
 		$_SESSION['settings'] = [];
 		return $result;
 	} else {
-		$widgetData = buildWidgets($widgets, true);
+		$widgetData = updateWidgets();
 		$playerStatus = fetchPlayerStatus();
 		$deviceText = json_encode($devices);
 		$settingData = array_merge(fetchGeneralData(), fetchUserData());
@@ -458,12 +444,13 @@ function getUiData($force = false) {
 			}
 			$ogVal = $value;
 			if (is_array($value)) {
+				foreach($value as $checkKey => &$check) if (isset($check['lastUpdate'])) unset($check['lastUpdate']);
 				$value = json_encode($value);
 			}
 			$oldValue = $_SESSION['settings'][$key] ?? "<NODATA>..";
 			if ($oldValue !== $value) {
 				if ($key === 'widgets') {
-					write_log("Pushing widgets because updated?", "ALERT", false, true);
+					write_log("Pushing widgets because updated: $value", "ALERT", false, true);
 				}
 				$updated[$key] = $ogVal;
 				$_SESSION['settings'][$key] = $value;
@@ -4103,12 +4090,40 @@ function buildTitle($item) {
 	return $string;
 }
 
-function buildWidgets($widgets, $update=false) {
-	write_log("BUILDING WIDGETS", "ALERT");
+function buildWidgets($widgets) {
 	$widgetData = [];
-	$_SESSION['widgetArray'] = [];
 	foreach ($widgets as $widget) {
-		write_log("WIDGET: ".json_encode($widget));
+		$widgetObject = false;
+		$type = $widget['type'];
+		try {
+			if ($type === 'serverStatus') {
+				$id = $widget['target'];
+				$server = findDevice('Id', $id, 'Server');
+				if ($server) {
+					$widget['url'] = $server['Uri'];
+					$widget['token'] = $server['Token'];
+					$widget['label'] = $server['Name'];
+				}
+			}
+			$widgetObject = new widget($type, $widget);
+		} catch (\digitalhigh\widgetException $e) {
+			write_log("Something went WRONG - '$e'.","ERROR");
+		}
+		if ($widgetObject) {
+			$widgetArray = $widgetObject->serialize();
+			array_push($widgetData, $widgetArray);
+		}
+	}
+	writeSession('widgetArray', $widgetData);
+	return $widgetData;
+}
+
+
+function updateWidgets() {
+	$widgets = fetchWidgetArray();
+	$widgetData = [];
+	$widgetSettings = [];
+	foreach ($widgets as $widget) {
 		$widgetObject = false;
 		try {
 			$widgetObject = new digitalhigh\widget($widget['type'],$widget);
@@ -4116,11 +4131,13 @@ function buildWidgets($widgets, $update=false) {
 			write_log("Something went WRONG - $e.","ERROR");
 		}
 		if ($widgetObject) {
-			if ($update) $widgetObject->update();
-			array_push($widgetData, $widgetObject->serialize());
+			$widgetInfo = $widgetObject->update();
+			array_push($widgetSettings, $widgetInfo);
+			unset($widgetInfo['lastUpdate']);
+			array_push($widgetData, $widgetInfo);
 		}
+		updateUserPreference('jsonWidgetArray', $widgetSettings);
 	}
-	//write_log("Returning widget data: ".json_encode($widgetData), "INFO", false, true);
 	return $widgetData;
 }
 

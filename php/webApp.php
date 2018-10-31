@@ -98,7 +98,7 @@ function initConfig() {
 function setPreference($section, $data, $selector = false) {
 	$config = initConfig();
 	$config->set($section, $data, $selector);
-	if ($section === 'userdata') writeSessionArray(fetchUserData());
+	if ($section === 'userdata') writeSessionArray($data);
 	if ($section === 'general') writeSessionArray(fetchGeneralData());
 }
 
@@ -723,8 +723,10 @@ function newUser($user) {
 	];
 	$user = array_merge($user, $defaults);
 	if (validateIp($currentAddress)) setStartUrl();
-	write_log("Creating and saving $userName as a new user: " . json_encode($defaults), "ALERT");
+	write_log("Creating and saving $userName as a new user: " . json_encode($user), "ALERT");
 	setPreference('userdata', $user, ['apiToken' => $apiToken]);
+	writeSessionArray($user);
+	$_SESSION['plexToken'] = $user['plexToken'];
 	return $user;
 }
 

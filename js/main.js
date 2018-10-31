@@ -3,6 +3,7 @@ var apiToken, appName, bgs, cv, dvr, token, resultDuration, logLevel, itemJSON,
 	weatherClass, city, state, scrollTimer, direction, progressSlider;
 
 var firstPoll = true;
+var firstLoad = true;
 
 var cleanLogs=true, couchEnabled=false, lidarrEnabled=false, ombiEnabled=false, sickEnabled=false, sonarrEnabled=false, radarrEnabled=false,
 	headphonesEnabled=false, watcherEnabled=false, delugeEnabled=false, downloadstationEnabled=false, sabnzbdEnabled=false, utorrentEnabled=false,
@@ -165,7 +166,7 @@ $(window).on("load", function() {
     // Load content window "stuff"
 
 
-    fetchData(false);
+    fetchData();
     fetchStatData();
     buildUiDeferred();
     setListeners();
@@ -174,16 +175,19 @@ $(window).on("load", function() {
 });
 
 // This is what should fetch data from the Server and build the UI
-function fetchData(firstLoad) {
-    if (firstLoad) console.log("First load...");
+function fetchData() {
     if (!polling) {
         polling = true;
         pollcount = 1;
         var uri = 'api.php?fetchData&force=' + firstPoll + '&apiToken=' + apiToken;
-        if (firstLoad) uri += "&force=true";
+        if (firstLoad) {
+            uri += "&force=true";
+            console.log("FirstLoad");
+        }
         $.get(uri, function (data) {
             if (data !== null) {
-                parseData(data, firstLoad);
+                parseData(data);
+                firstLoad = false;
             }
             polling = false;
             firstPoll = false;
@@ -214,7 +218,7 @@ function fetchStatData() {
     //getTopTag('year');
 }
 
-function parseData(data, firstLoad) {
+function parseData(data) {
     if (data.length || firstLoad) console.log("Parse data called.", data);
     // Check for these items, in order of priority, and "do stuff" with them
     var properties = ["strings", "messages", "dologout", "apps", "widgets", "fetchers", "userData", "devices", "playerStatus", "commands"];
@@ -251,7 +255,7 @@ function parseData(data, firstLoad) {
                         loadWidgetContainers(dataItem);
                         break;
                     case "apps":
-                        loadAppContainers(dataItem, firstLoad);
+                        loadAppContainers(dataItem);
                         break;
                     case "userData":
                         // MERGE THESE TWO FUNCTIONS
@@ -268,7 +272,7 @@ function parseData(data, firstLoad) {
                         break;
                     case "commands":
                         console.log("Data hab sum commands...");
-                        updateCommands(dataItem, firstLoad);
+                        updateCommands(dataItem);
                         break;
 
                 }
@@ -440,7 +444,7 @@ function buildUiDeferred() {
 
     setInterval(function () {
 		forceUpdate = false;
-		fetchData(false);
+		fetchData();
 	}, 5000);
 
 	setInterval(function () {
@@ -470,7 +474,7 @@ function fetchDeferredElements() {
             console.log("Loaded more deferred content.");
             $('body').append(data);
             mergeSections();
-            fetchData(true);
+            fetchData();
         });
     });
 }
@@ -541,8 +545,10 @@ function initGrid() {
             afIcon.toggleClass('delIcon');
         },
         onAdd: function(evt) {
-            var itemEl = $(evt.item);
-            initWidget(itemEl);
+            var target = $(evt.item);
+            var widgetId = Math.floor((Math.random() * 100000) + 1000);
+            target.attr('data-id', widgetId);
+            initWidget(target);
             saveWidgetContainers();
         }
 
@@ -606,6 +612,15 @@ function initWidget(target) {
             target.find('.offline-indicator').show();
             target.find('.online-indicator').hide();
             target.find(".card.m-0.service-status").attr('style', colString);
+        }
+    }
+    if (type === 'serverStatus') {
+        console.log("Trying to add server status widget...");
+        if (window.hasOwnProperty('plexServerId')) {
+            console.log("We have a server ID.");
+            target.attr('data-target', window['plexServerId']);
+        } else {
+            console.log("We need that ID.");
         }
     }
 }
@@ -1184,9 +1199,8 @@ function updatePlayerStatus(data) {
 }
 
 function updateCommands(data, prepend) {
-	if (JSON.stringify(lastUpdate) !== JSON.stringify(data) || prepend) {
+	if (prepend) {
 		if (!prepend) {
-			lastUpdate = data;
 			$('#resultsInner').html("");
 		}
 
@@ -1229,26 +1243,6 @@ function updateCommands(data, prepend) {
 			} catch (e) {
 				console.error(e, e.stack);
 			}
-			$('#JSON' + i).on('click', function () {
-			    var jsonData = decodeURIComponent($(this).data('json'));
-				jsonData = JSON.parse(jsonData);
-				jsonData = recurseJSON(jsonData);
-				$('#jsonTitle').text('Result JSON');
-				$('#jsonBody').html(jsonData);
-				$('#jsonModal').modal('show');
-			});
-
-			$('#CARDCLOSE' + i).on('click', function () {
-				var stamp = $(this).parent().attr("id");
-				$(this).parent().slideUp(750, function () {
-					$(this).remove();
-				});
-				apiToken = $('#apiTokenData').data('token');
-				console.log("Removing card: ",stamp);
-				$.get('api.php?apiToken=' + apiToken + '&card=' + stamp, function (data) {
-					lastUpdate = data;
-				});
-			});
 
 			Swiped.init({
 				query: '.resultDiv',
@@ -1365,7 +1359,6 @@ function buildCards(value, i) {
 }
 
 function buildList(list, element) {
-    console.log("Building a list.");
     if (element === undefined) {
         console.log("YOU NEED TO DEFINE AN ELEMENT FOR ",list);
         return false;
@@ -1481,8 +1474,7 @@ function notify() {
 }
 
 function fetchWeather() {
-    console.log("Fetching weather...");
-	var condition = "";
+   var condition = "";
 	$.getJSON('https://extreme-ip-lookup.com/json/', function (data) {
 		city = data["city"];
 		state = data["region"];
@@ -1494,7 +1486,7 @@ function fetchWeather() {
 				setWeather(weather);
 			},
 			error: function (error) {
-				console.log("Error updating weather: ", error);
+				console.error("Error updating weather: ", error);
 				setWeather("");
 			}
 		});
@@ -1623,8 +1615,7 @@ function setTime() {
 }
 
 function setListeners() {
-    console.log("Setting listeners");
-	var id;
+    var id;
 
     $('#alertModal').on('hidden.bs.modal', function () {
         loopMessages();
@@ -1656,6 +1647,27 @@ function setListeners() {
 
     $(window).on('scroll', function () {
         userScrolled = true;
+    });
+
+    $(document).on('click', '.JSONPop', function() {
+        var jsonData = decodeURIComponent($(this).data('json'));
+        jsonData = JSON.parse(jsonData);
+        jsonData = recurseJSON(jsonData);
+        $('#jsonTitle').text('Result JSON');
+        $('#jsonBody').html(jsonData);
+        $('#jsonModal').modal('show');
+    });
+
+    $(document).on('click', '.cardClose', function() {
+        var stamp = $(this).parent().attr("id");
+        $(this).parent().slideUp(750, function () {
+            $(this).remove();
+        });
+        apiToken = $('#apiTokenData').data('token');
+        console.log("Removing card: ",stamp);
+        $.get('api.php?apiToken=' + apiToken + '&card=' + stamp, function (data) {
+            lastUpdate = data;
+        });
     });
 
     $(document).on('click', '#ghostDiv', function() {
@@ -1827,7 +1839,7 @@ function setListeners() {
 	});
 
     $(document).on('click', '#appFab', function () {
-        addAppContainer(false);
+        addAppSetting(false);
         saveAppContainers();
     });
 
@@ -1986,30 +1998,9 @@ function setListeners() {
 	});
 
 	// This handles sending and parsing our result for the web UI.
-	$(document).on(".sendBtn", 'click', function () {
-	    console.log("Send button click.");
-		$('.load-barz').show();
-		var command = $('#commandTest').val();
-		if (command !== '') {
-		    if (command === 'I am a golden god.') {
-		        buildCards('gg');
-		        return true;
-            }
-			command = command.replace(/ /g, "+");
-			var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
-			waiting = true;
-			setTimeout(function()  {
-				clearLoadBar();
-			},10000);
-			$.get(url, function (data) {
-				$('#loadBar').hide();
-				if (data.hasOwnProperty('commands')) {
-				    console.log("Data has commands...USE IT.");
-                }
-				waiting = false;
-			});
-		}
-	});
+	$(document).on(".sendBtn", 'click', function() {
+        sendCommand();
+    });
 
     $(document).on( 'click', "#smallSendBtn", function () {
         $('.load-barz').show();
@@ -2050,16 +2041,16 @@ function setListeners() {
             setBackground(last);
             startBackgroundTimer();
         }
+    });
+
+    $(document).on('keypress', '#commandTest', function(event) {
         if (event.keyCode === 13) {
             console.log("Enter!");
-            $('.sendBtn').each(function(){
-                // console.log("CLICK");
-                if ($(this).is(":visible")) $(this).trigger('click');
-            });
+            sendCommand();
         }
     });
 
-	$(document).on( 'change', '#plexServerEnabled', function () {
+    $(document).on( 'change', '#plexServerEnabled', function () {
 		$('#plexGroup').toggle();
 	});
 
@@ -2202,12 +2193,11 @@ function setListeners() {
 		});
 
 	});
-	console.log("Okay, the listeners are loaded...");
 }
 
-function addAppGroup(app) {
+function addAppButton(app) {
 
-    console.log("Adding app groups.");
+    console.log("Adding app button for ", app);
     var container = $("#results");
     var appDrawer = $("#AppzDrawer");
     var appIcon = app['icon'];
@@ -2269,13 +2259,21 @@ function addAppGroup(app) {
 
 }
 
-function reloadAppGroups(appList, force) {
+function reloadAppGroups(appList) {
     console.log("Reloading app groups.");
-    if (force) $("#results").find('.frameDiv').remove();
+    if (firstLoad) {
+        console.log("FIRST LOAD.");
+    } else {
+        console.log("Shouldn't be adding settings!!!!!");
+    }
+    if (firstLoad) $("#results").find('.frameDiv').remove();
     $("#AppzDrawer").html("");
     for (var app in appList) if (appList.hasOwnProperty(app)) {
-        addAppGroup(appList[app]);
-        if (force) addAppContainer(appList[app])
+        addAppButton(appList[app]);
+        if (firstLoad) {
+            console.log("Force is on...");
+            addAppSetting(appList[app])
+        }
     }
 }
 
@@ -2328,7 +2326,8 @@ function removeAppGroup(appId) {
     if(btnItem.length) btnItem.remove();
 }
 
-function addAppContainer(data) {
+function addAppSetting(data) {
+    console.log("Adding app setting: ",data);
     var appId = Math.floor((Math.random() * 100000) + 1000);
     var appColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
     var appIcon = 'muximux-' + ICON_ARRAY[Math.floor(Math.random() * ICON_ARRAY.length)];
@@ -2407,16 +2406,34 @@ function addAppContainer(data) {
     $('button[role="iconpicker"],div[role="iconpicker"]').iconpicker();
 }
 
-function loadAppContainers(data, firstLoad) {
-    $('#appList').html("");
+function loadAppContainers(data) {
+    console.log("Load app containers fired.");
+    if(firstLoad) $('#appList').html("");
     $('#AppzDrawer').html("");
     buildingApps = true;
     if (!$('#customSettingsTab').hasClass('fade') || firstLoad) {
+        var cards = $('.appContainer.card.listCard');
+        var i = 0;
         for (var app in data) {
             if (data.hasOwnProperty(app)) {
-                addAppContainer(data[app]);
-                addAppGroup(data[app]);
+                addAppButton(data[app]);
+                if (firstLoad) {
+                    addAppSetting(data[app]);
+                } else {
+                    if (i < cards.length) {
+                        var checkCard = cards[i];
+                        var id = false;
+                        if (checkCard.hasOwnProperty('id')) id = checkCard['id'];
+                        if (id !== data[app]['id']) {
+                            console.log("This app doesn't match...");
+                        }
+                    } else {
+                        console.log("Adding an out-of-index app (new).");
+                        //addAppSetting(data[app]);
+                    }
+                }
             }
+            i++;
         }
     }
 
@@ -2453,7 +2470,7 @@ function saveAppContainers() {
     });
     console.log("Saving app List: ", appList);
     reloadServiceLists();
-    reloadAppGroups(appList, false);
+    reloadAppGroups(appList);
     window['jsonAppArray'] = JSON.stringify(appList);
     var url = "./api.php?apiToken=" + apiToken + "&jsonAppArray=" + encodeURIComponent(JSON.stringify(appList));
     $.get(url,function(data) {
@@ -2476,6 +2493,11 @@ function saveWidgetContainers() {
     var widgetData = [];
     $.each(widgets, function() {
         var elemData = $(this).info();
+        if (!elemData.hasOwnProperty('id')) {
+            var widgetId = Math.floor((Math.random() * 100000) + 1000);
+            elemData['id'] = widgetId;
+
+        }
         console.log("Widget Data: ", elemData);
         widgetData.push(elemData);
     });
@@ -2689,19 +2711,22 @@ function updateFetchers(userData) {
 function updateStatusMonitors() {
     $("div[data-type='statusMonitor']").each(function() {
         var target = $(this);
+        var id = 0;
+        var dataSet = [];
         if ($(this).data('target') === undefined || $(this).data('color') === undefined) {
-            var id = $('#AppzDrawer').find(".drawer-item").attr("id").replace("Btn","");
+            var drawerItem = $('#AppzDrawer').find(".drawer-item");
+            if (drawerItem.attr('id') !== undefined) id = drawerItem.attr("id").replace("Btn","");
             console.log("No defined target, using " + id);
             var targetBtn = $('#' + id + 'Btn');
             var icon = "muximux-foo";
             var label = "Click Me";
             var color = "#FFFFFF";
             var url = false;
-            var dataSet = targetBtn.data();
+            dataSet = targetBtn.data();
             var online = false;
         } else {
-            var id = $(this).data('target');
-            var dataSet = $(this).data();
+            id = $(this).data('target');
+            dataSet = $(this).data();
         }
 
         if (dataSet !== undefined) {
@@ -2730,8 +2755,39 @@ function updateStatusMonitors() {
     });
 }
 
+function updateServerStatusWidgets() {
+    $("div[data-type='serverStatus']").each(function() {
+
+    });
+}
+
 function setMonitorIcon(target) {
 
+}
+
+function sendCommand() {
+    console.log("Send button click.");
+    $('.load-barz').show();
+    var command = $('#commandTest').val();
+    if (command !== '') {
+        if (command === 'I am a golden god.') {
+            buildCards('gg');
+            return true;
+        }
+        command = command.replace(/ /g, "+");
+        var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
+        waiting = true;
+        setTimeout(function()  {
+            clearLoadBar();
+        },10000);
+        $.get(url, function (data) {
+            $('#loadBar').hide();
+            if (data.hasOwnProperty('commands')) {
+                console.log("Data has commands...USE IT.");
+            }
+            waiting = false;
+        });
+    }
 }
 
 function clearLoadBar() {

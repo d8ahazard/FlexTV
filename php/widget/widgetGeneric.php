@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: digitalhigh
- * Date: 10/30/2018
- * Time: 9:53 AM
- */
 
 namespace digitalhigh;
 

@@ -9,7 +9,8 @@
 namespace digitalhigh;
 
 require_once dirname(__FILE__) . "/widgetGeneric.php";
-require_once dirname(__FILE__) . "/widgetServiceMonitor.php";
+require_once dirname(__FILE__) . "/widgetStatusMonitor.php";
+require_once dirname(__FILE__) . "/widgetServerStatus.php";
 require_once dirname(__FILE__) . "/widgetException.php";
 
 
@@ -26,7 +27,10 @@ class widget {
 	function __construct($type, $data) {
 		switch ($type) {
 			case 'statusMonitor':
-				$widgetObject =  new widgetServiceMonitor($data);
+				$widgetObject =  new widgetStatusMonitor($data);
+				break;
+			case 'serverStatus':
+				$widgetObject = new widgetServerStatus($data);
 				break;
 			default:
 				$widgetObject = new widgetGeneric($data);
