@@ -119,35 +119,7 @@ scriptDefaults();
            $(function () {
                $('.grid-stack').gridstack(options);
            });
-
-           // var wd = $('#widgetDemo');
-           // var options = {
-           //     alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-           //     cellHeight: 70,
-           //     acceptWidgets: true,
-           //     animate: true,
-           //     float: true,
-           //     height: 10
-           // };
-           //
-           // wd.gridstack(options);
-           // var widgetList = wd.data('gridstack');
-           //
-           // var widgets = $('#widgetTemplates').find('.widgetCard');
-           // $.each(widgets, function() {
-           //     var clone = $(this);
-           //
-           //     var id = Math.floor((Math.random() * 100000) + 1000);
-           //     var widgetOpts = {
-           //         x: clone.data('gs-x'),
-           //         y: clone.data('gs-y'),
-           //         width: clone.data('gs-width'),
-           //         height: clone.data('gs-height'),
-           //         id: id
-           //     };
-           //
-           //     widgetList.addWidget(clone, widgetOpts);
-           // });
+           $('.editItem').show();
        });
 
         // Ignore the IDE when it says this is unused, it's lying
