@@ -128,7 +128,7 @@ class Watcher
     /**
      * version
      *
-     * Returns API version and current git hash of Watcher
+     * Returns API version and current gitUpdate hash of Watcher
      *
      * @return array|bool An associative array of info, or false if error.
      */

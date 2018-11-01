@@ -1,5 +1,5 @@
 <?php
-namespace digitalhigh;
+namespace digitalhigh\config;
 require_once dirname(__FILE__) . "/ConfigException.php";
 use mysqli;
 class DbConfig {

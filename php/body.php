@@ -2,6 +2,9 @@
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/../api.php';
 require_once dirname(__FILE__) . "/webApp.php";
+require_once dirname(__FILE__) . "/digitalhigh/widget/src/widget.php";
+
+use digitalhigh\widget\widget;
 
 scriptDefaults();
 
@@ -140,7 +143,7 @@ function deferredContent($user, $type = 'sections') {
 		';
 	}
 
-	$content = '<div class="view-tab fade show active settingPage col-md-9 col-lg-10 col-xl-8" id="customSettingsTab">     
+	$content = '<div class="view-tab fade show active settingPage col-11 col-md-9 col-xl-8" id="customSettingsTab">     
 	                        <div class="tableContainer">
 								<div id="appList" class="row">
 				                </div>
@@ -151,7 +154,7 @@ function deferredContent($user, $type = 'sections') {
 								</div>  
 		                    </div>
 	                    </div>
-		            	<div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="plexSettingsTab">
+		            	<div class="view-tab fade settingPage col-11 col-md-9 col-xl-8" id="plexSettingsTab">
 				            <div class="gridBox">
 			                    <div class="appContainer card">
 			                        <div class="card-body">
@@ -255,14 +258,14 @@ function deferredContent($user, $type = 'sections') {
 				        <div class="view-tab fade" id="recentStats">
 			            	<!-- Populated by js -->
 						</div>
-				        <div class="view-tab fade col-md-9 col-lg-10 col-xl-8" id="voiceTab">
+				        <div class="view-tab fade col-11 col-md-9 col-xl-8" id="voiceTab">
 				            <div id="resultsInner" class="queryWrap">
 				            	<!-- Populated by js -->
 				            </div>
 				        </div>
 				        ' . $masterDiv . '
 				        
-						<div class="view-tab fade settingPage col-md-9 col-lg-10 col-xl-8" id="generalSettingsTab">     
+						<div class="view-tab fade settingPage col-11 col-md-9 col-xl-8" id="generalSettingsTab">     
 	                    <div class="gridBox">
 						    <div class="appContainer card">
 				                <div class="card-body">
@@ -551,87 +554,88 @@ function deferredContent($user, $type = 'sections') {
 	                    <a class="dropdown-item client-item" data-id="rescan"><b>rescan devices</b></a>
 	                </div>
 	            </div>
-				<div id="sideMenu">
-					<div id="sideMenu-content">
-		                <div class="drawer-header container">
-			                <div class="userWrap row justify-content-around">
-			                    <div class="col-3">
-			                        <img class="avatar" src="' . $user['plexAvatar'] . '"/>
+	            <div id="sideMenu">
+						<div id="sideMenu-content">
+							<div class="drawer-header container">
+				                <div class="userWrap row justify-content-around">
+				                    <div class="col-3">
+				                        <img class="avatar" src="' . $user['plexAvatar'] . '"/>
+				                    </div>
+				                    <div class="col-9">
+					                    <p class="userHeader">' . ucfirst($user['plexUserName']) . '</p>
+					                    <p class="userEmail">' . $user['plexEmail'] . '</p>
+				                    </div>
 			                    </div>
-			                    <div class="col-9">
-				                    <p class="userHeader">' . ucfirst($user['plexUserName']) . '</p>
-				                    <p class="userEmail">' . $user['plexEmail'] . '</p>
-			                    </div>
+		                    </div>
+			                <div class="drawer-item btn active" data-link="homeTab" data-label="Home" id="homeBtn">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
+			                    <div class="btn btn-icon" id="homeEditBtn" data-toggle="button">
+			                        <i class="material-icons colorItem barIcon">edit</i>
+								</div>
 			                </div>
-		                </div>
-		                <div class="drawer-item btn active" data-link="homeTab" data-label="Home" id="homeBtn">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
-		                    <div class="btn btn-icon" id="homeEditBtn" data-toggle="button">
-		                    	<i class="material-icons colorItem barIcon">edit</i>
+			                <div class="drawer-item btn" data-link="expandDrawer" data-target="ClientDrawer" id="clientBtn">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
+			                </div>
+			                <div class="drawer-list collapsed" id="ClientDrawer">
+				                <div class="drawer-item btn" data-link="rescan">
+				                    <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
+				                </div>
+			                </div>
+			                <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
+			                </div>
+			                <div class="drawer-separator"></div>
+			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
+			                </div>
+			                <div class="drawer-list collapsed" id="AppzDrawer">
+			                </div>
+			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
+			                </div>
+			                <div class="drawer-list collapsed" id="StatsDrawer">
+				                <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
+				                    <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
+				                </div>
+				                <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
+				                    <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
+				                </div>
+				                <div class="drawer-item btn" data-link="userStats" data-target="Stats">
+				                    <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
+				                </div>
+				                <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
+				                    <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
+				                </div>
 							</div>
-		                </div>
-		                <div class="drawer-item btn" data-link="expandDrawer" data-target="ClientDrawer" id="clientBtn">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
-		                </div>
-		                <div class="drawer-list collapsed" id="ClientDrawer">
-			                <div class="drawer-item btn" data-link="rescan">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
+			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
 			                </div>
-		                </div>
-		                <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
-		                </div>
-		                <div class="drawer-separator"></div>
-		                <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
-		                </div>
-		                <div class="drawer-list collapsed" id="AppzDrawer">
-		                </div>
-		                <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
-		                </div>
-		                <div class="drawer-list collapsed" id="StatsDrawer">
-			                <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
+			                
+			                <div class="drawer-list collapsed" id="SettingsDrawer">
+			                    <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
+			                        <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
+			                    </div>
+		                        <div class="drawer-item btn" data-link="customSettingsTab" data-label="Customize">
+			                        <span class="barBtn"><i class="material-icons colorItem barIcon">view_quilt</i></span>Customize
+			                    </div>
+			                    ' . $masterBtn . '
+			                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
+			                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
+			                    </div>
+			                    <div class="drawer-item btn" data-link="fetcherSettingsTab" data-label="Fetchers">
+									<span class="barBtn"><i class="material-icons colorItem barIcon">cloud_download</i></span>Fetchers
+			                    </div>
+							</div>
+							<div class="drawer-separator"></div>
+							<div class="drawer-item btn" data-link="logTab" data-label="Logs">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
 			                </div>
-			                <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
-			                </div>
-			                <div class="drawer-item btn" data-link="userStats" data-target="Stats">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
-			                </div>
-			                <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
-			                </div>
+							<div class="drawer-item btn" id="logout">
+			                    <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
+			                </div>   
 						</div>
-		                <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
-		                </div>
-		                
-		                <div class="drawer-list collapsed" id="SettingsDrawer">
-		                    <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
-		                        <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
-		                    </div>
-	                        <div class="drawer-item btn" data-link="customSettingsTab" data-label="Customize">
-		                        <span class="barBtn"><i class="material-icons colorItem barIcon">view_quilt</i></span>Customize
-		                    </div>
-		                    ' . $masterBtn . '
-		                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
-		                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
-		                    </div>
-		                    <div class="drawer-item btn" data-link="fetcherSettingsTab" data-label="Fetchers">
-								<span class="barBtn"><i class="material-icons colorItem barIcon">cloud_download</i></span>Fetchers
-		                	</div>
-						</div>
-						<div class="drawer-separator"></div>
-						<div class="drawer-item btn" data-link="logTab" data-label="Logs">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
-		                </div>
-						<div class="drawer-item btn" id="logout">
-		                    <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
-		                </div>   
 					</div>
-				</div>
+	                
             </div>
             
 			
@@ -733,190 +737,20 @@ function mainBody($defaults) {
 				</div>
 				
 		        <div id="results">
-	                <div id="results-content" class="row">
-				        <div class="view-tab active col-md-9 col-lg-10 col-xl-8" id="homeTab">
+			        <div id="results-content" class="row">
+				        <div class="view-tab active" id="homeTab">
 				        	<div class="tableContainer" id="addContainer">
-								<div id="widgetList" class="queryWrap widgetList">
+								<div id="widgetList" class="widgetList grid-stack">
 				                </div>
 	                    	</div>
-                           <div id="widgetDrawer" class="queryWrap">
-	                            <div class="col-md-9 col-lg-10 col-xl-8 widgetWrap">
-			                        <div id="widgetAddList" class="queryWrap">
-			                            <!-- Server status card -->
-			                            
-										<div class="col-sm-12 col-lg-4 widgetCard" data-type="serverStatus" data-target="" data-user="" data-shared="">
-											<div class="spinCard">
-												<div class="card h-100">
-													<div class="front front-background">
-														<h4 class="card-header text-center px-2">Statistics</h4>
-														
-														<ul id="serverInformation" class="list-group list-group-flush">
-														
-														<!-- Check if Plex Server is online -->
-														<li id="serverStatus" class="list-group-item d-flex justify-content-between align-items-center list-group-item-success">Server Status: Online <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
-														
-														<!-- Check Current Activity -->
-														<li id="currentActivity" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
-															<span class="d-flex align-items-center">
-															Current Activity <button type="button" id="getCurrentActivity" title="Refresh Current Activity" onclick="getCurrentActivityViaPlex()" class="btn btn-sm btn-link text-muted py-0"><svg class="svg-inline--fa fa-sync-alt fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="sync-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg><!-- <i class="fas fa-fw fa-sync-alt fa-spin"></i> --></button>
-															</span>
-															<span id="currentActivityStreamCount">1 Stream <span id="currentActivityBandwidth" title="" data-toggle="tooltip" data-original-title="4 Mbps / 25 Mbps"><svg class="svg-inline--fa fa-info-circle fa-w-16 fa-fw" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg><!-- <i class="fas fa-fw fa-info-circle"></i> --></span></span>
-														</li>
-														
-														<li class="list-group-item d-flex justify-content-between bg-dark"><span>Movies</span><span class="text-right">1,542</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>TV Shows</span><span class="text-right">552</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>TV Episodes</span><span class="text-right">27,685</span></li><li class="list-group-item d-flex justify-content-between bg-dark"><span>Monthly Active Users</span><span id="montlyActiveUsers" class="text-right">21<span class="text-muted"> / 26</span></span></li></ul>
-													</div>
-													<div class="back card-rotate back-background">
-										                <div class="widgetHandle btn">
-															<h4 class="card-header text-center px-2">Settings</h4>
-														 </div>
-									                    <div class="form-group bmd-form-group">
-			                                				<label class="appLabel" for="serverList">Server</label>
-			                                				<select class="form-control custom-select serverList statInput statTarget" data-for="target" title="' . $lang["uiSettingPlaybackServerHint"] . '">
-			                                				</select>
-			                            				</div>
-										            </div>
-												</div><!-- card -->
-											</div>
-										</div>
-										
-					                   <!-- User widget -->
-										<div class="col-sm-12 col-lg-4 widgetCard" data-type="userActivity" data-target="" data-user="" data-shared="">
-										    <div class="spinCard">
-										        <div class="card card-rotate card-background">
-										            <!-- This is the UI side. -->
-										            <div class="front front-background">
-									                   <h4 class="card-header card-header-primary text-center px-2">User Activity</h4>
-														<ul id="userInformation" class="list-group list-group-flush">
-													
-															<!-- Check if Plex Server is online -->
-															<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
-															
-															<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">Current activity:
-															</li>
-															<li id="currentViewsSample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">Most viewed:
-															</li>
-														</ul>
-
-										            </div>
-													<!-- These are the settings -->
-										            <div class="back card-rotate back-background">
-										                <h4 class="widgetHandle card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-										                <div class="form-group bmd-form-group">
-										                <label class="appLabel" for="serverList">Label</label>
-									                    	<input type="text" class="statInput" data-for="label"/>
-									                    	<label class="appLabel" for="serverList">Server</label>
-								                           <input type="select" class="form-control custom-select serverList statInput statTarget" data-for="target"/>
-									                    </div>
-										            </div>
-										        </div>
-										    </div>
-									    </div>
-
-
-										<!-- Service Monitor -->
-										<div class="col-xs-12 col-md-4 m-0 service-status service-online widgetCard" data-type="statusMonitor" data-user="" data-shared="">
-										    <div class="spinCard">
-										        <div class="card card-rotate card-background">
-										            <!-- This is the UI side. -->
-										            <div class="front front-background">
-										                <div class="">
-															<div class="card m-0 service-status service-online text-white transparent shadow">
-																<i class="muximux-sonarr service-icon"></i>
-																<div class="service-text p-3">
-																	<div class="row">
-																		<div class="col">
-																			<h4 class="card-title text-white my-0 statTitle"></h4>
-																		</div>
-																		<div class="col d-flex align-items-center justify-content-end">
-																			<h4 class="my-0">
-																			<span class="online-indicator">Online</span>
-																			<span class="offline-indicator">Offline</span>
-																			<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw online-indicator" title="Service Online" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-2" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-2">Sonarr Online</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg>
-																			
-																			<svg class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw offline-indicator" title="Service Offline" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-3" data-prefix="fas" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-3">Tautulli Offline</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z" transform="translate(-256 -256)"></path></g></g></svg>
-																			
-																			<!-- <i class="fas fa-fw fa-check-circle" title="Sonarr Online" data-fa-transform="grow-3"></i> --></h4>
-																		</div>
-																	</div>
-																</div>
-															</div>
-														</div>
-										            </div>
-													<!-- These are the settings -->
-										            <div class="back card-rotate back-background">
-										                <div class="form-group">
-			                                				<label class="appLabel" for="serverList">Target</label>
-			                                				<select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
-			                                				</select>
-			                            				</div>
-										            </div>
-										        </div>
-										    </div>
-									    </div>
-
-										<!-- Another widget -->
-										<div class="col-sm-12 col-lg-4 widgetCard" data-type="popularStats" data-target="" data-user="" data-shared="">
-										    <div class="spinCard">
-										        <div class="card card-rotate card-background">
-										            <!-- This is the UI side. -->
-										            <div class="front front-background">
-									                   <h4 class="card-header card-header-primary text-center px-2 statHeader">Popular</h4>
-														<ul id="userInformation" class="list-group list-group-flush">
-													
-													<!-- Check if Plex Server is online -->
-													<li id="userDataSample" class="list-group-item d-flex justify-content-between align-items-center list-group-item-primary">User: ' . $_SESSION['plexUserName'] . ' <svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw" data-fa-transform="grow-4" aria-hidden="true" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.25, 1.25)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg><!-- <i class="fas fa-fw fa-check-circle" data-fa-transform="grow-4"></i> --></li>
-													
-													
-													<li id="currentActivitySample" class="list-group-item d-flex justify-content-between align-items-center bg-dark">
-													</li>
-													</ul>
-
-										            </div>
-													<!-- These are the settings -->
-										            <div class="back card-rotate back-background">
-										                <h4 class="card-header card-header-primary text-center px-2 statHeader">Settings</h4>
-										                <div class="form-group">
-								                            <input type="text" class="statInput"/>
-								                            <input type="select" class="statInput"/>
-							                            </div>
-										            </div>
-										        </div>
-										    </div>
-									    </div>
-										
-										<!-- Here is another one -->
-										<div class="col-sm-12 col-lg-4 widgetCard" data-type="user2Activity" data-target="" data-user="" data-shared="">
-										    <div class="spinCard" data-endpoint="popular" data-section="1">
-										        <div class="card card-rotate card-background">
-										            <!-- This is the UI side. -->
-										            <div class="front front-background">
-									                   <h4 class="card-title text-center px-2 statHeader">Most Viewed</h4>
-														<ul id="popularList" class="list-group list-group-flush">
-															<li>Sample1</li>
-															<li>Sample2</li>
-															<li>Sample3</li>
-															<li>Sample4</li>
-															<li>Sample5</li>
-															<li>Sample6</li>
-															<li>Sample7</li>
-															<li>Sample8</li>
-														</ul>
-
-										            </div>
-													<!-- These are the settings -->
-										            <div class="back card-rotate back-background">
-										                <h4 class="card-title text-center px-2 statHeader">Settings</h4>
-							                            <input type="text" class=""/>
-							                            <input type="select" class=""/>
-										            </div>
-										        </div>
-										    </div>
-									    </div>
-						                
-				                    </div>
-								</div>
+                            <div id="widgetDrawer">
+								
 							</div>
-							<div id="widgetDeleteList">
+							
+							<div id="widgetTemplates" class="grid-stack">
+	                            '. widget::getMarkup('HTML') .'
+							</div>
+							<div id="widgetDeleteList grid-stack grid-stack-6">
 							</div>			
 							<div id="widgetFab" class="btn btn-fab-lg">
 			                    <span class="material-icons addIcon">add</span>

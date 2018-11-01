@@ -26,10 +26,12 @@ var forceUpdate = true;
 
 var scrolling = false;
 var editingWidgets = false;
+var loadingWidgets = false;
 var scaling = false;
 var backgroundTimer = false;
 
-var widgetTable;
+var widgetList;
+var addDrawerCount;
 
 var lastUpdate = [];
 var devices = "foo";
@@ -170,7 +172,6 @@ $(window).on("load", function() {
     fetchStatData();
     buildUiDeferred();
     setListeners();
-    initGrid();
 
 });
 
@@ -252,7 +253,7 @@ function parseData(data) {
                         doLogout();
                         break;
                     case "widgets":
-                        loadWidgetContainers(dataItem);
+                        loadWidgetContainers(dataItem, firstLoad);
                         break;
                     case "apps":
                         loadAppContainers(dataItem);
@@ -479,8 +480,28 @@ function fetchDeferredElements() {
     });
 }
 
-function initGrid() {
+function initTables() {
     console.log("Initializing sort tables.");
+
+    $('#widgetList').on('added', function(evt, items) {
+        if (!loadingWidgets) {
+            console.log("ADDED");
+            for (var i = 0; i < items.length; i++) {
+                var newId = Math.floor((Math.random() * 100000) + 1000);
+                var item = $(items[i]['el'][0]);
+                var item2 = $(items[i]);
+                console.log('item added, setting ID to ' + newId);
+                console.log("Item2: " + item2);
+                item.attr('id', "widget" + newId);
+                item.attr('data-gs-id', newId);
+                item.data('gs-id', newId);
+                $.flexWidget('init', newId);
+                console.log(items[i]);
+                console.log("Item: ", item);
+            }
+        }
+    });
+
     Sortable.create(document.getElementById('appList'), {
         group: "localStorage-example",
         handle: ".appHandle",
@@ -520,59 +541,9 @@ function initGrid() {
             dL.html("");
         }
     });
-
-    // Widget lists
-    widgetTable = Sortable.create(document.getElementById('widgetList'), {
-        group: "widgetGroup",
-        handle: ".widgetCard",
-        animation: 250,
-        disabled: true,
-        onEnd: function() {
-            var afIcon = $('#widgetFab .material-icons');
-            console.log("onEnd called for widgetList...");
-            saveAppContainers();
-            afIcon.html('add');
-            $('#widgetFab').toggleClass('add');
-            afIcon.toggleClass('addIcon');
-            afIcon.toggleClass('delIcon');
-            saveWidgetContainers();
-        },
-        onStart: function() {
-            var afIcon = $('#widgetFab .material-icons');
-            afIcon.html('delete_forever');
-            $('#widgetFab').toggleClass('add');
-            afIcon.toggleClass('addIcon');
-            afIcon.toggleClass('delIcon');
-        },
-        onAdd: function(evt) {
-            var target = $(evt.item);
-            var widgetId = Math.floor((Math.random() * 100000) + 1000);
-            target.attr('data-id', widgetId);
-            initWidget(target);
-            saveWidgetContainers();
-        }
-
-
-    });
-
-    Sortable.create(document.getElementById('widgetDeleteList'), {
-        group: "widgetGroup",
-        handle: ".widgetCard",
-        animation: 250,
-        onAdd: function() {
-            console.log("onEnd called for widget delete list...");
-            $('#widgetDeleteList').html("");
-            saveWidgetContainers();
-        }
-    });
-
-    Sortable.create(document.getElementById('widgetAddList'), {
-        group: { name: "widgetGroup", pull: 'clone', put: false },
-        handle: ".widgetCard",
-        animation: 250,
-        sort: false
-    });
 }
+
+
 
 function initWidget(target) {
     console.log("ItemEL: ", target);
@@ -580,48 +551,9 @@ function initWidget(target) {
     var targetId = target.data('target');
     var id = false;
     console.log("Type is " + type, "target is " + targetId);
-    if (type === 'statusMonitor') {
-        if (target.data('target') === undefined) {
-            id = $('#AppzDrawer').find(".drawer-item").attr("id").replace("Btn","");
-            console.log("No defined target, using " + id);
-        } else {
-            id = target.data('target');
-            console.log("using target ID of " + id);
-        }
-        console.log("Target id is  " + id, target);
 
-        var targetBtn = $('#' + id + 'Btn');
-        var dataSet = targetBtn.data();
-        console.log("Dataset: ", dataSet);
-        if (dataSet !== undefined) {
-            var icon = dataSet['icon'];
-            var label = dataSet['label'];
-            var url = dataSet['url'];
-            var color = dataSet['color'];
-            var color2 = shadeColor(color, -30);
-            var colString = "background: linear-gradient(60deg, "+color+", "+color2+");";
-            console.log("Motherfucker...");
-            target.attr('data-target', id);
-            target.attr('data-icon', icon);
-            target.attr('data-label', label);
-            target.attr('data-color', color);
-            target.attr('data-url', url);
-
-            target.find('.service-icon').attr('class', 'service-icon ' + icon);
-            target.find('.statTitle').text(label);
-            target.find('.offline-indicator').show();
-            target.find('.online-indicator').hide();
-            target.find(".card.m-0.service-status").attr('style', colString);
-        }
-    }
     if (type === 'serverStatus') {
-        console.log("Trying to add server status widget...");
-        if (window.hasOwnProperty('plexServerId')) {
-            console.log("We have a server ID.");
-            target.attr('data-target', window['plexServerId']);
-        } else {
-            console.log("We need that ID.");
-        }
+
     }
 }
 
@@ -1738,13 +1670,14 @@ function setListeners() {
 
     $(document).on( 'click', "#homeEditBtn", function() {
         var wf = $('#widgetFab');
-        var tableState = widgetTable.option("disabled");
-        console.log("Setting widget table option to " + !tableState);
-        widgetTable.option("disabled", !tableState);
+        // var tableState = widgetTable.option("disabled");
+        // console.log("Setting widget table option to " + !tableState);
+        // widgetTable.option("disabled", !tableState);
         editingWidgets = !editingWidgets;
         wf.slideToggle();
-        $('.back').toggle();
-        $('.spinCard').toggleClass('rotating-card-container');
+        $('.editItem').toggle();
+        //$('.back').toggle();
+        //$('.spinCard').toggleClass('rotating-card-container');
         var wd = $('#widgetDrawer');
         if (wd.css('display') === 'block') {
             wd.slideUp();
@@ -2478,14 +2411,22 @@ function saveAppContainers() {
     });
 }
 
-function loadWidgetContainers(data) {
+function loadWidgetContainers(data, firstLoad) {
+    loadingWidgets = true;
     console.log("Loading widget containers...", data);
-    $('#widgetList').html("");
-    for (var key in data) {
-        if (data.hasOwnProperty(key)) addWidget(data[key]);
+    if (firstLoad) {
+        $.flexWidget();
+        initTables();
+
+        $('#widgetList').html("");
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) addWidget(data[key]);
+        }
+
+        reloadServiceLists();
+        updateStatusMonitors();
     }
-    reloadServiceLists();
-    updateStatusMonitors();
+    loadingWidgets = false;
 }
 
 function saveWidgetContainers() {
@@ -2493,10 +2434,15 @@ function saveWidgetContainers() {
     var widgetData = [];
     $.each(widgets, function() {
         var elemData = $(this).info();
-        if (!elemData.hasOwnProperty('id')) {
-            var widgetId = Math.floor((Math.random() * 100000) + 1000);
-            elemData['id'] = widgetId;
-
+        var id = false;
+        if (elemData.hasOwnProperty('gs-id')) {
+            id = elemData['gs-id'];
+        } else if (elemData.hasOwnProperty('id')) {
+            id = elemData['id'];
+        } else {
+            console.log("Generating an ID. We failed.");
+            id = Math.floor((Math.random() * 100000) + 1000);
+            elemData['gs-id'] = id;
         }
         console.log("Widget Data: ", elemData);
         widgetData.push(elemData);
@@ -2525,8 +2471,12 @@ function addWidget(widget) {
         var source = addAppList.find('[data-type="'+type+'"]');
         if (source.length) {
             var clone = source.clone();
+            var ignoreKeys = ["gsX", "gsY", "gsWidth", "gsHeight", "id", "gs-id"];
             for (var key in widget) if (widget.hasOwnProperty(key)) {
-                clone.attr('data-' + key, widget[key]);
+                if (! $.inArray(key, ignoreKeys)) {
+                    console.log("Appending data " + key);
+                    clone.attr('data-' + key, widget[key]);
+                }
             }
             for (var propertyName in widget) {
                 if (widget.hasOwnProperty(propertyName) && propertyName !== "type") {
@@ -2536,7 +2486,22 @@ function addWidget(widget) {
                 }
             }
             result = true;
-            clone.appendTo($('#widgetList'));
+            var id = false;
+            if (widget.hasOwnProperty('id')) id = widget['id'];
+            if (widget.hasOwnProperty('gs-id')) id = widget['gs-id'];
+            if (id === false) id = Math.floor((Math.random() * 100000) + 1000);
+            var widgetOpts = {
+                x: widget['gs-x'],
+                y: widget['gs-y'],
+                width: widget['gs-width'],
+                height: widget['gs-height'],
+                id: id
+            };
+
+            widgetList.addWidget(clone, widgetOpts);
+
+
+
             if (type === 'statusMonitor') {
                 reloadServiceLists();
                 updateStatusMonitors();
@@ -2797,23 +2762,14 @@ function clearLoadBar() {
 }
 
 function closeDrawer() {
-	var drawer = $('#sideMenu');
 	$('#ghostDiv').hide();
-	if (drawer.css("left") === '0px') {
-		drawer.animate({
-            left: '-352px'
-        }, 200);
-	}
+    $('#sideMenu').hide("slide", { direction: "left" }, 500);
+
 }
 
 function openDrawer() {
-    var drawer = $('#sideMenu');
     $('#ghostDiv').show();
-    if (drawer.css("left") === '-352px') {
-        drawer.animate({
-            left: '0'
-        }, 200);
-    }
+    $('#sideMenu').show("slide", { direction: "left" }, 500);
 }
 
 function setCookie(key, value, days) {
@@ -2860,11 +2816,14 @@ $.fn.info = function () {
     var data = {};
     [].forEach.call(this.get(0).attributes, function (attr) {
         if (/^data-/.test(attr.name)) {
-            var camelCaseName = attr.name.substr(5).replace(/-(.)/g, function ($0, $1) {
-                return $1.toUpperCase();
-            });
-            data[camelCaseName] = attr.value;
+            var key = attr.name.substr(5);
+            data[key] = attr.value;
         }
+    });
+    [].forEach.call(this.get(0).dataset, function (attr) {
+        var key = attr.name.substr(5);
+        data[key] = attr.value;
+
     });
     return data;
 };

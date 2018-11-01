@@ -1,6 +1,6 @@
 <?php
 
-namespace digitalhigh;
+namespace digitalhigh\config;
 
 require_once dirname(__FILE__) . "/DbConfig.php";
 require_once dirname(__FILE__) . "/FileConfig.php";

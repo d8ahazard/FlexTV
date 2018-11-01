@@ -1,12 +1,13 @@
 <?php
 require_once dirname(__FILE__) . '/util.php';
 require_once dirname(__FILE__) . '/vendor/autoload.php';
-require_once dirname(__FILE__) . '/git/GitUpdate.php';
-require_once dirname(__FILE__) . '/config/appConfig.php';
+require_once dirname(__FILE__) . '/digitalhigh/gitUpdate/GitUpdate.php';
+require_once dirname(__FILE__) . '/digitalhigh/config/appConfig.php';
 scriptDefaults();
 checkFiles();
 
-use digitalhigh\GitUpdate;
+use digitalhigh\gitUpdate\gitUpdate;
+use digitalhigh\config\appConfig;
 use Filebase\Database;
 
 $isWebapp = isWebApp();
@@ -83,8 +84,8 @@ function initConfig() {
 	$config = file_exists($dbConfig) ? $dbConfig : $dbDir;
 	if ($type === 'db') checkDefaultsDb($config);
 	try {
-		$config = new digitalhigh\appConfig($config, $type);
-	} catch (\digitalhigh\ConfigException $e) {
+		$config = new appConfig($config, $type);
+	} catch (\digitalhigh\config\ConfigException $e) {
 		write_log("An exception occurred creating the configuration. '$e'", "ERROR", false, false, true);
 		$error = true;
 	}
@@ -148,31 +149,32 @@ function deletePreference($table, $selector) {
 function checkUpdate() {
 	if (isWebApp()) return false;
 	$updates = [];
-	$git = new GitUpdate\GitUpdate(dirname(__FILE__) . "/..");
+	$git = new GitUpdate(dirname(__FILE__) . "/../..");
 	if ($git->hasGit) {
 		$updates = $git->checkMissing();
 		$refs = $updates['refs'];
 		writeSession('neededUpdates', $refs);
+		$revision = $git->revision;
+		$updates['last'] = $git->fetchCommits([$revision]);
+		$updates['revision'] = $revision;
 	}
-	$revision = $git->revision;
-	$updates['last'] = $git->fetchCommits([$revision]);
-	$updates['revision'] = $revision;
+
 	return $updates;
 }
 
 function checkRevision($short = false) {
 	write_log("Function fired!");
-	$git = new GitUpdate\GitUpdate(dirname(__FILE__) . "/..");
+	$git = new GitUpdate(dirname(__FILE__) . "/../..");
 	$revision = ($git->hasGit) ? $git->revision : false;
 	return ($short && $revision) ? substr($revision, 0, 7) : $revision;
 }
 
 function installUpdate() {
 	write_log("Function firsssed!!");
-	$git = new GitUpdate\GitUpdate(dirname(__FILE__) . "/..");
+	$git = new GitUpdate(dirname(__FILE__) . "/../..");
 	$result = [];
 	if ($git->hasGit) {
-		write_log("We have git!");
+		write_log("We have gitUpdate!");
 		$installed = $git->update();
 		$updates = $_SESSION['neededUpdates'] ?? false;
 		if ($installed && $updates) {
@@ -772,10 +774,8 @@ function checkGit() {
 	if (isset($_SESSION['hasGit'])) {
 		return $_SESSION['hasGit'];
 	} else {
-		exec("git", $lines);
-		$hasGit = ((preg_match("/git help/", implode(" ", $lines))) && (file_exists(dirname(__FILE__) . '/../.git')));
-		$gitPath = dirname(__FILE__) . '/../.git';
-		if (!file_exists($gitPath)) write_log("No git dir at '$gitPath'", "ALERT");
+		exec("gitUpdate", $lines);
+		$hasGit = (preg_match("/gitUpdate help/", implode(" ", $lines)));
 		writeSession('hasGit', $hasGit);
 	}
 	return $hasGit;

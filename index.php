@@ -3,6 +3,11 @@ require_once dirname(__FILE__) . '/php/vendor/autoload.php';
 require_once dirname(__FILE__) . "/php/webApp.php";
 require_once dirname(__FILE__) . '/php/util.php';
 require_once dirname(__FILE__) . "/api.php";
+
+require_once dirname(__FILE__) . "/php/digitalhigh/widget/src/widget.php";
+
+use digitalhigh\widget\widget;
+
 write_log("-------NEW REQUEST RECEIVED-------", "ALERT");
 scriptDefaults();
 
@@ -148,6 +153,7 @@ function showError() {
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
     <link rel="stylesheet" media="(min-width: 992px)" href="css/main_min_992.css">
+    <link rel="stylesheet" media="(max-width: 992px)" href="css/main_max_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
     <link rel="stylesheet" href="./css/homeBase.css" id="deferred">
 
@@ -156,7 +162,8 @@ function showError() {
 <body style="background-color:black">
     <noscript id="deferred-styles">
         <link href="css/lib/snackbar.min.css" rel="stylesheet">
-        <link href="css/lib/jquery-ui.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.4.0/gridstack.min.css" />
         <link rel="stylesheet" href="css/font/font-muximux.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
         <link href="css/lib/bootstrap-iconpicker.min.css" rel="stylesheet">
@@ -219,10 +226,19 @@ function showError() {
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
+    <script type="text/javascript">
+        <?php echo widget::getMarkup('JS'); ?>
+    </script>
+
     <!-- Utility scripts -->
     <script type="text/javascript" src="js/lib/lazyload.min.js"></script>
     <script defer type="text/javascript" src="js/lib/run_prettify.js"></script>
-    <script type="text/javascript" src="js/lib/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-touch-punch@0.2.3/jquery.ui.touch-punch.min.js" integrity="sha256-AAhU14J4Gv8bFupUUcHaPQfvrdNauRHMt+S4UVcaJb0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js" integrity="sha256-7/yoZS3548fXSRXqc/xYzjsmuW3sFKzuvOCHd06Pmps=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.4.0/gridstack.min.js'></script>
+    <script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.4.0/gridstack.jQueryUI.min.js'></script>
     <script defer type="text/javascript" src="js/lib/jquery.simpleWeather.min.js"></script>
 
     <!-- Icon picker -->

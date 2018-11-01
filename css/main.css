@@ -272,7 +272,7 @@ a:hover:not(#executeButton) {
 
 #widgetList {
     width: 100%;
-    min-height: 30%;
+    min-height: 50%;
 }
 
 #widgetDrawer {
@@ -285,6 +285,10 @@ a:hover:not(#executeButton) {
     display: none;
     box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149);
     overflow-y:scroll;
+}
+
+#widgetTemplates {
+    display: none;
 }
 
 #homeBtn:hover i {
@@ -378,6 +382,14 @@ a:hover:not(#executeButton) {
     z-index: 10 !important;
 }
 
+.btn-settings {
+    padding: 0;
+}
+
+.editItem {
+    display: none;
+}
+
 .btn-fab-lg {
     -webkit-border-radius: 50px;
     border-radius: 50px;
@@ -445,6 +457,24 @@ a:hover:not(#executeButton) {
     top: 14%;
     left: 14%;
     opacity: 0.1;
+}
+
+.card-widget {
+    background: var(--theme-primary);
+    color: var(--theme-primary-inverse);
+    border: 1px solid var(--theme-primary-inverse-50);
+    border: 0;
+    margin: 0 !important;
+    border-radius: 6px;
+    width: 100%;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-clip: border-box;
+    font-size: .875rem;
 }
 
 .service-status {
@@ -563,19 +593,7 @@ a:hover:not(#executeButton) {
     z-index:7;
 }
 
-#sideMenu {
-    background: var(--theme-primary);
-    width: 350px;
-    height: 100%;
-    position: fixed;
-    z-index: 8;
-    top: 0;
-    left: -352px;
-    word-break: break-word;
-    overflow: hidden;
-    -webkit-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
-    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
-}
+
 
 #sideMenu-content, #results-content {
     margin-right:-17px;
@@ -988,6 +1006,12 @@ div.card-img-overlay > p.card-text.card-base {
     margin-top: 5px;
     width: 100%;
     display: block;
+}
+
+.card-background {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
 .card-img-overlay {
@@ -1657,7 +1681,37 @@ span.toggle {
     -moz-transition: top 1.25s;
     -o-transition: top 1.25s;
     transition: top 1.25s;
+    display: table;
 }
+
+#sideMenu {
+    background: var(--theme-primary);
+    width: 285px;
+    z-index: 8;
+    position: fixed;
+    height: 100%;
+    top: 0;
+    word-break: break-word;
+    overflow: hidden;
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+    display: none;
+}
+
+.drawer-header.container {
+    display: block;
+}
+
+
+#results-content {
+    overflow: auto;
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+
+}
+
 
 .settingPage {
     margin: 0 auto;
@@ -1986,6 +2040,10 @@ span.toggle {
 
 .progress-circular-right {
     right: 0;
+}
+
+.spinCard {
+    overflow: visible !important;
 }
 
 .progress-circular-right .progress-circular-spinner {

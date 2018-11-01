@@ -13,14 +13,13 @@
     <orderEntry type="library" name="material-components-web" level="application" />
     <orderEntry type="library" name="popper" level="application" />
     <orderEntry type="library" name="bootstrap.bundle" level="application" />
-    <orderEntry type="library" name="@types/bootstrap-slider" level="application" />
-    <orderEntry type="library" name="html5shiv" level="application" />
-    <orderEntry type="library" name="jquery-ui" level="application" />
-    <orderEntry type="library" name="respond" level="application" />
-    <orderEntry type="library" name="muuri" level="application" />
-    <orderEntry type="library" name="hammer" level="application" />
     <orderEntry type="library" name="Sortable" level="application" />
     <orderEntry type="library" name="Sortable" level="application" />
     <orderEntry type="library" name="buttons" level="application" />
+    <orderEntry type="library" name="lodash" level="application" />
+    <orderEntry type="library" name="gridstack" level="application" />
+    <orderEntry type="library" name="gridstack.jQueryUI" level="application" />
+    <orderEntry type="library" name="jquery.ui.touch-punch" level="application" />
+    <orderEntry type="library" name="run_prettify" level="application" />
   </component>
 </module>

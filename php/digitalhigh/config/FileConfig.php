@@ -1,8 +1,8 @@
 <?php
-namespace digitalhigh;
+namespace digitalhigh\config;
 
 require_once dirname(__FILE__) . "/ConfigException.php";
-require_once dirname(__FILE__) . '/../vendor/autoload.php';
+require_once dirname(__FILE__) . '/../../vendor/autoload.php';
 
 use Filebase\Database;
 use Filebase\Query\Builder;

@@ -14638,6 +14638,15 @@ textarea {
     height: 100%
 }
 
+.btn.bmd-btn-icon {
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
+    margin: 0;
+    color: inherit;
+    line-height: 0;
+}
+
 .rotating-card-container .card .back.back-background:after {
     position: absolute;
     z-index: 1;

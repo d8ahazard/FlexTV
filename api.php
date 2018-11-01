@@ -5,13 +5,13 @@ require_once dirname(__FILE__) . '/php/util.php';
 require_once dirname(__FILE__) . '/php/fetchers.php';
 require_once dirname(__FILE__) . '/php/body.php';
 require_once dirname(__FILE__) . '/php/JsonXmlElement.php';
-require_once dirname(__FILE__) . '/php/dialogFlow/DialogFlow.php';
+require_once dirname(__FILE__) . '/php/digitalhigh/dialogFlow/DialogFlow.php';
 require_once dirname(__FILE__) . '/php/multiCurl.php';
-require_once dirname(__FILE__) . '/php/widget/widget.php';
+require_once dirname(__FILE__) . '/php/digitalhigh/widget/src/widget.php';
 
 use digitalhigh\DialogFlow\DialogFlow;
 use digitalhigh\multiCurl;
-use digitalhigh\widget;
+use digitalhigh\widget\widget;
 use Kryptonit3\SickRage\SickRage;
 use Kryptonit3\Sonarr\Sonarr;
 
@@ -4106,7 +4106,7 @@ function buildWidgets($widgets) {
 				}
 			}
 			$widgetObject = new widget($type, $widget);
-		} catch (\digitalhigh\widgetException $e) {
+		} catch (\digitalhigh\widget\exception\widgetException $e) {
 			write_log("Something went WRONG - '$e'.","ERROR");
 		}
 		if ($widgetObject) {

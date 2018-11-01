@@ -6,7 +6,7 @@
  * Time: 9:25 AM
  */
 
-namespace digitalhigh;
+namespace digitalhigh\widget\exception;
 
 
 class widgetException extends \Exception {

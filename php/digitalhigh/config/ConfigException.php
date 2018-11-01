@@ -6,7 +6,7 @@
  * Time: 8:52 AM
  */
 
-namespace digitalhigh;
+namespace digitalhigh\config;
 
 
 class ConfigException extends \Exception
