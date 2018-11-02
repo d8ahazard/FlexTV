@@ -14512,10 +14512,6 @@ textarea {
     text-overflow: ellipsis;
 }
 
-.list-group-item :first-child {
-    margin-right: 2rem;
-}
-
 .list-group-item > .pull-xs-right,
 .list-group-item > .pull-sm-right,
 .list-group-item > .pull-md-right,

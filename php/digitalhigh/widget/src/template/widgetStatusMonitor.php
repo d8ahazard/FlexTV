@@ -61,6 +61,7 @@ class widgetStatusMonitor extends widgetBase {
 	}
 
 	public function update() {
+		write_log("Update called for statusmonitor...","ALERT",false,true);
 		$lastUpdate = $this->lastUpdate;
 		$int = $this->refreshInterval;
 		$total = $lastUpdate + $int;
@@ -77,8 +78,7 @@ class widgetStatusMonitor extends widgetBase {
 
 	public function serialize() {
 		$parentKeys = parent::serialize();
-
-		return array_merge($parentKeys, [
+		$data = array_merge($parentKeys, [
 			'target' => $this->target,
 			'color' => $this->color,
 			'icon' => $this->icon,
@@ -86,48 +86,97 @@ class widgetStatusMonitor extends widgetBase {
 			'url' => $this->url,
 			'online' => $this->online
 		]);
+
+		write_log("Serializing: ".json_encode($data));
+		return $data;
 	}
 
 	public static function widgetHTML() {
-		return '<div class="widgetCard grid-stack-item" data-type="statusMonitor" data-target="0" data-gs-x="7" data-gs-y="0" data-gs-width="3" data-gs-height="1">
-				    <div class="spinCard grid-stack-item-content">
-				        <div class="card m-0 card-rotate card-background">
-				            <!-- This is the UI side. -->
-				            <div class="front front-background">
-		                        <i class="muximux-sonarr service-icon"></i>
-								<div class="service-text p-3">
-									<div class="row">
-										<div class="col">
-											<h4 class="card-title text-white my-0 statTitle"></h4>
-										</div>
-										<div class="col d-flex align-items-center justify-content-end">
-											<h4 class="my-0">
-											<span class="online-indicator">Online</span>
-											<span class="offline-indicator">Offline</span>
-											<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw online-indicator" title="Service Online" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-2" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-2">Sonarr Online</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg>
-											
-											<svg class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw offline-indicator" title="Service Offline" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-3" data-prefix="fas" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-3">Tautulli Offline</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z" transform="translate(-256 -256)"></path></g></g></svg>
-											
-											<!-- <i class="fas fa-fw fa-check-circle" title="Sonarr Online" data-fa-transform="grow-3"></i> --></h4>
-										</div>
-									</div>
+		$last = lcfirst(str_replace("widget", "", array_pop(explode("\\", get_called_class()))));
+		$attributes = [
+			'type' => $last,
+			'target' => "",
+			'gs-x' => 7,
+			'gs-y' => 0,
+			'gs-width' =>3,
+			'gs-height' => 1,
+			'gs-min-width' => 2,
+			'gs-min-height' => 1,
+			'gs-max-width' => 8,
+			'gs-max-height' => 4,
+			'gs-auto-position' => true
+		];
+		$attributeStrings = [];
+		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
+		$attributeString = join(" ", $attributeStrings);
+		return '
+				<div class="widgetCard card m-0 grid-stack-item '.$last.'" '.$attributeString.'>
+					<div class="grid-stack-item-content">
+						<div class="service-icon-wrapper">
+							<i class="muximux-sonarr service-icon"></i>
+						</div>
+						<div class="service-text p-3">
+							<div class="row">
+								<div class="col">
+									<h4 class="card-title text-white my-0 statTitle">No Services...</h4>
 								</div>
-				            </div>
-							<!-- These are the settings -->
-				            <div class="back card-rotate back-background">
-				                <div class="form-group">
-                                    <label class="appLabel" for="serverList">Target</label>
-                                    <select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
-                                    </select>
-                                </div>
-				            </div>
-				        </div>
-				    </div>
-			    </div>	';
+								<div class="col d-flex align-items-center justify-content-end">
+									<h4 class="my-0">
+										<span class="online-indicator">Online</span>
+										
+										<svg class="svg-inline--fa fa-check-circle fa-w-16 fa-fw online-indicator" title="Service Online" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-2" data-prefix="fas" data-icon="check-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-2">Sonarr Online</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z" transform="translate(-256 -256)"></path></g></g></svg>
+										
+										<span class="offline-indicator">Offline</span>
+										<svg class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw offline-indicator" title="Service Offline" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-3" data-prefix="fas" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-3">Tautulli Offline</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z" transform="translate(-256 -256)"></path></g></g></svg>
+										<button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											<i class="material-icons">more_vert</i>
+										</button>
+										<div class="dropdown-menu dropdown-menu-right">
+											<button class="dropdown-item widgetEdit" type="button">Edit</button>
+											<button class="dropdown-item widgetRefresh" type="button">Refresh</button>
+											<div class="dropdown-divider"></div>
+											<button class="dropdown-item widgetDelete" type="button">Delete</button>
+										</div>
+									
+									</h4>
+								</div>
+							</div>
+						</div>
+						<div class="card-settings">
+		                    <!-- Card setting markup goes here -->
+		                    <div class="form-group">
+                                <label class="appLabel" for="serverList">Target</label>
+                                <select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
+                                </select>
+                        	</div>
+			            </div>
+					</div>
+				</div>';
 	}
 
 	public static function widgetCSS() {
-		return '';
+		return '
+			.service-icon-wrapper {
+				position: absolute;
+			    top: 0;
+			    left: 0;
+			    width: 100%;
+			    height: 100%;
+			    overflow: hidden;
+			}
+		
+			.service-icon {
+			    font-size: 100px;
+			    position: absolute;
+			    top: 14%;
+			    left: 14%;
+			    opacity: 0.1;
+			}
+			
+			.online-indicator {
+				display: none;
+			}
+		';
 	}
 
 	public static function widgetJS() {

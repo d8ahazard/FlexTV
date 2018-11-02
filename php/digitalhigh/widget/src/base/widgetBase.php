@@ -64,7 +64,7 @@ class widgetBase {
 
 		$this->noResize = $data['gs-no-resize'] ?? false;
 		$this->noMove = $data['gs-no-move'] ?? false;
-		$this->autoPosition = $data['gs-auto-position'] ?? false;
+		$this->autoPosition = false;
 		$this->locked = $data['gs-locked'] ?? false;
 
 	}

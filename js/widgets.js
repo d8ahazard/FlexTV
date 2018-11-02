@@ -2,20 +2,26 @@
     $.flexWidget = function(action, id) {
         var target = $('#widget' + id);
         var type = target.data('type');
-        if (action === 'init') {
+        if (action === 'initWidget') {
             console.log('Initializing target from id ' + id, target);
             init(type, target);
-        } else if (action === 'update') {
+        } else if (action === 'updateWidget') {
             console.log('Updating target from id ' + id, target);
             update(type, target);
+        } else if (action === 'initListeners') {
+            initListeners();
+        } else if (action === 'initTemplates') {
+            initTemplates(id);
+        } else if (action === 'initGrid') {
+            initGrid();
         } else {
             initTemplates();
             initGrid();
-            console.log('Initializing the grid.');
+            initListeners();
         }
 
         function initGrid() {
-            console.log("Max rows?");
+            console.log("Initializing grid.");
             var options = {
                 alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
                 cellHeight: 70,
@@ -42,13 +48,16 @@
                 saveWidgetContainers();
             });
 
+
+
         }
 
-        function initTemplates() {
-            console.log("INITIALIZING TEMPLATES.");
+        function initTemplates(id) {
+            console.log("Initializing templates.");
+            var wd = $(id);
+            if (!wd.length) wd = $('#widgetDrawer');
             var wt = $('#widgetTemplates').clone().prop('id', 'widgetAddList');
             wt.css('display', 'block');
-            var wd = $('#widgetDrawer');
             wd.html("");
             wt.appendTo(wd);
 
@@ -64,17 +73,46 @@
             wal.on('removed', function() {
                 initTemplates();
             });
+        }
 
+        function initListeners() {
+            console.log("Initializing listeners.");
+
+            $(document).on('click', '.widgetEdit', function() {
+                console.log("Widget edit button clicked.");
+                var parent = $(this).closest('.widgetCard');
+                parent.find('.card-settings').slideToggle();
+                parent.toggleClass('editCard');
+                var noResize = parent.hasClass('editCard');
+                parent.attr('data-gs-no-resize', noResize);
+                //parent.toggleClass('editCard ui-resizable-autohide');
+                if (! parent.hasClass('editCard')) {
+                    $('.clickJack').show();
+                }
+
+            });
+
+            $(window).on('click', '.widgetRefresh', function() {
+                var parent = $(this).closest('.widgetCard');
+            });
+
+            $(window).on('click', '.widgetDelete', function() {
+                var parent = $(this).closest('.widgetCard');
+            });
         }
 
         function init(type, target) {
             console.log("ItemEL: ", target);
+            var type = target.data('type');
             var targetId = target.data('target');
             console.log("Type is " + type, "target is " + targetId);
             switch(type) {
-
                 case 'generic':
                     console.log('No init function defined for generic');
+                    break;
+
+                case 'nowPlaying':
+                    console.log('No init function defined for nowPlaying');
                     break;
 
                 case 'serverStatus':
@@ -91,9 +129,14 @@
 
                 case 'statusMonitor':
 
-                    if (target.data('target') === undefined || target.data('target' === 0) {
-                        id = $('#AppzDrawer').find('.drawer-item').attr('id').replace('Btn','');
-                        console.log('No defined target, using' + id);
+                    if (target.data('target') === undefined || target.data('target') === 0) {
+                        var drawerItems = $('#AppzDrawer').find('.drawer-item');
+                        if (drawerItems.length) {
+                            id = $('#AppzDrawer').find('.drawer-item').attr('id').replace('Btn','');
+                            console.log('No defined target, using' + id);
+                        } else {
+                            id = false;
+                        }
                     } else {
                         id = target.data('target');
                         console.log('using target ID of ' + id);
@@ -139,6 +182,10 @@
 
                 case 'generic':
                     console.log('No update function defined for generic');
+                    break;
+
+                case 'nowPlaying':
+                    console.log('No update function defined for nowPlaying');
                     break;
 
                 case 'serverStatus':

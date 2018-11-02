@@ -49,6 +49,20 @@ scriptDefaults();
             width: 100%;
             height: 100%;
         }
+
+        #editFab {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            display: block;
+        }
+
+        #editFab.active {
+            background: #ff4d00;
+        }
+
+        <?php echo widget::getMarkup('CSS') ?>
     </style>
 
 </head>
@@ -63,6 +77,10 @@ scriptDefaults();
 	    <?php echo widget::getMarkup('HTML'); ?>
     </div>
 
+    <div id="editFab" class="btn btn-fab-lg">
+        <span class="material-icons addIcon">edit</span>
+    </div>
+
     <!-- The root of all evil-->
     <script type="text/javascript" src="../js/lib/jquery-3.3.1.min.js"></script>
     <!-- material kit stuff -->
@@ -73,9 +91,7 @@ scriptDefaults();
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="../js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
-    <script type="text/javascript">
-        <?php echo widget::getMarkup('JS'); ?>
-    </script>
+    <script src="../js/widgets.js" type="text/javascript"></script>
 
     <!-- Utility scripts -->
     <script type="text/javascript" src="../js/lib/lazyload.min.js"></script>
@@ -116,10 +132,30 @@ scriptDefaults();
                height: 10
            };
 
-           $(function () {
-               $('.grid-stack').gridstack(options);
+
+           $('.grid-stack').gridstack(options);
+           $.flexWidget('initListeners');
+
+           var grid = $('#widgetDemo').data('gridstack');
+           grid.movable('.grid-stack-item', false);
+           grid.resizable('.grid-stack-item', false);
+
+           $(document).on( 'click', "#editFab", function() {
+
+               $('.editItem').toggle();
+               if ($(this).hasClass('active')) {
+                   console.log("Grid should be disabled.");
+                   grid.movable('.grid-stack-item', false);
+                   grid.resizable('.grid-stack-item', false);
+                   $('.editCard').removeClass('editCard');
+                   $('.card-settings').slideUp();
+               } else {
+                   console.log("Grid should be enabled.");
+                   grid.movable('.grid-stack-item', true);
+                   grid.resizable('.grid-stack-item', true);
+               }
+               $(this).toggleClass('active');
            });
-           $('.editItem').show();
        });
 
         // Ignore the IDE when it says this is unused, it's lying

@@ -6,9 +6,12 @@ $paths = ['template', 'exception'];
 foreach ($paths as $path) {
 	$items = array_slice(scandir(dirname(__FILE__) . "/$path"), 2);
 	foreach ($items as $item) {
-		require_once $libPath = dirname(__FILE__) . "/${path}/${item}";
+		require_once dirname(__FILE__) . "/${path}/${item}";
 	}
 }
+
+require_once dirname(__FILE__) . "/parser/cssParser.php";
+use digitalhigh\parser\cssParser;
 
 class widget {
 	public $type;
@@ -19,7 +22,7 @@ class widget {
 	 * @param $data
 	 * @throws widgetException
 	 */
-	function __construct($type, $data=false) {
+	function __construct($data=false) {
 		$files = array_slice(scandir(dirname(__FILE__) . "/template"), 2);
 		$classes = array_map(function($file){
 			return str_replace('.php', '', $file);
@@ -27,12 +30,11 @@ class widget {
 		$type = ucfirst($data['type'] ?? 'generic');
 
 		$typeCheck = "widget$type";
-
-		if (isset($classes, $typeCheck)) {
+		if (in_array($typeCheck, $classes)) {
 			$class = "digitalhigh\\widget\\template\\$typeCheck";
 			$widgetObject = new $class($data);
 		} else {
-			$widgetObject = new digitalhigh\widget\template\widgetGeneric($data);
+			$widgetObject = new template\widgetGeneric($data);
 		}
 		$this->widgetObject = $widgetObject;
 		return $this->widgetObject;
@@ -48,40 +50,66 @@ class widget {
 
 	public static function getMarkup($type) {
 		$files = array_slice(scandir(dirname(__FILE__) . "/template"), 2);
-		$classes = array_map(function($file){
+		$classes = array_map(function ($file) {
 			return str_replace('.php', '', $file);
 		}, $files);
 		$templates = [];
 		foreach ($classes as $className) {
-			$class = "digitalhigh\\widget\\template\\$className";
+				$class = "digitalhigh\\widget\\template\\$className";
 			if ($type === 'CSS') {
-				$templates[] = $class::widgetCSS();
-				$result = join(PHP_EOL,$templates);
+				$markup = $class::widgetCSS();
+				$last = lcfirst(str_replace("widget", "", array_pop(explode("\\", $class))));
+				$templates[] = (new cssParser($markup))->glue(".$last ");
 
 			} else if ($type === 'JS') {
 				$templates[$className] = $class::widgetJS();
-				$i = 0;
-				$js = "";
-				$initChecks = "";
-				$updateChecks = "";
-				foreach($templates as $key => $functions) {
-					$propKey = lcfirst(str_replace("widget", "", $key));
-					$initFunction = $functions['init'] ?? "console.log('No init function defined for $propKey');";
-					$updateFunction = $functions['update'] ?? "console.log('No update function defined for $propKey');";
-					$initChecks .= "
+
+			} else {
+				$templates[] = $class::widgetHTML();
+			}
+		}
+
+
+		if ($type === 'JS') {
+			$result = self::buildJs($templates);
+
+		} else if ($type === 'CSS') {
+			$result = self::buildCss($templates);
+		} else {
+			$result = join(PHP_EOL, $templates);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Generate Widget JQuery Plugin
+	 * @param $templates
+	 * @return string
+	 */
+	private static function buildJs($templates) {
+		$initChecks = "";
+		$updateChecks = "";
+		// Loop through each set of markup from classes and create a function to init/update that widget
+		foreach($templates as $key => $functions) {
+			$propKey = lcfirst(str_replace("widget", "", $key));
+			$initFunction = $functions['init'] ?? "console.log('No init function defined for $propKey');";
+			$updateFunction = $functions['update'] ?? "console.log('No update function defined for $propKey');";
+			$initChecks .= "
 			case '$propKey':
 				$initFunction
 				break;
 					";
 
-					$updateChecks .= "
+			$updateChecks .= "
 			case '$propKey':
 				$updateFunction
 				break;
 					";
-				}
+		}
 
-				$result = "
+		// Build our jQuery plugin to init and control the plugins from the UI.
+		$result = "
 !function($) {
     $.flexWidget = function(action, id) {
 	var target = $('#widget' + id);
@@ -172,12 +200,74 @@ class widget {
 	}
 	}
 }( jQuery );";
-			} else {
-				$templates[] = $class::widgetHTML();
-				$result = join(PHP_EOL,$templates);
-			}
-		}
+
 		return $result;
 	}
 
+
+	/**
+	 * Generate Widget CSS
+	 * Adds CSS code for general widget functionality
+	 * @param $templates
+	 * @return string
+	 */
+	private static function buildCss($templates) {
+		$results = "			
+			.card-background {
+			    overflow: hidden;
+			    width: 100%;
+			    height: 100%;
+			}
+			
+			.editItem {
+			    display: none;
+			}
+			
+			.grid-stack-item-content {
+				overflow: visible !important;
+			}
+			
+			.dropdown-menu {
+				overflow: hidden;
+				margin: 0;
+			}
+			
+			.dropdown-item {
+				width: 100%;
+				margin: 0;
+				background: var(--theme-primary);
+				color: var(--theme-primary-inverse);
+			}
+			
+			.btn-settings {
+			    padding: 0;
+			}
+			
+			.card-settings {
+				display: none;
+			}
+		";
+
+		$noPrepend = "
+			.widgetCard { transition: all .2s ease-in-out; }
+			
+			.widgetCard.editCard {
+				z-index: 10;
+				height: 100% !important;
+				box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+			}
+		";
+
+		// Format un-prepended CSS
+		$noPrepend = (new CssParser($noPrepend))->glue();
+
+		// Append child selector to above elements
+		$baseResults = (new cssParser($results))->glue(".widgetCard ");
+
+		// Append modifying selector to sub-widgets
+		$widgetResults = (new cssParser(join(PHP_EOL, $templates)))->glue(".widgetCard");
+
+
+		return $noPrepend . PHP_EOL . $baseResults . PHP_EOL . $widgetResults;
+	}
 }

@@ -156,6 +156,9 @@ function showError() {
     <link rel="stylesheet" media="(max-width: 992px)" href="css/main_max_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
     <link rel="stylesheet" href="./css/homeBase.css" id="deferred">
+    <style>
+        <?php echo widget::getMarkup('CSS') ?>
+    </style>
 
 </head>
 
@@ -226,9 +229,13 @@ function showError() {
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
+    <script src="/js/widgets.js" type="text/javascript"></script>
+
+    <!-- This is disabled until all the code works, then will be re-enabled
     <script type="text/javascript">
-        <?php echo widget::getMarkup('JS'); ?>
+        <?php //echo widget::getMarkup('JS'); ?>
     </script>
+    -->
 
     <!-- Utility scripts -->
     <script type="text/javascript" src="js/lib/lazyload.min.js"></script>

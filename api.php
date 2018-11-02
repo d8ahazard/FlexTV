@@ -14,6 +14,7 @@ use digitalhigh\multiCurl;
 use digitalhigh\widget\widget;
 use Kryptonit3\SickRage\SickRage;
 use Kryptonit3\Sonarr\Sonarr;
+use digitalhigh\widget\exception\widgetException;
 
 scriptDefaults();
 
@@ -4105,8 +4106,8 @@ function buildWidgets($widgets) {
 					$widget['label'] = $server['Name'];
 				}
 			}
-			$widgetObject = new widget($type, $widget);
-		} catch (\digitalhigh\widget\exception\widgetException $e) {
+			$widgetObject = new widget($widget);
+		} catch (widgetException $e) {
 			write_log("Something went WRONG - '$e'.","ERROR");
 		}
 		if ($widgetObject) {
@@ -4126,8 +4127,8 @@ function updateWidgets() {
 	foreach ($widgets as $widget) {
 		$widgetObject = false;
 		try {
-			$widgetObject = new digitalhigh\widget($widget['type'],$widget);
-		} catch (\digitalhigh\widgetException $e) {
+			$widgetObject = new widget($widget);
+		} catch (widgetException $e) {
 			write_log("Something went WRONG - $e.","ERROR");
 		}
 		if ($widgetObject) {

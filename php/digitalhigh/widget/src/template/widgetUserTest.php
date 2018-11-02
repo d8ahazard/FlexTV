@@ -22,24 +22,41 @@ class widgetUserTest {
 	}
 
 	public static function widgetHTML() {
+		$last = lcfirst(str_replace("widget", "", array_pop(explode('\\', get_called_class()))));
+		$attributes = [
+			'type' => $last,
+			'target' => "",
+			'gs-x' => 4,
+			'gs-y' => 0,
+			'gs-width' =>3,
+			'gs-height' => 2,
+			'gs-min-width' => 2,
+			'gs-min-height' => 1,
+			'gs-max-width' => 4,
+			'gs-max-height' => 3,
+			'gs-auto-position' => true
+		];
+		$attributeStrings = [];
+		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
+		$attributeString = join(" ", $attributeStrings);
 		return '
-		<div class="widgetCard grid-stack-item" data-type="userTest" data-target="" data-gs-x="4" data-gs-y="0" data-gs-width="3" data-gs-height="2">
+		<div class="widgetCard grid-stack-item" '.$attributeString.'>
 		    <div class="spinCard grid-stack-item-content">
 		        <div class="card m-0 card-rotate card-background">
 		            <!-- This is the UI side. -->
 		            <div class="front front-background">
                         <h4 class="card-header d-flex justify-content-between align-items-center text-white px-3">
 							<span class="d-flex align-items-center">
-							<i class="material-icons editItem">drag_indicator</i></span>User Activity 
+							<i class="material-icons dragHandle editItem">drag_indicator</i></span>User Activity
 							<span>
-								<button type="button" class="btn btn-settings editItem" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<i class="material-icons">more_vert</i>
 								</button>
 								<div class="dropdown-menu dropdown-menu-right">
-									<button class="dropdown-item" type="button">Edit</button>
-									<button class="dropdown-item" type="button">Refresh</button>
+									<button class="dropdown-item widgetEdit" type="button">Edit</button>
+									<button class="dropdown-item widgetRefresh" type="button">Refresh</button>
 									<div class="dropdown-divider"></div>
-									<button class="dropdown-item" type="button">Delete</button>
+									<button class="dropdown-item widgetDelete" type="button">Delete</button>
 								</div>
 							</span>
 						</h4>
@@ -57,7 +74,7 @@ class widgetUserTest {
 
 		            </div>
 					<!-- These are the settings -->
-		            <div class="back card-rotate back-background">
+		            <div class="card-settings">
 		                <h4 class="widgetHandle card-header card-header-primary text-center px-2 statHeader">Settings</h4>
 		                <div class="form-group bmd-form-group">
 		                <label class="appLabel" for="serverList">Label</label>

@@ -495,7 +495,7 @@ function initTables() {
                 item.attr('id', "widget" + newId);
                 item.attr('data-gs-id', newId);
                 item.data('gs-id', newId);
-                $.flexWidget('init', newId);
+                $.flexWidget('initWidget', newId);
                 console.log(items[i]);
                 console.log("Item: ", item);
             }
@@ -1651,6 +1651,8 @@ function setListeners() {
 		}
 	});
 
+
+
 	$(document).on( 'click', '.avatar', function() {
 		staticCount++;
 		if (staticCount >= 14 && cv==="") {
@@ -1670,18 +1672,23 @@ function setListeners() {
 
     $(document).on( 'click', "#homeEditBtn", function() {
         var wf = $('#widgetFab');
+        wf.toggleClass("open");
         // var tableState = widgetTable.option("disabled");
         // console.log("Setting widget table option to " + !tableState);
         // widgetTable.option("disabled", !tableState);
         editingWidgets = !editingWidgets;
         wf.slideToggle();
         $('.editItem').toggle();
-        //$('.back').toggle();
-        //$('.spinCard').toggleClass('rotating-card-container');
-        var wd = $('#widgetDrawer');
-        if (wd.css('display') === 'block') {
-            wd.slideUp();
+        var grid = $('#widgetList').data('gridstack');
+        if (wf.hasClass('open')) {
+            grid.disable();
+            $('#widgetDrawer').slideUp();
+        } else {
+            grid.enable();
         }
+
+
+
         if (!editingWidgets) {
             saveWidgetContainers();
         }

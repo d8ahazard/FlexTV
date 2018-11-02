@@ -382,13 +382,6 @@ a:hover:not(#executeButton) {
     z-index: 10 !important;
 }
 
-.btn-settings {
-    padding: 0;
-}
-
-.editItem {
-    display: none;
-}
 
 .btn-fab-lg {
     -webkit-border-radius: 50px;
@@ -449,14 +442,6 @@ a:hover:not(#executeButton) {
 
 .sendBtn:hover {
     color: var(--theme-accent-dark) !important;
-}
-
-.service-icon {
-    font-size: 100px;
-    position: absolute;
-    top: 14%;
-    left: 14%;
-    opacity: 0.1;
 }
 
 .card-widget {
@@ -1008,11 +993,6 @@ div.card-img-overlay > p.card-text.card-base {
     display: block;
 }
 
-.card-background {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-}
 
 .card-img-overlay {
     background: var(--theme-primary-20), var(--theme-primary-75);
@@ -2042,9 +2022,6 @@ span.toggle {
     right: 0;
 }
 
-.spinCard {
-    overflow: visible !important;
-}
 
 .progress-circular-right .progress-circular-spinner {
     -webkit-animation: progress-circular-spinner-right 1.333s cubic-bezier(.4,0,.2,1) infinite;
