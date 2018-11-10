@@ -145,82 +145,74 @@ $(function () {
     console.log("Fired jquery load function.");
     setBackground();
     apiToken = $('#apiTokenData').data('token');
-    console.log("ApiToken is " + apiToken);
 
     $(".select").dropdown({"optionClass": "withripple"});
 	$("#mainWrap").css({"top": 0});
-	// One for the money
+	// This calls our first 'fetchdata' loop.
     fetchDeferredElements();
 	// We do need to embed this in the page, just for the first query back to the server
+    var options = {
+        "main": "#widgetList",
+        "templates": "#widgetTemplates",
+        "drawer": "#widgetDrawer",
+        "delete": "#widgetDeleteList",
+        "save": saveWidgetContainers
+    };
 
-	bgs = $('.bg');
+    $.flexWidget(options);
+    bgs = $('.bg');
 	logLevel = "ALL";
 
 	$('#play').addClass('clicked');
     // Hides the loading animation
     $('body').addClass('loaded');
-
+    console.log("Fired window load function.");
+    // Load content window "stuff"
+    buildUiDeferred().then(fetchData()).then(initTimers());
+    setListeners();
 });
 
 // This fires after the page is completely ready
 $(window).on("load", function() {
-    console.log("Fired window load function.");
-    // Load content window "stuff"
 
-
-    fetchData();
-    fetchStatData();
-    buildUiDeferred();
-    setListeners();
 
 });
 
 // This is what should fetch data from the Server and build the UI
 function fetchData() {
+    var dfd = jQuery.Deferred();
     if (!polling) {
         polling = true;
         pollcount = 1;
-        var uri = 'api.php?fetchData&force=' + firstPoll + '&apiToken=' + apiToken;
+        var uri = 'api.php?fetchData&apiToken=' + apiToken;
         if (firstLoad) {
             uri += "&force=true";
             console.log("FirstLoad");
         }
-        $.get(uri, function (data) {
+        $.getJSON(uri, function (data) {
             if (data !== null) {
                 parseData(data);
-                firstLoad = false;
             }
             polling = false;
-            firstPoll = false;
-        }, "json");
+            firstLoad = false;
+            dfd.resolve("Success");
+        });
 
     } else {
         pollcount++;
         if (pollcount >= 10) {
             console.log("Breaking poll wait.");
             polling = false;
+            dfd.reject("Failure");
         }
     }
+    return dfd.promise();
 }
 
-function fetchStatData() {
-    getServerStatus();
-    getCurrentActivityViaPlex();
-    // getLibraryStats();
-    // getPopularMovies('30', '5');
-    // getPopularTvShows('30', '5');
-    // getTopPlatforms('30', '5');
-    // getTopContentRatings(['movie', 'show'], [], 6);
-    // getTopGenres(['movie', 'show'], [], 6);
 
-    // getTopTag() is definitely a work in progress
-    //getTopTag('contentRating');
-    //getTopTag('genre');
-    //getTopTag('year');
-}
 
 function parseData(data) {
-    if (data.length || firstLoad) console.log("Parse data called.", data);
+    //console.log("Parse data called.", data);
     // Check for these items, in order of priority, and "do stuff" with them
     var properties = ["strings", "messages", "dologout", "apps", "widgets", "fetchers", "userData", "devices", "playerStatus", "commands"];
 
@@ -253,7 +245,8 @@ function parseData(data) {
                         doLogout();
                         break;
                     case "widgets":
-                        loadWidgetContainers(dataItem, firstLoad);
+                        console.log("ALT Data: ", data.widgets);
+                        loadWidgetContainers(data['widgets'], firstLoad);
                         break;
                     case "apps":
                         loadAppContainers(dataItem);
@@ -404,7 +397,7 @@ function parseUpdates(data) {
 // Build the UI elements after document load
 function buildUiDeferred() {
     console.log("Building deferred UI.");
-
+    var dfd = jQuery.Deferred();
     // Why is this not hidden or where it should be on page load?
     $(".drawer-list").slideUp(500);
 
@@ -441,29 +434,14 @@ function buildUiDeferred() {
 	setTime();
 	fetchWeather();
     startBackgroundTimer();
-
-
-    setInterval(function () {
-		forceUpdate = false;
-		fetchData();
-	}, 5000);
-
-	setInterval(function () {
-		fetchWeather();
-		checkUpdate();
-	}, 10 * 1000 * 60);
-
-	setInterval(function() {
-		setTime();
-	}, 1000);
-
-	// Last but not least, make things fly around
+    // Last but not least, make things fly around
     setTimeout(function () {
         $('#results').css({"top": "64px", "max-height": "100%"});
         $('.userWrap').show();
         $('.avatar').show();
     }, 1000);
-
+    dfd.resolve("done");
+    return dfd.promise();
 }
 
 function fetchDeferredElements() {
@@ -482,25 +460,6 @@ function fetchDeferredElements() {
 
 function initTables() {
     console.log("Initializing sort tables.");
-
-    $('#widgetList').on('added', function(evt, items) {
-        if (!loadingWidgets) {
-            console.log("ADDED");
-            for (var i = 0; i < items.length; i++) {
-                var newId = Math.floor((Math.random() * 100000) + 1000);
-                var item = $(items[i]['el'][0]);
-                var item2 = $(items[i]);
-                console.log('item added, setting ID to ' + newId);
-                console.log("Item2: " + item2);
-                item.attr('id', "widget" + newId);
-                item.attr('data-gs-id', newId);
-                item.data('gs-id', newId);
-                $.flexWidget('initWidget', newId);
-                console.log(items[i]);
-                console.log("Item: ", item);
-            }
-        }
-    });
 
     Sortable.create(document.getElementById('appList'), {
         group: "localStorage-example",
@@ -1351,6 +1310,23 @@ function startBackgroundTimer() {
     }
 }
 
+function initTimers() {
+    console.log("Starting fetch loop for data");
+    setInterval(function () {
+        forceUpdate = false;
+        fetchData();
+    }, 5000);
+
+    setInterval(function () {
+        fetchWeather();
+        checkUpdate();
+    }, 10 * 1000 * 60);
+
+    setInterval(function() {
+        setTime();
+    }, 1000);
+}
+
 function startScrolling(){
 	if (!scrolling) {
 		direction = "down";
@@ -1619,13 +1595,6 @@ function setListeners() {
     	$('#cardModal').modal('hide');
 	});
 
-    $(document).on('click', '#widgetList', function() {
-        $('#widgetDrawer').slideUp();
-    });
-
-    $(document).on('click', '#addContainer', function() {
-        $('#widgetDrawer').slideUp();
-    });
 
     $(document).on('change', ':checkbox', function () {
 		var label = $("label[for='" + $(this).attr('id') + "']");
@@ -1672,6 +1641,7 @@ function setListeners() {
 
     $(document).on( 'click', "#homeEditBtn", function() {
         var wf = $('#widgetFab');
+        var wd = $('widgetDeleteList');
         wf.toggleClass("open");
         // var tableState = widgetTable.option("disabled");
         // console.log("Setting widget table option to " + !tableState);
@@ -1681,10 +1651,14 @@ function setListeners() {
         $('.editItem').toggle();
         var grid = $('#widgetList').data('gridstack');
         if (wf.hasClass('open')) {
-            grid.disable();
-            $('#widgetDrawer').slideUp();
-        } else {
             grid.enable();
+            grid.resizable(this.container.children('.' + this.opts.itemClass), true);
+            $('#widgetDrawer').slideUp();
+            wd.show();
+        } else {
+            grid.disable();
+            grid.resizable(this.container.children('.' + this.opts.itemClass), false);
+            wd.hide();
         }
 
 
@@ -1826,16 +1800,6 @@ function setListeners() {
                 saveAppContainers();
             }
         }
-    });
-
-    $(document).on('change', '.serviceList', function() {
-        console.log("Service list changed, we need to do some magic...");
-        var target = $(this).closest('.widgetCard');
-        var selection = $(this).find(":selected").val();
-        target.data('target', selection);
-        console.log("Current value " + selection, target);
-        initWidget(target);
-        saveWidgetContainers();
     });
 
     $(document).on('blur', '.blur', function () {
@@ -2217,48 +2181,6 @@ function reloadAppGroups(appList) {
     }
 }
 
-function reloadServiceLists() {
-    var appIds = [];
-    $('#appList').children().each(function() {
-        var appLabel = $(this).find('.blur').val();
-        if (appLabel === "") {
-            appLabel = $(this).find('.appSetter').text();
-        }
-        if (appLabel === "") appLabel = "Click Me";
-        var appId = $(this).find('.appSetter').data('id');
-        appIds[appId] = appLabel;
-    });
-    var sl = $('.serviceList');
-    $.each(sl, function() {
-        var target = $(this).closest('.widgetCard');
-        var targetId = false;
-        if (target.data('target') !== undefined) targetId = target.data('target');
-        var i = 0;
-        var selString = "";
-        for (var appId in appIds) if (appIds.hasOwnProperty(appId)) {
-            var label = appIds[appId];
-            var selected = "";
-            if (targetId) {
-                if (targetId === appId) {
-                    selected = " selected";
-                }
-            } else {
-                if (i === 0) {
-                    targetId = appId;
-                    selected = " selected";
-                }
-            }
-
-            selString += "<option value='" + appId + "'" + selected + ">" + label + "</option>";
-            i++;
-        }
-
-        $(this).html(selString);
-
-    });
-
-}
-
 function removeAppGroup(appId) {
     var divItem = $("#" + appId + "Div");
     var btnItem = $("#" + appId + "Btn");
@@ -2384,10 +2306,12 @@ function loadAppContainers(data) {
 
 }
 
+
+
 function saveAppContainers() {
     var appList = [];
     $('#appList').children().each(function() {
-    var appLabel = $(this).find('.blur').val();
+        var appLabel = $(this).find('.blur').val();
         if (appLabel === "") {
             appLabel = $(this).find('.appSetter').text();
         }
@@ -2421,104 +2345,85 @@ function saveAppContainers() {
 function loadWidgetContainers(data, firstLoad) {
     loadingWidgets = true;
     console.log("Loading widget containers...", data);
+    var action = 'updateWidget';
     if (firstLoad) {
-        $.flexWidget();
+        action = 'addWidget';
         initTables();
-
         $('#widgetList').html("");
-        for (var key in data) {
-            if (data.hasOwnProperty(key)) addWidget(data[key]);
-        }
-
-        reloadServiceLists();
-        updateStatusMonitors();
     }
+
+    for (var key in data) {
+        console.log("Widget action is " + action + ": ", data[key]);
+        if (data.hasOwnProperty('status')) console.log("Data Item has status here: " + data['status']);
+        if (data.hasOwnProperty(key)) $.flexWidget(action, data[key]);
+    }
+    if (firstLoad) $('#widgetList').data('gridstack').disable();
     loadingWidgets = false;
 }
 
-function saveWidgetContainers() {
-    var widgets = $('#widgetList').find('.widgetCard');
-    var widgetData = [];
-    $.each(widgets, function() {
-        var elemData = $(this).info();
-        var id = false;
-        if (elemData.hasOwnProperty('gs-id')) {
-            id = elemData['gs-id'];
-        } else if (elemData.hasOwnProperty('id')) {
-            id = elemData['id'];
-        } else {
-            console.log("Generating an ID. We failed.");
-            id = Math.floor((Math.random() * 100000) + 1000);
-            elemData['gs-id'] = id;
-        }
-        console.log("Widget Data: ", elemData);
-        widgetData.push(elemData);
-    });
+function saveWidgetContainers(widgetData) {
     var widgetString = JSON.stringify(widgetData);
-    var fetchUrl = './api.php?jsonWidgetArray=' + encodeURIComponent(widgetString) + "&apiToken=" + apiToken;
-    console.log("Saving widget container: ", widgetData);
-    var oldWidgetString = "<NODATA>..";
-    if (window.hasOwnProperty('widgets')) oldWidgetString = window['widgets'];
-    if (oldWidgetString !== widgetString) {
-        console.log("Widget strang really changed, saving.");
-        window['widgets'] = widgetString;
-        $.get(fetchUrl, function () {
-            console.log("Fetch completed.");
-        });
-    } else {
-        console.log("Widget string is identical, nothing to save.");
-    }
-}
-
-function addWidget(widget) {
-    var result = false;
-    var addAppList = $('#widgetAddList');
-    if (widget.hasOwnProperty('type')) {
-        var type = widget['type'];
-        var source = addAppList.find('[data-type="'+type+'"]');
-        if (source.length) {
-            var clone = source.clone();
-            var ignoreKeys = ["gsX", "gsY", "gsWidth", "gsHeight", "id", "gs-id"];
-            for (var key in widget) if (widget.hasOwnProperty(key)) {
-                if (! $.inArray(key, ignoreKeys)) {
-                    console.log("Appending data " + key);
-                    clone.attr('data-' + key, widget[key]);
-                }
-            }
-            for (var propertyName in widget) {
-                if (widget.hasOwnProperty(propertyName) && propertyName !== "type") {
-                    var inputItem = '.' + type + propertyName + "Input";
-                    var inputTarget = clone.find(inputItem);
-                    if (inputTarget.length) inputTarget.val(widget[propertyName]);
-                }
-            }
-            result = true;
-            var id = false;
-            if (widget.hasOwnProperty('id')) id = widget['id'];
-            if (widget.hasOwnProperty('gs-id')) id = widget['gs-id'];
-            if (id === false) id = Math.floor((Math.random() * 100000) + 1000);
-            var widgetOpts = {
-                x: widget['gs-x'],
-                y: widget['gs-y'],
-                width: widget['gs-width'],
-                height: widget['gs-height'],
-                id: id
-            };
-
-            widgetList.addWidget(clone, widgetOpts);
-
-
-
-            if (type === 'statusMonitor') {
-                reloadServiceLists();
-                updateStatusMonitors();
-            }
+    if (!firstLoad) {
+        var fetchUrl = './api.php?jsonWidgetArray=' + encodeURIComponent(widgetString) + "&apiToken=" + apiToken;
+        console.log("Saving widget container: ", widgetData);
+        var oldWidgetString = "<NODATA>..";
+        if (window.hasOwnProperty('widgets')) oldWidgetString = window['widgets'];
+        if (oldWidgetString !== widgetString) {
+            console.log("Widget strang really changed, saving.");
+            window['widgets'] = widgetString;
+            $.get(fetchUrl, function () {
+                console.log("Fetch completed.");
+            });
+        } else {
+            console.log("Widget string is identical, nothing to save.");
         }
     } else {
-        console.error("Widget data doesn't have a type...");
+        console.log("Loading...not saving.");
     }
-    return result;
 }
+
+function reloadServiceLists() {
+    var appIds = [];
+    $('#appList').children().each(function() {
+        var appLabel = $(this).find('.blur').val();
+        if (appLabel === "") {
+            appLabel = $(this).find('.appSetter').text();
+        }
+        if (appLabel === "") appLabel = "Click Me";
+        var appId = $(this).find('.appSetter').data('id');
+        appIds[appId] = appLabel;
+    });
+    var sl = $('.serviceList');
+    $.each(sl, function() {
+        var target = $(this).closest('.widgetCard');
+        var targetId = false;
+        if (target.data('target') !== undefined) targetId = target.data('target');
+        var i = 0;
+        var selString = "";
+        for (var appId in appIds) if (appIds.hasOwnProperty(appId)) {
+            var label = appIds[appId];
+            var selected = "";
+            if (targetId) {
+                if (targetId === appId) {
+                    selected = " selected";
+                }
+            } else {
+                if (i === 0) {
+                    targetId = appId;
+                    selected = " selected";
+                }
+            }
+
+            selString += "<option value='" + appId + "'" + selected + ">" + label + "</option>";
+            i++;
+        }
+
+        $(this).html(selString);
+
+    });
+
+}
+
 
 
 function updateFetchers(userData) {
@@ -2680,63 +2585,6 @@ function updateFetchers(userData) {
 
 }
 
-function updateStatusMonitors() {
-    $("div[data-type='statusMonitor']").each(function() {
-        var target = $(this);
-        var id = 0;
-        var dataSet = [];
-        if ($(this).data('target') === undefined || $(this).data('color') === undefined) {
-            var drawerItem = $('#AppzDrawer').find(".drawer-item");
-            if (drawerItem.attr('id') !== undefined) id = drawerItem.attr("id").replace("Btn","");
-            console.log("No defined target, using " + id);
-            var targetBtn = $('#' + id + 'Btn');
-            var icon = "muximux-foo";
-            var label = "Click Me";
-            var color = "#FFFFFF";
-            var url = false;
-            dataSet = targetBtn.data();
-            var online = false;
-        } else {
-            id = $(this).data('target');
-            dataSet = $(this).data();
-        }
-
-        if (dataSet !== undefined) {
-            icon = dataSet['icon'];
-            label = dataSet['label'];
-            color = dataSet['color'];
-            url = dataSet['url'];
-            online = dataSet['online'];
-        }
-
-
-        target.find('.service-icon').attr('class', 'service-icon ' + icon);
-        target.find('.statTitle').text(label);
-        if (online) {
-            target.find('.offline-indicator').hide();
-            target.find('.online-indicator').show();
-        } else {
-            target.find('.offline-indicator').show();
-            target.find('.online-indicator').hide();
-        }
-        var color2 = shadeColor(color, -30);
-        var colString = "background: linear-gradient(60deg, "+color+", "+color2+");";
-        var ss = target.find(".card.m-0.service-status");
-        ss.attr('style', colString);
-        target.attr('data-target', id);
-    });
-}
-
-function updateServerStatusWidgets() {
-    $("div[data-type='serverStatus']").each(function() {
-
-    });
-}
-
-function setMonitorIcon(target) {
-
-}
-
 function sendCommand() {
     console.log("Send button click.");
     $('.load-barz').show();
@@ -2821,16 +2669,16 @@ function colorItems(color, element) {
 
 $.fn.info = function () {
     var data = {};
+    [].forEach.call(this.get(0).dataset, function (attr) {
+        var key = attr.name.substr(5);
+        data[key] = attr.value;
+
+    });
     [].forEach.call(this.get(0).attributes, function (attr) {
         if (/^data-/.test(attr.name)) {
             var key = attr.name.substr(5);
             data[key] = attr.value;
         }
-    });
-    [].forEach.call(this.get(0).dataset, function (attr) {
-        var key = attr.name.substr(5);
-        data[key] = attr.value;
-
     });
     return data;
 };

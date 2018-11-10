@@ -750,7 +750,7 @@ function mainBody($defaults) {
 							<div id="widgetTemplates" class="grid-stack">
 	                            '. widget::getMarkup('HTML') .'
 							</div>
-							<div id="widgetDeleteList grid-stack grid-stack-6">
+							<div id="widgetDeleteList" class="grid-stack grid-stack-6">
 							</div>			
 							<div id="widgetFab" class="btn btn-fab-lg">
 			                    <span class="material-icons addIcon">add</span>

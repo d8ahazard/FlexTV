@@ -2621,7 +2621,7 @@ function write_log($text, $level = false, $caller = false, $force = false, $skip
 
 	$line = "[$date] [$level] " . $user . "[$caller] - $text" . PHP_EOL;
 
-	if ($pp) $_SESSION['fetchData'] = true;
+	if ($pp) $_GET['fetchData'] = true;
 	if (!is_writable($log)) return;
 	if (!$handle = fopen($log, 'a+')) return;
 	if (fwrite($handle, $line) === FALSE) return;

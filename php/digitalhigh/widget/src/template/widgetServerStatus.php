@@ -4,11 +4,10 @@ namespace digitalhigh\widget\template;
 
 require_once dirname(__FILE__) . "/../../../../multiCurl.php";
 
-use digitalhigh\widget\base\widgetBase;
 use digitalhigh\widget\exception\widgetException;
 use digitalhigh\multiCurl;
 
-class widgetServerStatus extends widgetBase {
+class widgetServerStatus {
 
 	public $serverId;
 	public $serverAddress;
@@ -18,10 +17,9 @@ class widgetServerStatus extends widgetBase {
 	public $sessionData;
 	public $libraryData;
 
-	public $DEFAULT_REFRESH_INTERVAL = 30;
+	public $refreshInterval = 30;
 
 	public function __construct($data) {
-		parent::__construct($data);
 		// A list of params required for update to work
 		$required = ['target', 'token', 'label', 'url'];
 		foreach($required as $key) if (!isset($data[$key])) throw new widgetException("Required key $key is missing.");
@@ -50,7 +48,7 @@ class widgetServerStatus extends widgetBase {
 		$total = $lastUpdate + $int;
 		$now = time();
 		if ($now > $total || $force) {
-			write_log("Updating widget!","INFO", false, true);
+			write_log("Updating ".$this->type." widget.","INFO", false, true);
 			$this->lastUpdate = time();
 			$address = $this->serverAddress;
 			$token = $this->serverToken;

@@ -93,7 +93,6 @@ class GitUpdate
             $ref = trim($ref);
             $commit = [];
             $cmd = 'gitUpdate log '.$ref.' -1 --pretty=format:"shortHead==%hD/H*head==%HD/H*subject==%sD/H*body==%bD/H*author==%aND/H*date==%aD"';
-            write_log("Command: '$cmd'");
             $data = $this->gitExec($cmd);
             $lines = explode('D/H*',$data);
             foreach($lines as $pair) {

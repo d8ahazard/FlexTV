@@ -109,6 +109,7 @@ function initialize() {
 		$force = ($_GET['force'] === 'true');
 		$result = getUiData($force);
 		header('Content-Type: application/json');
+		if (isset($result['widgets'])) write_log("Okay, really really echoing JSON here: ".json_encode($result),"ALERT",false,true);
 		echo json_encode($result);
 		bye();
 	}
@@ -399,7 +400,7 @@ function getUiData($force = false) {
 	$devices = selectDevices(scanDevices(false));
 	$apps = fetchAppArray();
 	if ($force) {
-		$widgetData = fetchWidgetArray();
+		$widgetData = updateWidgets();
 		write_log("Sending forced data.","ALERT",false,true);
 		$lang = checkSetLanguage();
 		$result = [
@@ -4097,15 +4098,6 @@ function buildWidgets($widgets) {
 		$widgetObject = false;
 		$type = $widget['type'];
 		try {
-			if ($type === 'serverStatus') {
-				$id = $widget['target'];
-				$server = findDevice('Id', $id, 'Server');
-				if ($server) {
-					$widget['url'] = $server['Uri'];
-					$widget['token'] = $server['Token'];
-					$widget['label'] = $server['Name'];
-				}
-			}
 			$widgetObject = new widget($widget);
 		} catch (widgetException $e) {
 			write_log("Something went WRONG - '$e'.","ERROR");
@@ -4124,6 +4116,8 @@ function updateWidgets() {
 	$widgets = fetchWidgetArray();
 	$widgetData = [];
 	$widgetSettings = [];
+	$count = count($widgets);
+	//if ($count) write_log("Updating $count widgets.","INFO",false,true);
 	foreach ($widgets as $widget) {
 		$widgetObject = false;
 		try {
@@ -4133,6 +4127,7 @@ function updateWidgets() {
 		}
 		if ($widgetObject) {
 			$widgetInfo = $widgetObject->update();
+			if ($widgetInfo !== $widget) write_log("Widget updated!");
 			array_push($widgetSettings, $widgetInfo);
 			unset($widgetInfo['lastUpdate']);
 			array_push($widgetData, $widgetInfo);

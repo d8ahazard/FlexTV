@@ -2,21 +2,50 @@
 
 namespace digitalhigh\widget\template;
 
-require_once dirname(__FILE__) . "/../base/widgetBase.php";
+use digitalhigh\widget\exception\widgetException;
 
-// Rename this class
 class widgetGeneric {
-	public $data;
-	public $type;
+	// Unique ID for each widget
+	// Data store for other values
+	private $data;
+	// Required values in order for other things to work
+	const required = ['target', 'color', 'icon', 'label', 'url'];
+	// Set these accordingly
+	const maxWidth = 3;
+	const maxHeight = 3;
+	const minWidth = 1;
+	const minHeight = 1;
+	const refreshInterval = 30;
+	const type = "generic";
+	/**
+	 * widgetStatusMonitor constructor.
+	 * @param $data
+	 * @throws widgetException
+	 */
+	function __construct($data) {
+		$data['type'] = self::type;
 
-	public function __construct($data) {
-		// Auto sets the type based on the class name.
-		$last = lcfirst(str_replace("widget", "", array_pop(explode("\\", get_called_class()))));
-		$this->type = $last;
+		foreach(self::required as $key)	{
+			if (!isset($data[$key])) throw new widgetException("Missing required key $key");
+		}
 		$this->data = $data;
+		$this->data['service-status'] = $data['service-status'] ?? "offline";
+		$this->data['gs-max-width'] = self::maxWidth;
+		$this->data['gs-min-width'] = self::minWidth;
+		$this->data['gs-max-height'] = self::maxHeight;
+		$this->data['gs-min-height'] = self::minHeight;
 	}
 
-	public function update() {
+
+	public function update($force=false) {
+		$lastUpdate = $this->data['lastUpdate'];
+		$int = self::refreshInterval;
+		$total = $lastUpdate + $int;
+		$now = time();
+		if ($now > $total || $force) {
+			$this->data['lastUpdate'] = time();
+			// Do stuff here to update
+		}
 		return $this->serialize();
 	}
 
@@ -25,25 +54,25 @@ class widgetGeneric {
 	}
 
 	public static function widgetHTML() {
-		$last = lcfirst(str_replace("widget", "", array_pop(explode("\\", get_called_class()))));
+		// As odd as it may seem, this is where we set our "default" values for the widget.
+		// Auto-position will be turned off when the widget is created.
 		$attributes = [
-			'type' => $last,
-			'target' => "",
-			'gs-x' => 1,
+			'gs-x' => 7,
 			'gs-y' => 0,
 			'gs-width' =>3,
-			'gs-height' => 3,
-			'gs-min-width' => 1,
-			'gs-min-height' => 1,
-			'gs-max-width' => 12,
-			'gs-max-height' => 12,
+			'gs-height' => 1,
+			'type' => self::type,
+			'gs-min-width' => self::minWidth,
+			'gs-min-height' => self::minHeight,
+			'gs-max-width' => self::maxWidth,
+			'gs-max-height' => self::maxHeight,
 			'gs-auto-position' => true
 		];
 		$attributeStrings = [];
 		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
 		$attributeString = join(" ", $attributeStrings);
 		return '
-		<div class="widgetCard card m-0 grid-stack-item '.$last.'" '.$attributeString.'>
+		<div class="widgetCard card m-0 grid-stack-item '.self::type.'" '.$attributeString.'>
 			<div class="grid-stack-item-content">
 				<!-- Optional header to show buttons, drag handle, and a title -->
 				<h4 class="card-header d-flex justify-content-between align-items-center text-white px-3">

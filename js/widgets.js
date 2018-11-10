@@ -1,26 +1,44 @@
+// Options:
+// initWidget, updateWidget (the widget ID to intialize or update)
+
+// initListeners, initTemplates, initGrid - params = [
+//  main: The "display" grid users add and remove widgets from
+//  templates: A hidden div filled with the contents of widget()::getMarkup("HTML") in php
+//  list: The active drawer users will select new widgets from. Populated from 'templates'
+//  delete: (optional) If specified, a grid that items can be dragged to to be deleted
+//  save: (function(data){}) The function to execute when saving widget data to the server.
+//        Data will be serialzied from the data tags of the current "main" grid.
+//        Data will be a JSON-serializable array of widget objects.
+//
+// ]
+
+
+
 !function($) {
-    $.flexWidget = function(action, id) {
-        var target = $('#widget' + id);
-        var type = target.data('type');
-        if (action === 'initWidget') {
-            console.log('Initializing target from id ' + id, target);
-            init(type, target);
-        } else if (action === 'updateWidget') {
-            console.log('Updating target from id ' + id, target);
-            update(type, target);
-        } else if (action === 'initListeners') {
-            initListeners();
-        } else if (action === 'initTemplates') {
-            initTemplates(id);
-        } else if (action === 'initGrid') {
-            initGrid();
-        } else {
-            initTemplates();
-            initGrid();
-            initListeners();
+    $.flexWidget = function(data, param) {
+        if (data === 'addWidget' || data === 'initWidget' || data === 'updateWidget') {
+
+                if (data === 'initWidget') {
+                    initWidget(param);
+                } else if (data === 'updateWidget') {
+                    updateWidget(param);
+                } else {
+                    addWidget(param);
+                }
+        } else if (data === 'initListeners') {
+            initListeners(param);
+        } else if (typeof data === "object") {
+            initGrid(data);
+            initListeners(data);
+            var returnFunc = data['save'];
+            window['return_func'] = returnFunc;
+            returnFunc(serialize());
         }
 
-        function initGrid() {
+
+        function initGrid(data) {
+            var returns = [];
+            var returnFunc = data['save'];
             console.log("Initializing grid.");
             var options = {
                 alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
@@ -31,51 +49,53 @@
                 height: 10
             };
 
-            var wl = $('#widgetList');
+            if (data.hasOwnProperty('main')) {
+                if (data.hasOwnProperty('delete')) {
+                    options['removable'] = data['delete'];
+                }
+                var mainTarget = data['main'];
+                var wl = $(mainTarget);
 
-            wl.gridstack(options);
+                wl.gridstack(options);
 
-            $('#widgetDeleteList').gridstack(options);
-            widgetList = wl.data('gridstack');
+                wl.on('dragstop', function () {
+                    console.log('Drag stop');
+                    returnFunc(serialize());
+                });
 
-            wl.on('dragstop', function(event, ui) {
-                console.log('Drag stop');
-                //saveWidgetContainers();
-            });
+                wl.on('change', function () {
+                    console.log('Change');
+                    returnFunc(serialize());
+                });
+                widgetList = wl.data('gridstack');
+                returns['list'] = widgetList;
+            }
 
-            wl.on('change', function() {
-                console.log('Change');
-                saveWidgetContainers();
-            });
+            if (data.hasOwnProperty('templates') && data.hasOwnProperty('drawer')) {
+                var templateTarget = data['templates'];
+                var drawerTarget = data['drawer'];
+                console.log("Initializing templates, targeting " + drawerTarget + " with data from " + templateTarget);
+                var tt = $(templateTarget);
+                var widgetDrawer = $(drawerTarget);
+                var wt = tt.clone().prop('id', 'widgetAddList');
+                wt.css('display', 'block');
+                widgetDrawer.html("");
+                wt.appendTo(widgetDrawer);
 
+                var addOptions = {
+                    cellHeight: 70,
+                    acceptWidgets: false
+                };
 
+                wt.gridstack(addOptions);
 
+                widgetDrawer.on('removed', function() {
+                    initGrid({'templates': templateTarget, 'drawer': drawerTarget})
+                });
+            }
         }
 
-        function initTemplates(id) {
-            console.log("Initializing templates.");
-            var wd = $(id);
-            if (!wd.length) wd = $('#widgetDrawer');
-            var wt = $('#widgetTemplates').clone().prop('id', 'widgetAddList');
-            wt.css('display', 'block');
-            wd.html("");
-            wt.appendTo(wd);
-
-            var addOptions = {
-                cellHeight: 70,
-                acceptWidgets: false
-            };
-
-            var wal = $('#widgetAddList');
-
-            wal.gridstack(addOptions);
-
-            wal.on('removed', function() {
-                initTemplates();
-            });
-        }
-
-        function initListeners() {
+        function initListeners(data) {
             console.log("Initializing listeners.");
 
             $(document).on('click', '.widgetEdit', function() {
@@ -99,87 +119,109 @@
             $(window).on('click', '.widgetDelete', function() {
                 var parent = $(this).closest('.widgetCard');
             });
-        }
 
-        function init(type, target) {
-            console.log("ItemEL: ", target);
-            var type = target.data('type');
-            var targetId = target.data('target');
-            console.log("Type is " + type, "target is " + targetId);
-            switch(type) {
-                case 'generic':
-                    console.log('No init function defined for generic');
-                    break;
-
-                case 'nowPlaying':
-                    console.log('No init function defined for nowPlaying');
-                    break;
-
-                case 'serverStatus':
-
-                    console.log("Trying to add server status widget...");
-                    if (window.hasOwnProperty('plexServerId')) {
-                        console.log("We have a server ID.");
-                        target.attr('data-target', window['plexServerId']);
-                    } else {
-                        console.log("We need that ID.");
+            if (data.hasOwnProperty('main')) {
+                $(data['main']).on('added', function(evt, items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var item = $(items[i]['el'][0]);
+                        initWidget(item);
                     }
+                });
+            }
 
-                    break;
+            if (data.hasOwnProperty('delete')) {
+                $(data['delete']).on('added', function() {
+                    $(this).html("");
+                });
+            }
 
-                case 'statusMonitor':
+            if (data.hasOwnProperty('templates')) {
+                var drawer = data['templates'];
+                if (data.hasOwnProperty('list')) {
+                    $(document).on('click', data['list'], function () {
+                        $(drawer).slideUp();
+                    });
+                }
 
-                    if (target.data('target') === undefined || target.data('target') === 0) {
-                        var drawerItems = $('#AppzDrawer').find('.drawer-item');
-                        if (drawerItems.length) {
-                            id = $('#AppzDrawer').find('.drawer-item').attr('id').replace('Btn','');
-                            console.log('No defined target, using' + id);
-                        } else {
-                            id = false;
-                        }
-                    } else {
-                        id = target.data('target');
-                        console.log('using target ID of ' + id);
-                    }
-                    console.log('Target id is  ' + id, target);
-
-                    var targetBtn = $('#' + id + 'Btn');
-                    var dataSet = targetBtn.data();
-                    console.log('Dataset: ', dataSet);
-                    if (dataSet !== undefined) {
-                        var icon = dataSet['icon'];
-                        var label = dataSet['label'];
-                        var url = dataSet['url'];
-                        var color = dataSet['color'];
-                        var color2 = shadeColor(color, -30);
-                        var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
-                        console.log('Motherfucker...');
-                        target.attr('data-target', id);
-                        target.attr('data-icon', icon);
-                        target.attr('data-label', label);
-                        target.attr('data-color', color);
-                        target.attr('data-url', url);
-
-                        target.find('.service-icon').attr('class', 'service-icon ' + icon);
-                        target.find('.statTitle').text(label);
-                        target.find('.offline-indicator').show();
-                        target.find('.online-indicator').hide();
-                        target.find('.card-background').attr('style', colString);
-                    }
-                    break;
-
-                case 'userTest':
-                    console.log('No init function defined for userTest');
-                    break;
-
-                default:
-                    return false;
+                if (data.hasOwnProperty('main')) {
+                    $(document).on('click', data['main'], function () {
+                        $(drawer).slideUp();
+                    });
+                }
             }
         }
 
-        function update(type, target) {
-            switch(type) {
+        function serialize() {
+            var widgets = $('#widgetList').find('.widgetCard');
+            var widgetData = [];
+            $.each(widgets, function() {
+                var elemData = $(this).info();
+                var id = false;
+                if (!elemData.hasOwnProperty('gs-id') && !elemData.hasOwnProperty('id')) {
+                    id = Math.floor((Math.random() * 100000) + 1000);
+                    elemData['gs-id'] = id;
+                }
+                widgetData.push(elemData);
+            });
+            return widgetData;
+        }
 
+        // Build a widget into the UI using previously stored data
+        function addWidget(widget) {
+            console.log("Adding widget: ", widget);
+            var result = false;
+            // It should be safe to call this from the DOM, as we've declared this name within widgets.js
+            var addAppList = $('#widgetAddList');
+            if (widget.hasOwnProperty('type')) {
+                var type = widget['type'];
+                var source = addAppList.find('[data-type="'+type+'"]');
+                if (source.length) {
+                    var clone = source.clone();
+                    for (var key in widget) if (widget.hasOwnProperty(key)) {
+                        clone.attr('data-' + key, widget[key]);
+                        var inputItem = '.' + type + key + "Input";
+                        var inputTarget = clone.find(inputItem);
+                        if (inputTarget.length) inputTarget.val(widget[key]);
+
+                    }
+                    clone.attr('data-gs-auto-position', 0);
+                    clone.attr('data-gs-no-resize', 0);
+
+                    result = true;
+                    var id = false;
+                    if (widget.hasOwnProperty('gs-id')) id = widget['gs-id'];
+                    if (id === false) id = Math.floor((Math.random() * 100000) + 1000);
+                    clone.attr('id',id);
+                    clone.attr('data-gs-id',widget['gs-id']);
+                    clone.appendTo($('#widgetList'));
+                    widgetList.makeWidget(clone);
+                    initWidget($(id));
+                }
+            } else {
+                console.error("Widget data doesn't have a type...");
+            }
+            return result;
+        }
+
+        // Update a widget in the UI using fetched data
+        function updateWidget(widgetData) {
+            var widgetId = widgetData['gs-id'];
+            var target = $('#widget' + widgetId);
+            target.bind("DOMSubtreeModified", function () {
+                console.log("Element readY??");
+            });
+            var checkCount = 0;
+            console.log("Targeting widget with ID of " + widgetId, target);
+            while(!target.length && checkCount < 20) {
+
+                console.log("NO ELEMENT, Re-checking...");
+                target = $('#widget' + widgetId);
+                checkCount++;
+            }
+            var type = widgetData['type'];
+
+
+            switch(type) {
                 case 'generic':
                     console.log('No update function defined for generic');
                     break;
@@ -193,11 +235,143 @@
                     break;
 
                 case 'statusMonitor':
-                    console.log('No update function defined for statusMonitor');
+                    var targetId = widgetData['target'];
+                    var targetDiv = $('#AppzDrawer').find('#' + targetId + 'Btn');
+                    var dataSet = targetDiv.info();
+                    if (dataSet !== undefined) {
+                        widgetData['icon'] = dataSet['icon'];
+                        widgetData['label'] = dataSet['label'];
+                        widgetData['color'] = dataSet['color'];
+                        widgetData['url'] = dataSet['url'];
+                    }
+
+                    var icon = target.find('.service-icon');
+                    var title = target.find('.statTitle');
+                    target.find('.service-icon').attr('class', 'service-icon ' + widgetData['icon']);
+                    target.find('.statTitle').text(widgetData['label']);
+                    console.log("Widget service status is " + widgetData['service-status']);
+                    if (widgetData['service-status'] === "online") {
+                        console.log("OI: ", target.find('.offline-indicator'));
+                        target.find('.offline-indicator').hide();
+                        target.find('.online-indicator').show();
+                    } else {
+                        target.find('.offline-indicator').show();
+                        target.find('.online-indicator').hide();
+                    }
+                    var color2 = shadeColor(widgetData['color'], -30);
+                    var colString = "background: linear-gradient(60deg, "+widgetData['color']+", "+color2+");";
+                    var ss = target.find(".card.m-0.service-status");
+                    ss.attr('style', colString);
                     break;
 
                 case 'userTest':
                     console.log('No update function defined for userTest');
+                    break;
+
+                default:
+                    return false;
+            }
+        }
+
+        // Initialize a widget added to the grid via drag/drop
+        function initWidget(widget) {
+            console.log("ItemEL: ", widget);
+            var type = widget.data('type');
+            var targetId = widget.data('target');
+            widget.attr('data-gs-auto-position', 0);
+            console.log("Type is " + type, "target is " + targetId);
+            var id = Math.floor((Math.random() * 100000) + 1000);
+            widget.attr('id', "widget" + id);
+            widget.attr('data-gs-id',id);
+
+            switch(type) {
+                case 'generic':
+                    console.log('No init function defined for generic');
+                    break;
+
+                case 'nowPlaying':
+                    widget.find('#currentActivity').removeClass('list-group-item-danger');
+                    break;
+
+                case 'serverStatus':
+
+                    console.log("Trying to add server status widget...");
+                    if (window.hasOwnProperty('plexServerId')) {
+                        console.log("We have a server ID.");
+                        widget.attr('data-target', window['plexServerId']);
+                    } else {
+                        console.log("We need that ID.");
+                    }
+                    break;
+
+                case 'statusMonitor':
+                    if (widget.hasOwnProperty('data-target')) {
+                        console.log("Data is set for widget??");
+                    } else {
+                        console.log("NO TARGET");
+                    }
+                    if (widget.data('target') === undefined || widget.data('target') === 0) {
+                        var drawer = $('#AppzDrawer');
+                        var drawerItems = drawer.find('.drawer-item');
+                        if (drawerItems.length) {
+                            id = drawer.find('.drawer-item').attr('id').replace('Btn','');
+                            console.log('No defined target, using' + id);
+                        } else {
+                            id = false;
+                        }
+                    } else {
+                        id = widget.data('target');
+                        console.log('using target ID of ' + id);
+                    }
+                    console.log('Target id is  ' + id, widget);
+
+                    var targetBtn = $('#' + id + 'Btn');
+                    var dataSet = targetBtn.data();
+                    console.log('Dataset: ', dataSet);
+                    if (dataSet !== undefined) {
+                        console.log("Setting status monitor attributes.");
+                        var icon = dataSet['icon'];
+                        var label = dataSet['label'];
+                        var url = dataSet['url'];
+                        var color = dataSet['color'];
+                        var color2 = shadeColor(color, -30);
+                        var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
+                        widget.attr('data-target', id);
+                        widget.attr('data-icon', icon);
+                        widget.attr('data-label', label);
+                        widget.attr('data-color', color);
+                        widget.attr('data-url', url);
+
+                        widget.find('.service-icon').attr('class', 'service-icon ' + icon);
+                        widget.find('.statTitle').text(label);
+                        widget.attr('style', colString);
+                    }
+                    if (widget.attr('data-service-status') !== undefined) {
+                        if (widget.attr('data-service-status') === "online") {
+                            widget.find('.offline-indicator').hide();
+                            widget.find('.online-indicator').show();
+                        }
+                    } else {
+                        widget.attr('data-service-status', "offline");
+                        widget.find('.offline-indicator').show();
+                        widget.find('.online-indicator').hide();
+
+                    }
+
+
+                    $(document).on('change', '.serviceList', function() {
+                        console.log("Service list changed, we need to do some magic...");
+                        var target = $(this).closest('.widgetCard');
+                        var selection = $(this).find(":selected").val();
+                        target.data('target', selection);
+                        console.log("Current value " + selection, target);
+                        initWidget(target);
+                        returnFunc(serialize());
+                    });
+                    break;
+
+                case 'userTest':
+                    console.log('No init function defined for userTest');
                     break;
 
                 default:

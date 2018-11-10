@@ -368,7 +368,7 @@ a:hover:not(#executeButton) {
     to { background-color: #960000; }
 }
 
-#appDeleteList, #widgetDeleteList {
+#appDeleteList {
     position: fixed;
     bottom: 14px;
     margin: 0 auto;
@@ -376,6 +376,18 @@ a:hover:not(#executeButton) {
     width: 80px;
     height: 80px;
     z-index: 8;
+}
+
+#widgetDeleteList {
+    position: fixed;
+    bottom: 20px;
+    margin: 0 auto;
+    left: calc(50% - 50px);
+    transition: .3s;
+    z-index: 11;
+    width: 100px;
+    height: 75px !important;
+    display: none;
 }
 
 #appDeleteList.elevate {
@@ -580,7 +592,7 @@ a:hover:not(#executeButton) {
 
 
 
-#sideMenu-content, #results-content {
+#sideMenu-content {
     margin-right:-17px;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -703,9 +715,10 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-inverse) !important;
 }
 
-#appList, #results-content {
+#appList {
     overflow: hidden;
     margin: 5px;
+
 }
 
 html {
@@ -1689,6 +1702,7 @@ span.toggle {
     top:0;
     left:0;
     width: 100%;
+    height: 100%;
 
 }
 

@@ -22,9 +22,7 @@ class widgetBase {
 
 	public $type;
 	public $lastUpdate;
-	public $refreshInterval;
-
-	public $DEFAULT_REFRESH_INTERVAL = 30;
+	public $refreshInterval = 30;
 
 	/**
 	 * widgetBase constructor.
@@ -38,8 +36,7 @@ class widgetBase {
 		$this->type = 'serverStatus';
 
 		// Load refresh interval and last update time
-		$this->refreshInterval = $data['refreshInterval'] ?? $this->DEFAULT_REFRESH_INTERVAL;
-		$this->lastUpdate = $data['lastUpdate'] ?? (time() - $this->refreshInterval);
+		$this->lastUpdate = $data['lastUpdate'] ?? false;
 
 		// List of properties to require, and props to filter from general data
 		$required = ['gs-x', 'gs-y', 'gs-height', 'gs-width'];
@@ -57,10 +54,10 @@ class widgetBase {
 		$this->gsWidth = $data['gs-width'];
 
 		// Store optional UI props
-		if (isset($data['gs-max-width'])) $this->maxWidth = $data['gs-max-width'];
-		if (isset($data['gs-min-width'])) $this->maxWidth = $data['gs-min-width'];
-		if (isset($data['gs-max-height'])) $this->maxWidth = $data['gs-max-height'];
-		if (isset($data['gs-min-height'])) $this->maxWidth = $data['gs-min-height'];
+		$this->maxWidth = $data['gs-max-width'];
+		$this->maxWidth = $data['gs-min-width'];
+		$this->maxWidth = $data['gs-max-height'];
+		$this->maxWidth = $data['gs-min-height'];
 
 		$this->noResize = $data['gs-no-resize'] ?? false;
 		$this->noMove = $data['gs-no-move'] ?? false;
@@ -71,11 +68,10 @@ class widgetBase {
 
 
 	public function serialize() {
-		$data = [
-			'type' => 'serverStatus',
-			'refreshInterval' => $this->refreshInterval,
-			'lastUpdate' => $this->lastUpdate
-		];
+
+		$data['lastUpdate'] = $this->lastUpdate;
+		$data['type'] = $this->type;
+		$data['refreshInterval'] = $this->refreshInterval;
 
 		$data['gs-id'] = $this->gsId;
 		$data['gs-x'] = $this->gsX;
