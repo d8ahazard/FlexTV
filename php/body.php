@@ -33,7 +33,8 @@ function deferredContent($user, $type = 'sections') {
 	$gitDiv = "";
 	if ($useGit) {
 		$gitDiv = '
-				<div class="appContainer card updateDiv' . $hidden . '">
+		    <div class="col-12 col-lg-6 mb-4">
+				<div class="appContainer card h-100 updateDiv' . $hidden . '">
 			        <div class="card-body">
 			            <h4 class="card-title">' . $lang['uiSettingUpdates'] . '</h4>
 			            <div class="form-group bmd-form-group">
@@ -61,7 +62,8 @@ function deferredContent($user, $type = 'sections') {
 			                </div>
 			            </div>
 			        </div>
-			    </div>';
+			    </div>
+			</div>';
 	}
 
 	$masterBtn = $masterDiv = "";
@@ -132,7 +134,7 @@ function deferredContent($user, $type = 'sections') {
 		}
 
 		$masterDiv = '
-					<div class="view-tab settingPage col-sm-11 col-lg-11 fade" id="userSettingsTab">
+					<div class="view-tab settingPage container fade" id="userSettingsTab">
 						<div class="card">
 							<div class="form-group bmd-form-group" id="userGroup">
 								' . $userDiv . '
@@ -143,98 +145,98 @@ function deferredContent($user, $type = 'sections') {
 		';
 	}
 
-	$content = '<div class="view-tab fade show active settingPage col-11 col-md-9 col-xl-8" id="customSettingsTab">     
+	$content = '<div class="view-tab fade show active settingPage container" id="customSettingsTab">     
 	                        <div class="tableContainer">
 								<div id="appList" class="row">
 				                </div>
 				                <div id="appDeleteList">
 				                </div>    
-				                <div id="appFab" class="btn btn-fab-lg">
-				                    <span class="material-icons addIcon">add</span>
+				                <div id="appFab" class="btn btn-fab">
+				                    <i class="material-icons addIcon">add</i>
 								</div>  
 		                    </div>
 	                    </div>
-		            	<div class="view-tab fade settingPage col-11 col-md-9 col-xl-8" id="plexSettingsTab">
-				            <div class="gridBox">
-			                    <div class="appContainer card">
-			                        <div class="card-body">
-			                            <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
-			                            <div class="form-group bmd-form-group">
-			                                <label class="appLabel" for="serverList">' . $lang['uiSettingPlaybackServer'] . '</label>
-			                                <select class="form-control custom-select serverList" id="serverList" title="' . $lang["uiSettingPlaybackServerHint"] . '">
-			                                </select>
-			                            </div>
-			                            <div class="form-group bmd-form-group">
-			                                <div class="form-group bmd-form-group">
-			                                    <label for="returnItems" class="appLabel">' . $lang['uiSettingOndeckRecent'] . '
-			                                        <input id="returnItems" class="appInput form-control" type="number" min="1" max="20" value="' . $_SESSION["returnItems"] . '" />
-			                                    </label>
-			                                </div>
-			                                <br>
-			                                <div class="form-group text-center">
-			                                    <button class="btn btn-raised logBtn btn-primary" id="castLogs" data-action="castLogs">' . $lang['uiSettingCastLogs'] . '</button><br>
-			                                </div>
-			                            </div>
-			                        </div>
-			                    </div>
-			                    <div class="appContainer card" id="dvrGroup">
-			                        <div class="card-body">
-			                            <h4 class="card-title">' . $lang['uiSettingPlexDVR'] . '</h4>
-			                            <div class="form-group bmd-form-group">
-			                                <div class="form-group bmd-form-group">
-			                                    <label class="appLabel serverList" for="dvrList">' . $lang['uiSettingDvrServer'] . '</label>
-			                                    <select class="form-control custom-select" id="dvrList">
-			                                    </select>
-			                                </div>
-			                                <div class="form-group bmd-form-group">
-			                                    <label class="appLabel" for="resolution">' . $lang['uiSettingDvrResolution'] . '</label>
-			                                    <select class="form-control appInput" id="plexDvrResolution">
-			                                        <option value="0" ' . ($_SESSION["plexDvrResolution"] == 0 ? "selected" : "") . ' >' . $lang['uiSettingDvrResolutionAny'] . '</option>
-			                                        <option value="720" ' . ($_SESSION["plexDvrResolution"] == 720 ? "selected" : "") . ' >' . $lang['uiSettingDvrResolutionHD'] . '</option>
-			                                    </select>
-			                                </div>
-			                                <div class="form-group bmd-form-group">
-			                                    <div class="togglebutton">
-			                                        <label for="plexDvrNewAirings" class="appLabel checkLabel">' . $lang['uiSettingDvrNewAirings'] . '
-			                                            <input id="plexDvrNewAirings" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrNewAirings"] ? "checked" : "") . ' />
-			                                            <span class="toggle"></span>
-			                                        </label>
-			                                    </div>
-			                                    <div class="togglebutton">
-			                                        <label for="plexDvrReplaceLower" class="appLabel checkLabel">' . $lang['uiSettingDvrReplaceLower'] . '
-			                                            <input id="plexDvrReplaceLower" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrReplaceLower"] ? " checked " : "") . ' />
-	                                                    <span class="toggle"></span>
-			                                        </label>
-			                                    </div>
-			                                    <div class="togglebutton">
-			                                        <label for="plexDvrRecordPartials" class="appLabel checkLabel">' . $lang['uiSettingDvrRecordPartials'] . '
-			                                            <input id="plexDvrRecordPartials" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrRecordPartials"] ? "checked" : "") . ' />
-	                                                    <span class="toggle"></span>
-			                                        </label>
-			                                    </div>
-			                                    <div class="togglebutton">
-			                                        <label for="plexDvrComskipEnabled" class="appLabel checkLabel">' . $lang['uiSettingDvrComskipEnabled'] . '
-			                                            <input id="plexDvrComskipEnabled" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrComskipEnabled"] ? "checked" : "") . ' />
-	                                                    <span class="toggle"></span>
-			                                        </label>
-			                                    </div>
-			                                </div>
-			                                <div class="form-group bmd-form-group">
-			                                    <label for="plexDvrStartOffsetMinutes" class="appLabel">' . $lang['uiSettingDvrStartOffset'] . '
-			                                        <input id="plexDvrStartOffsetMinutes" class="appInput form-control" type="number" min="1" max="30" value="' . $_SESSION["plexDvrStartOffsetMinutes"] . '" />
-			                                    </label>
-			                                </div>
-			                                <div class="form-group bmd-form-group">
-			                                    <label for="plexDvrEndOffsetMinutes" class="appLabel">' . $lang['uiSettingDvrEndOffset'] . '
-			                                        <input id="plexDvrEndOffsetMinutes" class="appInput form-control" type="number" min="1" max="30" value="' . $_SESSION["plexDvrEndOffsetMinutes"] . '" />
-			                                    </label>
-			                                </div>	
-			                            </div>
-			                        </div>
+		            	<div class="view-tab fade settingPage container" id="plexSettingsTab">
+				            <div class="row">
+				                <div class="col-12 col-lg-6 mb-4">
+                                    <div class="appContainer card h-100">
+                                        <div class="card-body">
+                                            <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
+                                            <div class="form-group bmd-form-group ">
+                                                <label for="serverList" class="appLabel bmd-label-static">' . $lang['uiSettingPlaybackServer'] . '</label>
+                                                <select id="serverList" class="form-control selectpicker serverList" data-style="btn-secondary" title="' . $lang["uiSettingPlaybackServerHint"] . '">
+                                                </select>
+                                            </div>
+                                            <div class="form-group bmd-form-group">
+                                                <label for="returnItems" class="appLabel bmd-label-static">' . $lang['uiSettingOndeckRecent'] . '</label>
+                                                <input id="returnItems" class="appInput form-control" type="number" min="1" max="20" value="' . $_SESSION["returnItems"] . '" />
+                                            </div>
+                                            <div class="form-group bmd-form-group text-center mb-0">
+                                                <button class="btn btn-raised btn-primary logBtn" id="castLogs" data-action="castLogs">' . $lang['uiSettingCastLogs'] . '</button><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-4">
+			                        <div class="appContainer card h-100" id="dvrGroup">
+                                        <div class="card-body">
+                                            <h4 class="card-title">' . $lang['uiSettingPlexDVR'] . '</h4>
+                                            <div class="form-group bmd-form-group">
+                                                <div class="form-group bmd-form-group">
+                                                    <label class="appLabel serverList" for="dvrList">' . $lang['uiSettingDvrServer'] . '</label>
+                                                    <select class="form-control custom-select" id="dvrList">
+                                                    </select>
+                                                </div>
+                                                <div class="form-group bmd-form-group">
+                                                    <label class="appLabel" for="resolution">' . $lang['uiSettingDvrResolution'] . '</label>
+                                                    <select class="form-control appInput" id="plexDvrResolution">
+                                                        <option value="0" ' . ($_SESSION["plexDvrResolution"] == 0 ? "selected" : "") . ' >' . $lang['uiSettingDvrResolutionAny'] . '</option>
+                                                        <option value="720" ' . ($_SESSION["plexDvrResolution"] == 720 ? "selected" : "") . ' >' . $lang['uiSettingDvrResolutionHD'] . '</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group bmd-form-group">
+                                                    <div class="togglebutton">
+                                                        <label for="plexDvrNewAirings" class="appLabel checkLabel">' . $lang['uiSettingDvrNewAirings'] . '
+                                                            <input id="plexDvrNewAirings" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrNewAirings"] ? "checked" : "") . ' />
+                                                            <span class="toggle"></span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="togglebutton">
+                                                        <label for="plexDvrReplaceLower" class="appLabel checkLabel">' . $lang['uiSettingDvrReplaceLower'] . '
+                                                            <input id="plexDvrReplaceLower" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrReplaceLower"] ? " checked " : "") . ' />
+                                                            <span class="toggle"></span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="togglebutton">
+                                                        <label for="plexDvrRecordPartials" class="appLabel checkLabel">' . $lang['uiSettingDvrRecordPartials'] . '
+                                                            <input id="plexDvrRecordPartials" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrRecordPartials"] ? "checked" : "") . ' />
+                                                            <span class="toggle"></span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="togglebutton">
+                                                        <label for="plexDvrComskipEnabled" class="appLabel checkLabel">' . $lang['uiSettingDvrComskipEnabled'] . '
+                                                            <input id="plexDvrComskipEnabled" type="checkbox" class="appInput" ' . ($_SESSION["plexDvrComskipEnabled"] ? "checked" : "") . ' />
+                                                            <span class="toggle"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group bmd-form-group">
+                                                    <label for="plexDvrStartOffsetMinutes" class="appLabel">' . $lang['uiSettingDvrStartOffset'] . '
+                                                        <input id="plexDvrStartOffsetMinutes" class="appInput form-control" type="number" min="1" max="30" value="' . $_SESSION["plexDvrStartOffsetMinutes"] . '" />
+                                                    </label>
+                                                </div>
+                                                <div class="form-group bmd-form-group">
+                                                    <label for="plexDvrEndOffsetMinutes" class="appLabel">' . $lang['uiSettingDvrEndOffset'] . '
+                                                        <input id="plexDvrEndOffsetMinutes" class="appInput form-control" type="number" min="1" max="30" value="' . $_SESSION["plexDvrEndOffsetMinutes"] . '" />
+                                                    </label>
+                                                </div>	
+                                            </div>
+                                        </div>
+                                    </div>
 			                    </div>		                
 				            </div>
 		            	</div>
-						<div class="view-tab settingPage col-sm-9 col-lg-8 fade' . $hidden . '" id="logTab">
+						<div class="view-tab settingPage container fade' . $hidden . '" id="logTab">
 							<div class="modal-header">
 								<div class="form-group bmd-form-group" id="logGroup">
 									<div id="log">
@@ -245,239 +247,328 @@ function deferredContent($user, $type = 'sections') {
 										</div>
 									</div>
 									<a class="logbutton" href="log.php?apiToken=' . $apiToken . '" target="_blank">
-										<span class="material-icons colorItem">open_in_browser</span>
+										<i class="material-icons colorItem">open_in_browser</i>
 									</a>
 								</div>
 							</div>
 						</div>
-						<div class="view-tab settingPage col-sm-9 col-lg-8 fade" id="fetcherSettingsTab">
+						<div class="view-tab settingPage container fade" id="fetcherSettingsTab">
 							<div class="gridBox" id="fetcherTab">
 							
 							</div>
 						</div>
-				        <div class="view-tab fade" id="recentStats">
+				        <div class="view-tab container fade" id="recentStats">
 			            	<!-- Populated by js -->
 						</div>
-				        <div class="view-tab fade col-11 col-md-9 col-xl-8" id="voiceTab">
+				        <div class="view-tab container fade" id="voiceTab">
 				            <div id="resultsInner" class="queryWrap">
 				            	<!-- Populated by js -->
 				            </div>
 				        </div>
 				        ' . $masterDiv . '
 				        
-						<div class="view-tab fade settingPage col-11 col-md-9 col-xl-8" id="generalSettingsTab">     
-	                    <div class="gridBox">
-						    <div class="appContainer card">
-				                <div class="card-body">
-				                    <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
-				                    <div class="form-group bmd-form-group">
-				                        <label class="appLabel" for="appLanguage">' . $lang['uiSettingLanguage'] . '</label>
-				                        <select class="form-control custom-select" id="appLanguage">
-				                            ' . listLocales() . '
-				                        </select>
-			                        </div>
-			                        <div class="form-group bmd-form-group' . $hidden . '">
-			                            <label for="apiToken" class="appLabel bmd-label-floating">' . $lang['uiSettingApiKey'] . '</label>
-			                            <input id="apiToken" class="appInput form-control" type="text" value="' . $apiToken . '" readonly="readonly"/>
-			                            <span class="bmd-help">Your API Token can be used to access FlexTV from other services.</span>
-			                        </div>
-			                        <div class="form-group bmd-form-group' . ($hide ? ' hidden' : '') . '">
-			                            <label for="publicAddress" class="appLabel">' . $lang['uiSettingPublicAddress'] . '</label>
-			                            <input id="publicAddress" class="appInput form-control formpop" type="text" value="' . $webAddress . '" >
-			                            <span class="bmd-help">The web address the mothership can reach FlexTV at.</span>
-			                        </div>
-			                        <div class="form-group bmd-form-group">
-			                            <label for="rescanTime" class="appLabel">' . $lang['uiSettingRescanInterval'] . '</label>
-			                            <input id="rescanTime" class="appInput form-control" type="number" min="10" max="30" value="' . $_SESSION["rescanTime"] . '" />
-		                                <span class="bmd-help">' . $lang['uiSettingRescanHint'] . '</span>
-			                        </div>
-				                    
-				                    <div class="form-group bmd-form-group">
-					                    <div class="noNewUsersGroup togglebutton' . $hidden . '">
-					                        <label for="noNewUsers" class="appLabel checkLabel">' . $lang['uiSettingNoNewUsers'] . '
-					                            <input id="noNewUsers" title="' . $lang['uiSettingNoNewUsersHint'] . '" class="appInput" type="checkbox" ' . ($_SESSION["noNewUsers"] ? "checked" : "") . '/>
-			                                    <span class="toggle"></span>
-					                        </label>
-					                    </div>
-					                    <div class="togglebutton">
-					                        <label for="shortAnswers" class="appLabel checkLabel">' . $lang['uiSettingShortAnswers'] . '
-					                            <input id="shortAnswers" class="appInput" type="checkbox" ' . ($_SESSION["shortAnswers"] ? "checked" : "") . '/>
-					                            <span class="toggle"></span>
-					                        </label>
-					                    </div>
-					                    <div class="togglebutton' . $hidden . '">
-					                        <label for="cleanLogs" class="appLabel checkLabel">' . $lang['uiSettingObscureLogs'] . '
-					                            <input id="cleanLogs" type="checkbox" class="appInput" ' . ($_SESSION["cleanLogs"] ? "checked" : "") . '/>
-					                            <span class="toggle"></span>
-					                        </label>
-					                    </div>
-					                    <div class="togglebutton">
-					                        <label for="darkTheme" class="appLabel checkLabel">' . $lang['uiSettingThemeColor'] . '
-					                            <input id="darkTheme" class="appInput" type="checkbox" ' . ($_SESSION["darkTheme"] ? "checked" : "") . '/>
-					                            <span class="toggle"></span>
-					                        </label>
-					                    </div>
-					                    <div class="togglebutton' . $hidden . '">
-					                        <label for="forceSSL" class="appLabel checkLabel">' . $lang['uiSettingForceSSL'] . '
-					                            <input id="forceSSL" class="appInput" type="checkbox" ' . ($_SESSION["forceSSL"] ? "checked" : "") . '/>
-					                            <span class="toggle"></span>
-					                        </label>
-					                        <span class="bmd-help">' . $lang['uiSettingForceSSLHint'] . '</span>
-					                    </div>
-				                    </div>
-				                </div>
-				            </div>
-				            ' . $gitDiv . '
-				            <div class="appContainer card">
-				                <div class="card-body">
-				                    <h4 class="card-title">' . $lang['uiSettingAccountLinking'] . '</h4>
-				                    <div class="form-group text-center">
-				                        <div class="form-group bmd-form-group">
-				                            <button class="btn btn-raised linkBtn btn-primary testServer' . $hidden . '" id="testServer" data-action="test">' . $lang['uiSettingTestServer'] . '</button><br>
-				                            <button id="linkAccountv2" data-action="googlev2" class="btn btn-raised linkBtn btn-danger">' . $lang['uiSettingLinkGoogle'] . '</button>
-				                            <button id="linkAmazonAccount" data-action="amazon" class="btn btn-raised linkBtn btn-info">' . $lang['uiSettingLinkAmazon'] . '</button>
-				                        </div>
-				                    </div>
-				                    <div class="text-center">
-				                        <label for="sel1">' . $lang['uiSettingCopyIFTTT'] . '</label><br>
-				                        <button id="sayURL" class="copyInput btn btn-raised btn-primary btn-70" type="button"><i class="material-icons colorItem">message</i></button>
-				                    </div>
-				                </div>
-				            </div>
-				            <div class="appContainer card">
-				                <div class="card-body">
-				                    <h4 class="card-title">Notifications</h4>
-				                    <div class="form-group bmd-form-group">
-				                        <label class="appLabel" for="broadcastList">' . $lang['uiSettingBroadcastDevice'] . '</label>
-				                        <select class="form-control custom-select deviceList" id="broadcastList" title="' . $lang["uiSettingBroadcastDeviceHint"] . '">
-				                        </select>
-				                    </div>
-				                    <div class="form-group center-group">
-				                        <label for="appt-time">Start:</label>
-				                        <input type="time" id="quietStart" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
-				                        <label for="appt-time">Stop:</label>
-				                        <input type="time" id="quietStop" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
-				                    </div>
-				                    <div class="fetchNotify">
-				                        <button id="copyBroadcast" class="hookLnk btn btn-raised btn-warn btn-100" title="Copy WebHook Notification URL">
-				                            <i class="material-icons colorItem">assignment</i>
-				                        </button>
-				                        <button id="testBroadcast" value="broadcast" class="testInput btn btn-info btn-raised btn-100" title="Test WebHook Notification">
-				                            <i class="material-icons colorItem">send</i>
-				                        </button>
-				                    </div>
-				                </div>
-				            </div>
-				            <div class="appContainer card">
-				                <div class="card-body">
-				                    <h4 class="card-title">' . $lang['uiSettingHookLabel'] . '</h4>
-				                    <div class="togglebutton">
-				                        <label for="hook" class="appLabel checkLabel">' . $lang['uiSettingEnable'] . '
-				                            <input id="hook" type="checkbox" data-app="hook" class="appInput appToggle"/>
-				                            <span class="toggle"></span>
-				                        </label>
-				                    </div>
-				                    <div class="form-group bmd-form-group" id="hookGroup">
-				                        <div class="togglebutton">
-				                            <label for="hookSplit" class="appLabel checkLabel">' . $lang['uiSettingSeparateHookUrl'] . '
-				                                <input id="hookSplit" type="checkbox" class="appInput appToggle"/>
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="form-group bmd-form-group">
-				                            <label for="hookUrl" class="appLabel">' . $lang['uiSettingHookUrlGeneral'] . '
-				                                <input id="hookUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookUrl"] . '"/>
-				                                <span class="bmd-help">' . $lang['uiSettingHookPlayHint'] . '</span>
-				                            </label>
-				                        </div>
-				                        <div class="togglebutton">
-				                            <label for="hookPlay" class="appLabel checkLabel">' . $lang['uiSettingHookPlayback'] . '
-				                                <input id="hookPlay" type="checkbox" data-app="hookPlay" class="appInput appToggle"/>
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="hookLabel" id="hookPlayGroup">
-				                            <div class="form-group urlGroup hookSplitGroup">
-				                                <label for="hookPlayUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
-				                                    <input id="hookPlayUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookPlayUrl"] . '"/>
-				                                    <span class="bmd-help">' . $lang['uiSettingHookPlayHint'] . '</span>
-				                                </label>
-				                            </div>
-				                        </div>
-				                        <div class="togglebutton">
-				                            <label for="hookPause" class="appLabel checkLabel">' . $lang['uiSettingHookPause'] . '
-				                                <input id="hookPause" type="checkbox" data-app="hookPause" class="appInput appToggle"/>
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="hookLabel" id="hookPauseGroup">
-				                            <div class="form-group urlGroup hookSplitGroup">
-				                                <label for="hookPauseUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
-				                                    <input id="hookPauseUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookPauseUrl"] . '"/>
-				                                </label>
-				                            </div>
-				                        </div>
-				                        <div class="togglebutton">
-				                            <label for="hookStop" class="appLabel checkLabel">' . $lang['uiSettingHookStop'] . '
-				                                <input id="hookStop" type="checkbox" data-app="hookStop" class="appInput appToggle">
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="hookLabel" id="hookStopGroup">
-				                            <div class="form-group urlGroup hookSplitGroup">
-				                                <label for="hookStopUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
-				                                    <input id="hookStopUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookStopUrl"] . '"/>
-				                                </label>
-				                            </div>
-				                        </div>
-				                        <div class="togglebutton">
-				                            <label for="hookFetch" class="appLabel checkLabel">' . $lang['uiSettingHookFetch'] . '
-				                                <input id="hookFetch" type="checkbox" class="appInput appToggle hookToggle"/>
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="hookLabel" id="hookFetchGroup">
-				                            <div class="form-group urlGroup hookSplitGroup">
-				                                <label for="hookFetchUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
-				                                    <input id="hookFetchUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookFetchUrl"] . '"/>
-				                                </label>
-				                            </div>
-				                        </div>
-				                        <div class="togglebutton">
-				                            <label for="hookCustom" class="appLabel checkLabel">' . $lang['uiSettingHookCustom'] . '
-				                                <input id="hookCustom" type="checkbox" data-app="hookCustom" class="appInput appToggle"/>
-				                                <span class="toggle"></span>
-				                            </label>
-				                        </div>
-				                        <div class="form-group hookSplitGroup">
-				                            <div class="hookLabel" id="hookCustomGroup">
-				                                <label for="hookCustomUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
-				                                    <input id="hookCustomUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomUrl"] . '"/>
-				                                </label>
-				                            </div>
-				                            <label for="hookCustomPhrase" class="appLabel">' . $lang['uiSettingHookCustomPhrase'] . '
-				                                <input id="hookCustomPhrase" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomPhrase"] . '"/>
-				                            </label>
-				                            <label for="hookCustomReply" class="appLabel">' . $lang['uiSettingHookCustomResponse'] . '
-				                                <input id="hookCustomReply" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomReply"] . '"/>
-				                            </label>
-				                        </div>
-				                        <div class="text-center">
-				                            <div class="form-group btn-group">
-				                                <button value="Webhooks" class="testInput btn btn-raised btn-info" type="button">' . $lang['uiSettingBtnTest'] . '</button>
-				                                <button id="resetCouch" value="Webhooks" class="resetInput btn btn-raised btn-danger btn-100" type="button">' . $lang['uiSettingBtnReset'] . '</button>
-				                            </div>
-				                        </div>
-				                    </div>
-				                </div>
-				            </div>
-			            </div>	                    
+						<div class="view-tab fade settingPage container" id="generalSettingsTab">     
+                            <div class="row">
+                                <div class="col-12 col-lg-6 mb-4">
+                                    <div class="appContainer card h-100">
+                                        <div class="card-body">
+                                            <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
+                                            <div class="form-group bmd-form-group">
+                                                <label class="appLabel" for="appLanguage">' . $lang['uiSettingLanguage'] . '</label>
+                                                <select id="appLanguage" class="form-control selectpicker " data-style="select-with-transition" title="Single Select" data-size="7">
+                                                    ' . listLocales() . '
+                                                </select>
+                                            </div>
+                                            <div class="form-group bmd-form-group' . $hidden . '">
+                                                <label for="apiToken" class="appLabel bmd-label-floating">' . $lang['uiSettingApiKey'] . '</label>
+                                                <input id="apiToken" class="appInput form-control" type="text" value="' . $apiToken . '" readonly="readonly"/>
+                                                <span class="bmd-help">Your API Token can be used to access FlexTV from other services.</span>
+                                            </div>
+                                            <div class="form-group bmd-form-group' . ($hide ? ' hidden' : '') . '">
+                                                <label for="publicAddress" class="appLabel">' . $lang['uiSettingPublicAddress'] . '</label>
+                                                <input id="publicAddress" class="appInput form-control formpop" type="text" value="' . $webAddress . '" >
+                                                <span class="bmd-help">The web address the mothership can reach FlexTV at.</span>
+                                            </div>
+                                            <div class="form-group bmd-form-group">
+                                                <label for="rescanTime" class="appLabel">' . $lang['uiSettingRescanInterval'] . '</label>
+                                                <input id="rescanTime" class="appInput form-control" type="number" min="10" max="30" value="' . $_SESSION["rescanTime"] . '" />
+                                                <span class="bmd-help">' . $lang['uiSettingRescanHint'] . '</span>
+                                            </div>
+                                            
+                                            <div class="form-group bmd-form-group">
+                                                <div class="noNewUsersGroup togglebutton' . $hidden . '">
+                                                    <label for="noNewUsers" class="appLabel checkLabel">' . $lang['uiSettingNoNewUsers'] . '
+                                                        <input id="noNewUsers" title="' . $lang['uiSettingNoNewUsersHint'] . '" class="appInput" type="checkbox" ' . ($_SESSION["noNewUsers"] ? "checked" : "") . '/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="shortAnswers" class="appLabel checkLabel">' . $lang['uiSettingShortAnswers'] . '
+                                                        <input id="shortAnswers" class="appInput" type="checkbox" ' . ($_SESSION["shortAnswers"] ? "checked" : "") . '/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="togglebutton' . $hidden . '">
+                                                    <label for="cleanLogs" class="appLabel checkLabel">' . $lang['uiSettingObscureLogs'] . '
+                                                        <input id="cleanLogs" type="checkbox" class="appInput" ' . ($_SESSION["cleanLogs"] ? "checked" : "") . '/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="darkTheme" class="appLabel checkLabel">' . $lang['uiSettingThemeColor'] . '
+                                                        <input id="darkTheme" class="appInput" type="checkbox" ' . ($_SESSION["darkTheme"] ? "checked" : "") . '/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="togglebutton' . $hidden . '">
+                                                    <label for="forceSSL" class="appLabel checkLabel">' . $lang['uiSettingForceSSL'] . '
+                                                        <input id="forceSSL" class="appInput" type="checkbox" ' . ($_SESSION["forceSSL"] ? "checked" : "") . '/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                    <span class="bmd-help">' . $lang['uiSettingForceSSLHint'] . '</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                ' . $gitDiv . '
+                                <div class="col-12 col-lg-6 mb-4">
+                                    <div class="appContainer card h-100">
+                                        <div class="card-body">
+                                            <h4 class="card-title">' . $lang['uiSettingAccountLinking'] . '</h4>
+                                            <div class="form-group text-center">
+                                                <div class="form-group bmd-form-group">
+                                                    <button class="btn btn-raised linkBtn btn-primary testServer' . $hidden . '" id="testServer" data-action="test">' . $lang['uiSettingTestServer'] . '</button><br>
+                                                    <button id="linkAccountv2" data-action="googlev2" class="btn btn-raised linkBtn btn-danger">' . $lang['uiSettingLinkGoogle'] . '</button>
+                                                    <button id="linkAmazonAccount" data-action="amazon" class="btn btn-raised linkBtn btn-info">' . $lang['uiSettingLinkAmazon'] . '</button>
+                                                </div>
+                                            </div>
+                                            <div class="text-center">
+                                                <label for="sel1">' . $lang['uiSettingCopyIFTTT'] . '</label><br>
+                                                <button id="sayURL" class="copyInput btn btn-raised btn-primary btn-70" type="button"><i class="material-icons colorItem">message</i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-4">
+                                    <div class="appContainer card h-100">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Notifications</h4>
+                                            <div class="form-group bmd-form-group">
+                                                <label class="appLabel" for="broadcastList">' . $lang['uiSettingBroadcastDevice'] . '</label>
+                                                <select class="form-control custom-select deviceList" id="broadcastList" title="' . $lang["uiSettingBroadcastDeviceHint"] . '">
+                                                </select>
+                                            </div>
+                                            <div class="form-group center-group">
+                                                <label for="appt-time">Start:</label>
+                                                <input type="time" id="quietStart" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
+                                                <label for="appt-time">Stop:</label>
+                                                <input type="time" id="quietStop" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
+                                            </div>
+                                            <div class="fetchNotify">
+                                                <button id="copyBroadcast" class="hookLnk btn btn-raised btn-warn btn-100" title="Copy WebHook Notification URL">
+                                                    <i class="material-icons colorItem">assignment</i>
+                                                </button>
+                                                <button id="testBroadcast" value="broadcast" class="testInput btn btn-info btn-raised btn-100" title="Test WebHook Notification">
+                                                    <i class="material-icons colorItem">send</i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-4">
+                                    <div class="appContainer card h-100">
+                                        <div class="card-body">
+                                            <h4 class="card-title">' . $lang['uiSettingHookLabel'] . '</h4>
+                                            <div class="togglebutton">
+                                                <label for="hook" class="appLabel checkLabel">' . $lang['uiSettingEnable'] . '
+                                                    <input id="hook" type="checkbox" data-app="hook" class="appInput appToggle"/>
+                                                    <span class="toggle"></span>
+                                                </label>
+                                            </div>
+                                            <div class="form-group bmd-form-group" id="hookGroup">
+                                                <div class="togglebutton">
+                                                    <label for="hookSplit" class="appLabel checkLabel">' . $lang['uiSettingSeparateHookUrl'] . '
+                                                        <input id="hookSplit" type="checkbox" class="appInput appToggle"/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="form-group bmd-form-group">
+                                                    <label for="hookUrl" class="appLabel">' . $lang['uiSettingHookUrlGeneral'] . '
+                                                        <input id="hookUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookUrl"] . '"/>
+                                                        <span class="bmd-help">' . $lang['uiSettingHookPlayHint'] . '</span>
+                                                    </label>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="hookPlay" class="appLabel checkLabel">' . $lang['uiSettingHookPlayback'] . '
+                                                        <input id="hookPlay" type="checkbox" data-app="hookPlay" class="appInput appToggle"/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="hookLabel" id="hookPlayGroup">
+                                                    <div class="form-group urlGroup hookSplitGroup">
+                                                        <label for="hookPlayUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
+                                                            <input id="hookPlayUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookPlayUrl"] . '"/>
+                                                            <span class="bmd-help">' . $lang['uiSettingHookPlayHint'] . '</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="hookPause" class="appLabel checkLabel">' . $lang['uiSettingHookPause'] . '
+                                                        <input id="hookPause" type="checkbox" data-app="hookPause" class="appInput appToggle"/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="hookLabel" id="hookPauseGroup">
+                                                    <div class="form-group urlGroup hookSplitGroup">
+                                                        <label for="hookPauseUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
+                                                            <input id="hookPauseUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookPauseUrl"] . '"/>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="hookStop" class="appLabel checkLabel">' . $lang['uiSettingHookStop'] . '
+                                                        <input id="hookStop" type="checkbox" data-app="hookStop" class="appInput appToggle">
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="hookLabel" id="hookStopGroup">
+                                                    <div class="form-group urlGroup hookSplitGroup">
+                                                        <label for="hookStopUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
+                                                            <input id="hookStopUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookStopUrl"] . '"/>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="hookFetch" class="appLabel checkLabel">' . $lang['uiSettingHookFetch'] . '
+                                                        <input id="hookFetch" type="checkbox" class="appInput appToggle hookToggle"/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="hookLabel" id="hookFetchGroup">
+                                                    <div class="form-group urlGroup hookSplitGroup">
+                                                        <label for="hookFetchUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
+                                                            <input id="hookFetchUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookFetchUrl"] . '"/>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="togglebutton">
+                                                    <label for="hookCustom" class="appLabel checkLabel">' . $lang['uiSettingHookCustom'] . '
+                                                        <input id="hookCustom" type="checkbox" data-app="hookCustom" class="appInput appToggle"/>
+                                                        <span class="toggle"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="form-group hookSplitGroup">
+                                                    <div class="hookLabel" id="hookCustomGroup">
+                                                        <label for="hookCustomUrl" class="appLabel">' . $lang['uiSettingHookGeneric'] . '
+                                                            <input id="hookCustomUrl" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomUrl"] . '"/>
+                                                        </label>
+                                                    </div>
+                                                    <label for="hookCustomPhrase" class="appLabel">' . $lang['uiSettingHookCustomPhrase'] . '
+                                                        <input id="hookCustomPhrase" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomPhrase"] . '"/>
+                                                    </label>
+                                                    <label for="hookCustomReply" class="appLabel">' . $lang['uiSettingHookCustomResponse'] . '
+                                                        <input id="hookCustomReply" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomReply"] . '"/>
+                                                    </label>
+                                                </div>
+                                                <div class="text-center">
+                                                    <div class="form-group btn-group">
+                                                        <button value="Webhooks" class="testInput btn btn-raised btn-info" type="button">' . $lang['uiSettingBtnTest'] . '</button>
+                                                        <button id="resetCouch" value="Webhooks" class="resetInput btn btn-raised btn-danger btn-100" type="button">' . $lang['uiSettingBtnReset'] . '</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>	                    
 	                </div>';
 
 	$content2 = '
-			<div id="ghostDiv"></div>
-					
+
+            <div id="ghostDiv" class="modal-backdrop fade"></div>
+			
 			<div class="modals">
+			    
+			    <div id="sideMenu" class="offcanvas-collapse">
+                    <div id="sideMenu-content" data-simplebar="init">
+                        <div class="userWrap media">
+                            <img class="avatar mr-3" src="' . $user['plexAvatar'] . '"/>
+                            <div class="media-body">
+                                <span class="userHeader">' . ucfirst($user['plexUserName']) . '</span>
+                                <br>
+                                <span class="userEmail">' . $user['plexEmail'] . '</span>
+                            </div>
+                        </div>
+                        <div class="drawer-item btn active" data-link="homeTab" data-label="Home" id="homeBtn">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
+                            <div class="btn btn-sm ml-auto" id="homeEditBtn" data-toggle="button">
+                                <i class="material-icons colorItem">edit</i>
+                            </div>
+                        </div>
+                        <div class="drawer-item btn" data-link="expandDrawer" data-target="ClientDrawer" id="clientBtn">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
+                        </div>
+                        <div class="drawer-list collapsed" id="ClientDrawer">
+                            <div class="drawer-item btn" data-link="rescan">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
+                            </div>
+                        </div>
+                        <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
+                        </div>
+                        <div class="drawer-separator"></div>
+                        <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
+                        </div>
+                        <div class="drawer-list collapsed" id="AppzDrawer">
+                        </div>
+                        <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
+                        </div>
+                        <div class="drawer-list collapsed" id="StatsDrawer">
+                            <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
+                            </div>
+                            <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
+                            </div>
+                            <div class="drawer-item btn" data-link="userStats" data-target="Stats">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
+                            </div>
+                            <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
+                            </div>
+                        </div>
+                        <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
+                        </div>
+                        
+                        <div class="drawer-list collapsed" id="SettingsDrawer">
+                            <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
+                            </div>
+                            <div class="drawer-item btn" data-link="customSettingsTab" data-label="Customize">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">view_quilt</i></span>Customize
+                            </div>
+                            ' . $masterBtn . '
+                            <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
+                            </div>
+                            <div class="drawer-item btn" data-link="fetcherSettingsTab" data-label="Fetchers">
+                                <span class="barBtn"><i class="material-icons colorItem barIcon">cloud_download</i></span>Fetchers
+                            </div>
+                        </div>
+                        <div class="drawer-separator"></div>
+                        <div class="drawer-item btn" data-link="logTab" data-label="Logs">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
+                        </div>
+                        <div class="drawer-item btn" id="logout">
+                            <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
+                        </div>   
+                    </div>
+                </div>
+            
 				<div class="nowPlayingFooter">
 					<div class="coverImage">
 						<img class="statusImage card-1" src=""/>
@@ -512,6 +603,7 @@ function deferredContent($user, $type = 'sections') {
 						</div>
 					</div>
 				</div>
+				
 				<div class="modal fade" id="jsonModal">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
@@ -527,7 +619,8 @@ function deferredContent($user, $type = 'sections') {
 							<button class="btnAdd" title="Copy JSON to clipboard">Copy JSON</button></div>
 						</div>
 					</div>
-				</div>			
+				</div>
+						
 				<div class="modal" id="cardModal">
 					<div class="row justify-content-center" role="document" id="cardModalBody">
 						<div id="cardWrap" class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
@@ -535,6 +628,7 @@ function deferredContent($user, $type = 'sections') {
 						</div>
 					</div>
 				</div>
+				
 				<div class="progress-circular hidden">
 					<div class="progress-circular-wrapper">
 						<div class="progress-circular-inner">
@@ -548,94 +642,7 @@ function deferredContent($user, $type = 'sections') {
 						</div>
 					</div>
 				</div>
-				<div id="plexClient">
-				    <div class="popover-arrow"></div>
-					<div id="clientWrapper">
-	                    <a class="dropdown-item client-item" data-id="rescan"><b>rescan devices</b></a>
-	                </div>
-	            </div>
-	            <div id="sideMenu">
-						<div id="sideMenu-content">
-							<div class="drawer-header container">
-				                <div class="userWrap row justify-content-around">
-				                    <div class="col-3">
-				                        <img class="avatar" src="' . $user['plexAvatar'] . '"/>
-				                    </div>
-				                    <div class="col-9">
-					                    <p class="userHeader">' . ucfirst($user['plexUserName']) . '</p>
-					                    <p class="userEmail">' . $user['plexEmail'] . '</p>
-				                    </div>
-			                    </div>
-		                    </div>
-			                <div class="drawer-item btn active" data-link="homeTab" data-label="Home" id="homeBtn">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">home</i></span>Home
-			                    <div class="btn btn-icon" id="homeEditBtn" data-toggle="button">
-			                        <i class="material-icons colorItem barIcon">edit</i>
-								</div>
-			                </div>
-			                <div class="drawer-item btn" data-link="expandDrawer" data-target="ClientDrawer" id="clientBtn">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">cast</i></span>Clients
-			                </div>
-			                <div class="drawer-list collapsed" id="ClientDrawer">
-				                <div class="drawer-item btn" data-link="rescan">
-				                    <span class="barBtn"><i class="material-icons colorItem barIcon">refresh</i></span>Rescan Devices
-				                </div>
-			                </div>
-			                <div class="drawer-item btn" data-link="voiceTab" data-label="Voice">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">list</i></span>Commands
-			                </div>
-			                <div class="drawer-separator"></div>
-			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Appz">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">apps</i></span>Apps
-			                </div>
-			                <div class="drawer-list collapsed" id="AppzDrawer">
-			                </div>
-			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Stats">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">show_chart</i></span>Stats
-			                </div>
-			                <div class="drawer-list collapsed" id="StatsDrawer">
-				                <div class="drawer-item btn" id="recent" data-link="recentStats" data-label="Recents">
-				                    <span class="barBtn"><i class="material-icons colorItem barIcon">watch_later</i></span>Recent
-				                </div>
-				                <div class="drawer-item btn" data-link="popularStats" data-target="Stats">
-				                    <span class="barBtn"><i class="material-icons colorItem barIcon">grade</i></span>Popular
-				                </div>
-				                <div class="drawer-item btn" data-link="userStats" data-target="Stats">
-				                    <span class="barBtn"><i class="material-icons colorItem barIcon">account_circle</i></span>User
-				                </div>
-				                <div class="drawer-item btn" data-link="lbraryStats" data-target="Stats">
-				                    <span class="barBtn"><i class="material-icons colorItem barIcon">local_library</i></span>Library
-				                </div>
-							</div>
-			                <div class="drawer-item btn" data-link="expandDrawer" data-target="Settings">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">settings</i></span>Settings
-			                </div>
-			                
-			                <div class="drawer-list collapsed" id="SettingsDrawer">
-			                    <div class="drawer-item btn" data-link="generalSettingsTab" data-label="General">
-			                        <span class="barBtn"><i class="material-icons colorItem barIcon">build</i></span>General
-			                    </div>
-		                        <div class="drawer-item btn" data-link="customSettingsTab" data-label="Customize">
-			                        <span class="barBtn"><i class="material-icons colorItem barIcon">view_quilt</i></span>Customize
-			                    </div>
-			                    ' . $masterBtn . '
-			                    <div class="drawer-item btn" data-link="plexSettingsTab" data-label="Plex">
-			                        <span class="barBtn"><i class="material-icons colorItem barIcon">label_important</i></span>Plex
-			                    </div>
-			                    <div class="drawer-item btn" data-link="fetcherSettingsTab" data-label="Fetchers">
-									<span class="barBtn"><i class="material-icons colorItem barIcon">cloud_download</i></span>Fetchers
-			                    </div>
-							</div>
-							<div class="drawer-separator"></div>
-							<div class="drawer-item btn" data-link="logTab" data-label="Logs">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">bug_report</i></span>Logs
-			                </div>
-							<div class="drawer-item btn" id="logout">
-			                    <span class="barBtn"><i class="material-icons colorItem barIcon">exit_to_app</i></span>Log Out
-			                </div>   
-						</div>
-					</div>
-	                
+				
             </div>
             
 			
@@ -679,66 +686,76 @@ function mainBody($defaults) {
 				</div>
 			</div>
 			
-			<div id="body" class="container">
+			<div id="body">
 				<!-- This needs to be loaded right away -->
-				<div id="topBar" class="row testGrp justify-content-between">
-					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="leftGrp">
-						<div class="row testGrp">
-							<div class="col-12 col-md-6 col-lg-4 center-block">
-								<div class="btn btn-sm navIcon center-block" id="hamburger">
-									<span class="material-icons colorItem">menu</span>
-								</div>
-							</div>
-							<div class="col-0 col-md-6 col-lg-4 center-block">
-								<div class="btn btn-sm navIcon center-block" id="refresh">
-									<span class="material-icons colorItem">refresh</span>
-								</div>
-							</div>
-							<div class="col"></div>
-						</div>
-					</div>
-					<div class="col-8 col-sm-10 col-md-9 col-lg-8 wrapper">
-						<div class="searchWrap" id="queryCard">
-				            <div class="query">
-				            	<div class="form-group bmd-form-group bmd-form-group" id="queryGroup">
+				
+                <nav id="topBar" class="navbar navbar-expand px-0 py-1 flex-row align-items-center fixed-top">
+                
+                    <div class="col-3 col-lg-2">
+                    
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <button type="button" class="navIcon btn nav-link p-2 m-0" data-toggle="offcanvas">
+                                    <i class="material-icons colorItem">menu</i>
+                                </button>
+                            </li>
+                            <li class="nav-item ml-2">
+                                <button type="button" id="refresh" class="navIcon btn nav-link p-2 m-0">
+                                    <i class="material-icons colorItem">refresh</i>
+                                </button>
+                            </li>
+                        </ul>
+                        
+                    </div>
+                    
+                    <div class="col-6 col-lg-8">
+                    
+                        <div class="searchWrap" id="queryCard">
+                            <div class="query">
+                                <div class="form-group bmd-form-group bmd-form-group-sm input-group p-0 m-0" id="queryGroup">
+                                    <div class="input-group-prepend">
+                                        <button type="button" id="sendBtn" class="navIcon btn nav-link p-2 m-0">
+                                            <i class="material-icons colorItem">message</i>
+                                        </button>
+                                    </div>
                                     <label for="commandTest" id="actionLabel" class="bmd-label-floating">' . $lang['uiGreetingDefault'] . '</label>
-                                    <input type="text" class="form-control" id="commandTest">
+                                    <input type="text" class="form-control form-control-sm" id="commandTest">
                                     <div class="load-barz colorBg" id="loadbar">
-										<div class="barz"></div>
-										<div class="barz colorBg"></div>
-										<div class="barz"></div>
-										<div class="barz"></div>
-									</div>
-			        				<div class="btn btn-sm navIcon sendBtn" id="sendBtn">
-            							<span class="material-icons colorItem">message</span>
-									</div>
+                                        <div class="barz"></div>
+                                        <div class="barz colorBg"></div>
+                                        <div class="barz"></div>
+                                        <div class="barz"></div>
+                                    </div>
                                 </div>
-					        </div>
-				        </div>
-					</div>
-					<div class="col-2 col-sm-1 col-md-1 col-lg-2" id="rightGrp">
-						<div class="row testGrp">
-							<div class="col-md-0 col-lg-8 col-xl-8">
-								<div id="sectionLabel" class="colorItem">
-									Home
-								</div>
-							</div>
-							<div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 center-block">
-								<div class="btn btn-sm navIcon clientBtn center-block" data-position="right" id="client">
-	            					<span class="material-icons colorItem">cast</span>
-	            					<div class="ddLabel"></div>
-            					</div>
-            					<div class="btn btn-sm navIcon sendBtn" id="smallSendBtn">
-            						<span class="material-icons colorItem">message</span>
-								</div>	
-							</div>
-						</div>
-					</div>
-				</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="col-3 col-lg-2 d-flex justify-content-between align-items-center">
+                    
+                        <div id="sectionLabel" class="colorItem">
+                            Home
+                        </div>
+                        
+                        <div class="btn-group d-none d-sm-inline-flex">
+                            <button type="button" id="client" class="navIcon btn nav-link p-2 m-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="material-icons colorItem">cast</i>
+                                <span class="ddLabel"></span>
+                            </button>
+                            <div id="clientWrapper" class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item client-item" data-id="rescan">Rescan Devices</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                </nav>
 				
 		        <div id="results">
-			        <div id="results-content" class="row">
-				        <div class="view-tab active" id="homeTab">
+			        <div id="results-content">
+				        <div class="view-tab container active" id="homeTab">
 				        	<div class="tableContainer" id="addContainer">
 								<div id="widgetList" class="widgetList grid-stack">
 				                </div>
@@ -752,8 +769,8 @@ function mainBody($defaults) {
 							</div>
 							<div id="widgetDeleteList grid-stack grid-stack-6">
 							</div>			
-							<div id="widgetFab" class="btn btn-fab-lg">
-			                    <span class="material-icons addIcon">add</span>
+							<div id="widgetFab" class="btn btn-fab">
+			                    <i class="material-icons addIcon">add</i>
 							</div>  
                         </div>
 					</div>

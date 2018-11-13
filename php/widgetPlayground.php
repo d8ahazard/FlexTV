@@ -41,15 +41,6 @@ scriptDefaults();
     <link rel="stylesheet" href="../css/font/font-muximux.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
     <link href="../css/lib/bootstrap-iconpicker.min.css" rel="stylesheet">
-    <style>
-        #widgetDemo {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
 
 </head>
 
