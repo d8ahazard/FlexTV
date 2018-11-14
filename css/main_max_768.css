@@ -6,7 +6,6 @@ input:focus {
 
 }
 
-
 select,
 textarea,
 input {
@@ -40,19 +39,6 @@ input {
 #client {
 	display: none;
 }
-
-#sendBtn {
-	display: none;
-}
-
-#smallSendBtn {
-	display: block;
-}
-
-#sideMenu {
-	max-width: 80%;
-}
-
 
 #clientBtn {
 	display: flex;

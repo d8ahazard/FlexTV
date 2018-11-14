@@ -436,7 +436,7 @@ function buildUiDeferred() {
     startBackgroundTimer();
     // Last but not least, make things fly around
     setTimeout(function () {
-        $('#results').css({"top": "64px", "max-height": "100%"});
+        $('#results').css({"top": "58px", "max-height": "100%"});
         $('.userWrap').show();
         $('.avatar').show();
     }, 1000);
@@ -616,7 +616,7 @@ function deviceHtml(type, deviceData) {
             var selected = ((device["Selected"]) ? ((type === 'Client' || type === 'ClientDrawer') ? " dd-selected" : " selected") : "");
 
             if (type === 'Client') {
-                string = "<a class='dropdown-item client-item" + selected + "' data-type='Client' data-id='" + id + "'>" + friendlyName + "</a>";
+                string = "<button class='dropdown-item client-item" + selected + "' data-type='Client' data-id='" + id + "'>" + friendlyName + "</button>";
             } else if (type ==='ClientDrawer') {
                 var iconType = "label_important";
                 if (device['Product'] === "Cast") iconType = "cast";
@@ -624,8 +624,8 @@ function deviceHtml(type, deviceData) {
                 if (device["Selected"]) {
                     $('#clientBtn').html(clientSpan);
                 } else {
-                    string = "<div class='drawer-item btn"+selected+"' data-link='client' data-id='" + id + "'>" +
-                        clientSpan + "</div>";
+                    string = "<span class='drawer-item btn"+selected+"' data-link='client' data-id='" + id + "'>" +
+                        clientSpan + "</span>";
                 }
             } else {
 
@@ -646,8 +646,8 @@ function deviceHtml(type, deviceData) {
     	output = "<option data-type='Broadcast' value='all'" + selected + ">ALL DEVICES</option>";
         output += tmp;
     } else {
-        if (type === 'Client') output += '<a class="dropdown-item client-item" data-id="rescan"><b>rescan devices</b></a>';
-        if (type === 'ClientDrawer') output += '<div class="drawer-item btn" data-link="client" data-id="rescan"><b>rescan devices</b></div>';
+        if (type === 'Client') output += '<div class="dropdown-divider"></div><button class="dropdown-item client-item" data-id="rescan">Rescan Devices</button>';
+        if (type === 'ClientDrawer') output += '<button class="drawer-item btn" data-link="client" data-id="rescan">Rescan Devices</button>';
     }
 	return output;
 }
@@ -751,9 +751,9 @@ function scaleElements() {
 	var winWidth = $(window).width();
 	var winHeight = $(window).height();
 	var commandTest = $('#actionLabel');
-	if (winWidth <= 340) commandTest.html(javaStrings[1]);
-	if ((winWidth >= 341) && (winWidth <= 400)) commandTest.html(javaStrings[1]);
-	if (winWidth >= 401) commandTest.html(javaStrings[0]);
+	if (winWidth <= 340) commandTest.html(javaStrings[0]);
+	if ((winWidth >= 341) && (winWidth <= 400)) commandTest.html(javaStrings[0]);
+	if (winWidth >= 401) commandTest.html(javaStrings[1]);
 	$('#logFrame').height(($(window).height()/3) * 2);
 }
 
@@ -909,14 +909,20 @@ function updateUi(data, firstLoad) {
 }
 
 function toggleDrawer(expandDrawer, element) {
+    var el = new SimpleBar(document.getElementById('sideMenu-content'));
     if (expandDrawer.hasClass("collapsed")) {
         element.addClass("opened");
         expandDrawer.removeClass("collapsed");
-        expandDrawer.slideDown(500);
+        expandDrawer.slideDown( 300, function() {
+            el.recalculate();
+        });
+
     } else {
         element.removeClass('opened');
         expandDrawer.addClass("collapsed");
-        expandDrawer.slideUp(500);
+        expandDrawer.slideUp( 300, function() {
+            el.recalculate();
+        });
     }
 }
 
@@ -924,7 +930,6 @@ function toggleClientList() {
     console.log("Toggling a client list?");
     var pc = $("#plexClient");
     if (!pc.hasClass('open')) {
-        $('#ghostDiv').show();
         setTimeout(function () {
             pc.addClass('open');
         }, 200);
@@ -932,7 +937,6 @@ function toggleClientList() {
         setTimeout(function () {
             pc.removeClass('open');
         }, 200);
-        $('#ghostDiv').hide();
     }
     $('#ClientDrawer').toggleClass('collapsed');
     pc.slideToggle();
@@ -944,7 +948,6 @@ function closeClientList() {
         pc.removeClass('open');
     }
     pc.slideUp();
-    $('#ghostDiv').hide();
 }
 
 function toggleGroups() {
@@ -1579,13 +1582,12 @@ function setListeners() {
     });
 
     $(document).on('click', '#ghostDiv', function() {
-        console.log("Ghost click...");
+        //console.log("Ghost click...");
         closeDrawer();
         closeClientList();
     });
 
-    $(document).on('click', "#hamburger", function () {
-        console.log("Hanga-burger...");
+    $('[data-toggle="offcanvas"]').on('click', function () {
         openDrawer();
     });
 
@@ -2194,7 +2196,7 @@ function addAppSetting(data) {
     var appColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
     var appIcon = 'muximux-' + ICON_ARRAY[Math.floor(Math.random() * ICON_ARRAY.length)];
     var appLabel = "Click me";
-    var appUrl = "http://localhost";
+    var appUrl = "";
     var appNewTab = false;
     if (data !== false) {
         appId = data['id'];
@@ -2217,25 +2219,25 @@ function addAppSetting(data) {
     var checked = (appNewTab) ? " active" : "";
     var pressed = (appNewTab) ? " aria-pressed='true'" : "";
     var container = $('' +
-    '<div class="col-10 col-lg-6">' +
+    '<div class="col-12 col-lg-6 mb-4">' +
         '<div class="appContainer card listCard" data-id="' + appId + '">' +
-            '<div class="custom-body">' +
+            '<div class="card-body">' +
                 '<div class="appHandle btn">' +
-                    '<span class="material-icons">drag_handle</span>' +
+                    '<i class="material-icons">drag_handle</i>' +
                 '</div>' +
                 '<div class="row">' +
-                    '<div class="col-auto">' +
-                        '<button class="btn btn-raised btn-icon appPicker" role="iconpicker" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"'+pressed+'></button>' +
+                    '<div class="col-2">' +
+                        '<button class="btn btn-icon p-2 m-0 appPicker" role="iconpicker" data-arrow-class="btn" data-selected-class="btn-raised" data-unselected-class="btn-secondary" data-iconset="muximux" data-icon="'+appIcon+'" data-id="' + appId + '"'+pressed+'></button>' +
                     '</div>' +
-                    '<div class="col-6">' +
-                        '<h4 class="card-title">' +
+                    '<div class="col-8 d-flex align-items-center">' +
+                        '<h4 class="card-title w-100 m-0">' +
                             '<span class="label label-default appSetter" data-for="appName'+appId+'"  data-id="' + appId + '" title="Click here to set the app display name.">'+appLabel+'</span>' +
-                            '<input value="" type="text" id="appName'+appId+'" name="textBox1"  data-id="' + appId + '" class="blur hidden" value="'+appLabel+'">' +
+                            '<input value="" type="text" id="appName'+appId+'" name="textBox1"  data-id="' + appId + '" class="blur hidden" value="'+appLabel+'" style="background-image: linear-gradient(to top, ' + appColor + ' 2px, rgba(156, 39, 176, 0) 2px), linear-gradient(to top, var(--theme-primary-inverse) 1px, rgba(210, 210, 210, 0) 1px)">' +
                         '</h4>' +
                     '</div>' +
-                    '<div class="col-auto ml-auto">' +
-                        '<div class="btn btn-color" data-for="appColor'+appId+'" data-id="' + appId + '" title="Select the application color.">' +
-                            '<span class="material-icons">colorize</span>' +
+                    '<div class="col-2 d-flex align-items-center justify-content-end">' +
+                        '<div class="btn btn-color p-2 m-0" data-for="appColor'+appId+'" data-id="' + appId + '" title="Select the application color.">' +
+                            '<i class="material-icons">colorize</i>' +
                         '</div>' +
                         '<input type="color" name="favcolor" list="colorList" value="'+appColor+'" id="appColor'+appId+'" data-id="'+appId+'" hidden>' +
                     '</div>' +
@@ -2244,16 +2246,16 @@ function addAppSetting(data) {
                     '<div class="col">' +
                         '<div class="input-group">' +
                             '<div class="input-group-prepend">' +
-                                '<span class="input-group-text">' +
+                                '<span class="input-group-text p-2">' +
                                     '<i class="material-icons linkIcon">link</i>' +
                                 '</span>' +
                             '</div>' +
-                            '<input type="text" class="form-control app-url" placeholder="Enter a URL" value="'+appUrl+'">' +
+                            '<input type="text" class="form-control app-url" data-id="\'+appId+\'" placeholder="Enter a URL" value="'+appUrl+'" style="background-image: linear-gradient(to top, ' + appColor + ' 2px, rgba(156, 39, 176, 0) 2px), linear-gradient(to top, var(--theme-primary-inverse) 1px, rgba(210, 210, 210, 0) 1px)">' +
                         '</div>' +
                     '</div>' +
-                    '<div class="col-auto ml-auto">' +
-                        '<div class="btn btn-newtab'+checked+'" data-toggle="button" data-for="appNewTab1" data-id="'+appId+'">' +
-                            '<span class="material-icons" title="Open app in a new tab.">open_in_new</span>' +
+                    '<div class="col-auto ml-auto d-flex align-items-center">' +
+                        '<div class="btn btn-newtab p-2 m-0'+checked+'" data-toggle="button" data-for="appNewTab1" data-id="'+appId+'">' +
+                            '<i class="material-icons" title="Open app in a new tab.">open_in_new</i>' +
                         '</div>' +
                         '<input type="checkbox" class="app-newtab" id="appNewTab1" data-id="'+appId+'" hidden'+checked+'>' +
                     '</div>' +
@@ -2617,14 +2619,14 @@ function clearLoadBar() {
 }
 
 function closeDrawer() {
-	$('#ghostDiv').hide();
-    $('#sideMenu').hide("slide", { direction: "left" }, 500);
+    $('#ghostDiv').addClass('fade');
+    $('.offcanvas-collapse').removeClass('open');
 
 }
 
 function openDrawer() {
-    $('#ghostDiv').show();
-    $('#sideMenu').show("slide", { direction: "left" }, 500);
+    $('#ghostDiv').removeClass('fade');
+    $('.offcanvas-collapse').addClass('open');
 }
 
 function setCookie(key, value, days) {
@@ -2654,8 +2656,9 @@ function colorItems(color, element) {
 		$(items[i]).attr('style', 'color: ' + color);
 	}
     $('.drawer-item').attr('style','');
-	element.attr('style', 'background-color: ' + color + " !important");
-    $('.dd-selected').attr('style', 'background-color: ' + color + " !important");
+	element.attr('style', 'background-color: ' + color + ' !important');
+	$('#commandTest').attr('style', 'background-image: linear-gradient(to top, ' + color + ' 2px, rgba(156, 39, 176, 0) 2px), linear-gradient(to top, var(--theme-primary-inverse) 1px, rgba(210, 210, 210, 0) 1px);');
+	$('.dd-selected').attr('style', 'background-color: ' + color + ' !important');
     $('.colorBg').attr('style','background-color: ' + color);
     $(':checkbox').each(function () {
         var label = $("label[for='" + $(this).attr('id') + "']");
