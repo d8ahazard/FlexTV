@@ -230,6 +230,28 @@
                     console.log('No update function defined for nowPlaying');
                     break;
 
+                case 'systemMonitor':
+                    var devOutput = "";
+                    if (window.hasOwnProperty(devices)) {
+                        var deviceList = JSON.parse(window['devices']);
+                        if (deviceList.hasOwnProperty('Server')) {
+                            var serverList = deviceList['Server'];
+                            $.each(serverList, function (key, device) {
+                                var id = device["Id"];
+                                var name = device["Name"];
+                                if (device['HasPlugin']) {
+                                    var selected = "";
+                                    if (device['Id'] === widgetData['target']) {
+                                        devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    var list = target.find('.serverList');
+                    list.html(devOutput);
+                    break;
+
                 case 'serverStatus':
                     console.log('No update function defined for serverStatus');
                     break;

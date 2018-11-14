@@ -186,7 +186,6 @@ class widgetStatusMonitor {
 					var color = dataSet['color'];
 					var color2 = shadeColor(color, -30);
 					var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
-					console.log('Motherfucker...');
 					target.attr('data-target', id);
 					target.attr('data-icon', icon);
 					target.attr('data-label', label);

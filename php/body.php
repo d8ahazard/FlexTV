@@ -766,5 +766,5 @@ function mainBody($defaults) {
 			';
 
 
-	return [$bodyText, $_SESSION['darkTheme']];
+	return $bodyText;
 }

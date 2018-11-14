@@ -619,10 +619,8 @@ function fetchUser($userData) {
 	} else {
 		$selector = ['plexEmail' => $userData['plexEmail']];
 	}
-	$keys = [
-		'plexUserName', 'plexEmail', 'apiToken', 'plexAvatar', 'plexPassUser', 'plexToken', 'apiToken', 'appLanguage'
-	];
-	$data = getPreference('userdata', $keys, false, $selector);
+
+	$data = getPreference('userdata', false, false, $selector, true);
 	return $data;
 }
 
@@ -758,7 +756,7 @@ function verifyApiToken($apiToken) {
 	if (trim($apiToken)) {
 		$keys = [
 			'plexUserName', 'plexEmail', 'apiToken', 'plexAvatar', 'plexPassUser', 'plexToken', 'apiToken',
-			'appLanguage'
+			'appLanguage', 'darkTheme'
 		];
 		$data = getPreference('userdata', $keys, false, ['apiToken' => $apiToken]);
 	}

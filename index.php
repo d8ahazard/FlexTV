@@ -51,31 +51,26 @@ foreach ($_GET as $key => $value) {
 		$code = $value;
 	}
 }
-$apiToken = $_SESSION['apiToken'] ?? false;
-$getToken =  $_GET['apiToken'] ?? false;
 $user = $token = false;
+$checkToken = $_GET['apiToken'] ?? $_SESSION['apiToken'] ?? false;
 $bodyData = "";
-if ($code || $apiToken || $getToken) {
+if ($code || $checkToken) {
 	$GLOBALS['login'] = false;
-	$result = false;
-	if (!$apiToken) $result = plexSignIn($code);
-	if ($getToken) $user = verifyApiToken($_GET['apiToken']);
-	if ($user) $token = $user['apiToken'] ?? false;
-	if ($token) $apiToken = $token;
-	if ($result || $apiToken) {
-		if ($result == "Not allowed.") {
-			$bodyData = showError();
-		} else {
-			define('LOGGED_IN', true);
-			require_once dirname(__FILE__) . '/php/body.php';
-			write_log("Making body!");
-			$defaults['token'] = $token;
-			$bodyData = mainBody($defaults);
-			$body = $bodyData[0];
-			$_SESSION['darkTheme'] = $bodyData[1];
-			$bodyData = $body;
-		}
-	}
+	if ($code) $user = plexSignIn($code);
+	if ($checkToken) $user = verifyApiToken($_GET['apiToken']);
+	if ($user) $apiToken = $user['apiToken'] ?? false;
+	if ($apiToken) {
+        write_log("USER: ".json_encode($user));
+        define('LOGGED_IN', true);
+        require_once dirname(__FILE__) . '/php/body.php';
+        $dt = $user['darkTheme'];
+        write_log($dt ? "DARK" : "Light");
+        $darkTheme = ($user['darkTheme'] ?? false) ? '<link href="css/darkTheme.css" rel="stylesheet">' .PHP_EOL : "";
+        write_log("Making body!");
+        $defaults['token'] = $token;
+        $body = mainBody($defaults);
+        $bodyData = $body;
+    }
 } else {
 	$bodyData = showLogin();
 }
@@ -148,7 +143,7 @@ function showError() {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Flex TV CSS Files-->
     <link href="./css/main.css" rel="stylesheet">
-    <?php if ($_SESSION['darkTheme'] ?? false) echo '<link href="css/darkTheme.css" rel="stylesheet">' .PHP_EOL ?>
+    <?php echo $darkTheme?>
     <link rel="stylesheet" media="(max-width: 576px)" href="css/main_max_576.css">
     <link rel="stylesheet" media="(max-width: 768px)" href="css/main_max_768.css">
     <link rel="stylesheet" media="(min-width: 768px)" href="css/main_min_768.css">
