@@ -139,7 +139,8 @@ function showError() {
 	<link rel="shortcut icon" href="./img/favicon.ico">
     <link rel="stylesheet" href="css/loadingAnimation.css">
     <!-- Material Kit/Bootstrap4 CSS, Material Icons-->
-    <link href="css/material-kit_custom.css?v=2.0.4" rel="stylesheet" />
+    <!-- <link href="css/material-kit_custom.css?v=2.0.4" rel="stylesheet" /> -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Flex TV CSS Files-->
     <link href="./css/main.css" rel="stylesheet">
@@ -151,6 +152,28 @@ function showError() {
     <link rel="stylesheet" media="(max-width: 992px)" href="css/main_max_992.css">
     <link rel="stylesheet" media="(min-width: 1200px)" href="css/main_min_1200.css">
     <link rel="stylesheet" href="./css/homeBase.css" id="deferred">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js" integrity="sha256-EPrkNjGEmCWyazb3A/Epj+W7Qm2pB9vnfXw+X6LImPM=" crossorigin="anonymous"></script>
+    <style type="text/css">
+        .pace {
+            -webkit-pointer-events: none;
+            pointer-events: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+        .pace-inactive {
+            display: none;
+        }
+        .pace .pace-progress {
+            background: var(--theme-accent);
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            right: 100%;
+            width: 100%;
+            height: 3px;
+        }
+    </style>
     <style>
         <?php echo widget::getMarkup('CSS') ?>
     </style>
@@ -165,6 +188,8 @@ function showError() {
         <link rel="stylesheet" href="css/font/font-muximux.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
         <link href="css/lib/bootstrap-iconpicker.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/css/bootstrap-select.min.css" integrity="sha256-q+3CS1i6GuPNz/JQk7dapdWXvii85xf7vecZx2QqsFI=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplebar/2.6.1/simplebar.min.css" integrity="sha256-K165qkCFzUrAZsklS/OSoifAwNqxWxJ/PbYEWYUSh0I=" crossorigin="anonymous" />
     </noscript>
 
 	<div class="backgrounds">
@@ -224,7 +249,7 @@ function showError() {
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
-    <script src="/js/widgets.js" type="text/javascript"></script>
+    <script src="js/widgets.js" type="text/javascript"></script>
 
     <!-- This is disabled until all the code works, then will be re-enabled
     <script type="text/javascript">
@@ -252,6 +277,10 @@ function showError() {
     <script defer type="text/javascript" src="js/lib/swiped.min.js"></script>
     <script src="https://rubaxa.github.io/Sortable/Sortable.js"></script>
     <script type="text/javascript" src="js/lib/cache-polyfill.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/js/bootstrap-select.min.js" integrity="sha256-APwNt/Yju1ZD+yBddFqLhJsk21FXdiNGUuISL4EkUs4=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplebar/2.6.1/simplebar.min.js" integrity="sha256-bpLJbsEBcYeYFpadgZfuNyDGy9/IWoOEFzuVgM9QrtE=" crossorigin="anonymous"></script>
 
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
 
