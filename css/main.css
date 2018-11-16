@@ -562,12 +562,17 @@ a:hover:not(#executeButton) {
     align-items: center;
     display: flex;
     height: 48px;
+    font-size: 18px;
     outline: none;
     color: var(--theme-primary-inverse) !important;
     text-transform: none !important;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
+}
+
+.drawer-item .barIcon, .colorItem {
+    font-size: 25px !important;
 }
 
 .navIcon {
@@ -984,6 +989,13 @@ p.card-subtitle {
 #clientWrapper.dropdown-menu-right {
     right: 0;
     left: auto;
+    top: 60px;
+}
+
+#clientWrapper button {
+    display: block;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 .dropdown-item {
@@ -2025,6 +2037,7 @@ span.toggle {
     left: 0;
     visibility: visible;
 }
+
 
 .card {
     margin-top: 0;

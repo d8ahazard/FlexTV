@@ -17,7 +17,6 @@
 !function($) {
     $.flexWidget = function(data, param) {
         if (data === 'addWidget' || data === 'initWidget' || data === 'updateWidget') {
-
                 if (data === 'initWidget') {
                     initWidget(param);
                 } else if (data === 'updateWidget') {
@@ -27,6 +26,9 @@
                 }
         } else if (data === 'initListeners') {
             initListeners(param);
+        } else if (data === 'refreshWidgets') {
+            console.log("Refreshing widgets.");
+            refreshWidgets();
         } else if (typeof data === "object") {
             initGrid(data);
             initListeners(data);
@@ -118,6 +120,12 @@
 
             $(window).on('click', '.widgetDelete', function() {
                 var parent = $(this).closest('.widgetCard');
+            });
+
+            // Set the value of the setting thinger to the widget data, refresh
+            $(window).on('change', '.widgetSetting', function() {
+                var parent = $(this).closest('.widgetCard');
+                console.log("Got a change for ", parent);
             });
 
             if (data.hasOwnProperty('main')) {
@@ -233,23 +241,47 @@
                 case 'systemMonitor':
                     var devOutput = "";
                     if (window.hasOwnProperty(devices)) {
+                        console.log("We have a device list.");
                         var deviceList = JSON.parse(window['devices']);
                         if (deviceList.hasOwnProperty('Server')) {
                             var serverList = deviceList['Server'];
+                            var i = 0;
+                            var widgetTarget = false;
+                            if (widgetData.hasOwnProperty('target')) {
+                                widgetTarget = widgetData['target'];
+                            }
                             $.each(serverList, function (key, device) {
+                                var selected = "";
+                                if (widgetTarget) {
+                                    if (widgetTarget = device['Id']) {
+                                        selected = " selected";
+                                    }
+                                } else {
+                                    if (i = 0) {
+                                        selected = " selected";
+                                    }
+                                }
                                 var id = device["Id"];
                                 var name = device["Name"];
                                 if (device['HasPlugin']) {
-                                    var selected = "";
-                                    if (device['Id'] === widgetData['target']) {
-                                        devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                    devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                    if (selected !== "") {
+                                        widgetData['target'] = id;
+                                        widgetData['uri'] = device['Uri'];
+                                        widgetData['token'] = device['Token'];
                                     }
                                 }
                             });
                         }
                     }
                     var list = target.find('.serverList');
+                    console.log("Setting serverList to " + devOutput, list);
                     list.html(devOutput);
+
+                    if (widgetData.hasOwnProperty('stats')) {
+                        var statData = widgetData['stats'];
+                        console.log("We have statData: ", statData);
+                    }
                     break;
 
                 case 'serverStatus':
@@ -267,8 +299,6 @@
                         widgetData['url'] = dataSet['url'];
                     }
 
-                    var icon = target.find('.service-icon');
-                    var title = target.find('.statTitle');
                     target.find('.service-icon').attr('class', 'service-icon ' + widgetData['icon']);
                     target.find('.statTitle').text(widgetData['label']);
                     console.log("Widget service status is " + widgetData['service-status']);
@@ -324,6 +354,38 @@
                     } else {
                         console.log("We need that ID.");
                     }
+                    break;
+
+                case 'systemMonitor':
+                    var devOutput = "";
+                    if (window.hasOwnProperty(devices)) {
+                        console.log("We have a device list.");
+                        var deviceList = JSON.parse(window['devices']);
+                        if (deviceList.hasOwnProperty('Server')) {
+                            var serverList = deviceList['Server'];
+                            var i = 0;
+                            $.each(serverList, function (key, device) {
+                                var selected = "";
+                                    if (i = 0) {
+                                        selected = " selected";
+                                    }
+                                var id = device["Id"];
+                                var name = device["Name"];
+                                if (device['HasPlugin']) {
+                                    devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                    if (selected !== "") {
+                                        widget.attr('data-target', id);
+                                        widget.attr('data-uri', device['Uri']);
+                                        widget.attr('data-token', device['Token']);
+                                    }
+                                }
+                                i++;
+                            });
+                        }
+                    }
+                    var list = widget.find('.serverList');
+                    console.log("Setting serverList to " + devOutput, list);
+                    list.html(devOutput);
                     break;
 
                 case 'statusMonitor':
@@ -399,6 +461,13 @@
                 default:
                     return false;
             }
+        }
+
+        function refreshWidgets() {
+            var widgetList = serialize();
+            $.each(widgetList, function(widget) {
+                updateWidget(widget);
+            });
         }
     }
 }( jQuery );

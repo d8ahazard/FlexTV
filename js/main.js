@@ -1379,6 +1379,7 @@ function mergeSections() {
 
     modals.last().append(modals.first().children());
     modals.first().remove();
+    $('.drawer-list.collapsed').hide();
 }
 
 function notify() {

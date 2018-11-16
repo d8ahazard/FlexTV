@@ -1,9 +1,9 @@
 <?php
 
-namespace digitalhigh\GitUpdate;
+namespace digitalhigh\gitUpdate;
 
 
-class GitUpdate
+class gitUpdate
 {
     protected $repository;
     protected $lastUpdate;
@@ -14,14 +14,27 @@ class GitUpdate
     public $revision;
 
     /**
-     * GitUpdate constructor.
-     * @param $repository
+     * git constructor.
      */
-    public function __construct($repository)
+    public function __construct()
     {
-        exec("gitUpdate", $lines);
-        $hasGit = (preg_match("/gitUpdate help/", implode(" ", $lines)));
-        if(basename($repository) === '.gitUpdate')
+    	$paths = dirname(__FILE__);
+		$repository = false;
+    	if (file_exists("$paths/.git")) {
+    		$repository = "$paths/.git";
+	    } else {
+    		$path = explode("/", $paths);
+    		while (count($path) && !$repository) {
+    			array_pop($path);
+    			$test = implode("/", $path) . "/.git";
+    			if (file_exists($test)) $repository = $test;
+		    }
+	    }
+		if (!$repository) return false;
+		write_log("Repository: $repository", "INFO", false, true);
+        exec("git", $lines);
+        $hasGit = (preg_match("/git help/", implode(" ", $lines)));
+        if(basename($repository) === '.git')
         {
             $repository = dirname($repository);
         }
@@ -30,7 +43,7 @@ class GitUpdate
 
         if($repository === FALSE || $hasGit === FALSE)
         {
-            $msg = $hasGit ? "No gitUpdate Binary Found." : "Directory specified is not a repository.";
+            $msg = $hasGit ? "No git Binary Found." : "Directory specified is not a repository.";
             write_log("$msg","ERROR");
             $this->hasGit = false;
             return false;
@@ -39,9 +52,9 @@ class GitUpdate
         $this->hasGit = true;
         $this->repository = realpath($path);
         $this->cwd = getcwd();
-        $this->revision = $this->gitExec('gitUpdate rev-parse HEAD');
+        $this->revision = $this->gitExec('git rev-parse HEAD');
         $this->branch = $this->getBranch();
-        $this->gitExec('gitUpdate config --global http.sslVerify false');
+        $this->gitExec('git config --global http.sslVerify false');
         return true;
     }
 
@@ -51,7 +64,7 @@ class GitUpdate
      */
     public function getBranch()
     {
-        $branch = $this->gitExec('gitUpdate branch -a',true);
+        $branch = $this->gitExec('git branch -a',true);
         if (is_array($branch)) foreach($branch as $line) {
             $values = explode (" ",$line);
             if ($values[0] == "*") {
@@ -68,10 +81,10 @@ class GitUpdate
      */
     public function checkMissing($limit=10)
     {
-        $this->gitExec("gitUpdate fetch");
+        $this->gitExec("git fetch");
         $refs = [];
         $branch = $this->branch;
-        $command = "gitUpdate log ..origin/$branch --oneline";
+        $command = "git log ..origin/$branch --oneline";
         exec($command, $lines);
         foreach($lines as $line) array_push($refs,explode(" ",$line)[0]);
         $commits = count($refs) ? $this->fetchCommits($refs,$limit) : [];
@@ -92,7 +105,7 @@ class GitUpdate
         foreach ($refs as $ref) {
             $ref = trim($ref);
             $commit = [];
-            $cmd = 'gitUpdate log '.$ref.' -1 --pretty=format:"shortHead==%hD/H*head==%HD/H*subject==%sD/H*body==%bD/H*author==%aND/H*date==%aD"';
+            $cmd = 'git log '.$ref.' -1 --pretty=format:"shortHead==%hD/H*head==%HD/H*subject==%sD/H*body==%bD/H*author==%aND/H*date==%aD"';
             $data = $this->gitExec($cmd);
             $lines = explode('D/H*',$data);
             foreach($lines as $pair) {
@@ -110,16 +123,16 @@ class GitUpdate
     public function update()
     {
         write_log("FUNCTION FIRED!!","INFO");
-        $result = $this->gitExec("gitUpdate pull",true);
+        $result = $this->gitExec("git pull",true);
         write_log("Install result: ".json_encode($result));
         $result = (preg_match("/updating/",strtolower(join(" ",$result))));
         if ($result) write_log("Update was successful!","ALERT"); else write_log("UPDATE FAILED.","ERROR");
-        $this->revision = $this->gitExec('gitUpdate rev-parse HEAD');
+        $this->revision = $this->gitExec('git rev-parse HEAD');
         return $result;
     }
 
     /**
-     * @param $cmd - The gitUpdate command to execute
+     * @param $cmd - The git command to execute
      * @param bool $allLines - Whether or not to return the last line, or all lines as an array
      * @return string | array - Return values from command. Format depends on $allLines
      */

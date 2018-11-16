@@ -51,16 +51,19 @@ foreach ($_GET as $key => $value) {
 		$code = $value;
 	}
 }
+
 $user = $token = false;
-$checkToken = $_GET['apiToken'] ?? $_SESSION['apiToken'] ?? false;
+$checkToken = $_SESSION['apiToken'] ?? $_GET['apiToken'] ?? false;
 $bodyData = "";
 if ($code || $checkToken) {
 	$GLOBALS['login'] = false;
 	if ($code) $user = plexSignIn($code);
-	if ($checkToken) $user = verifyApiToken($_GET['apiToken']);
+	if ($checkToken) {
+	    $user = verifyApiToken($checkToken);
+	}
 	if ($user) $apiToken = $user['apiToken'] ?? false;
 	if ($apiToken) {
-        write_log("USER: ".json_encode($user));
+	    write_log("USER: ".json_encode($user));
         define('LOGGED_IN', true);
         require_once dirname(__FILE__) . '/php/body.php';
         $dt = $user['darkTheme'];

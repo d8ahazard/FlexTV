@@ -755,7 +755,7 @@ function mainBody($defaults) {
 				
 		        <div id="results">
 			        <div id="results-content">
-				        <div class="view-tab container active" id="homeTab">
+				        <div class="view-tab container-fluid active" id="homeTab">
 				        	<div class="tableContainer" id="addContainer">
 								<div id="widgetList" class="widgetList grid-stack">
 				                </div>

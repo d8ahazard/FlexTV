@@ -149,7 +149,7 @@ function deletePreference($table, $selector) {
 function checkUpdate() {
 	if (isWebApp()) return false;
 	$updates = [];
-	$git = new GitUpdate(dirname(__FILE__) . "/../..");
+	$git = new GitUpdate();
 	if ($git->hasGit) {
 		$updates = $git->checkMissing();
 		$refs = $updates['refs'];
@@ -163,15 +163,15 @@ function checkUpdate() {
 }
 
 function checkRevision($short = false) {
-	write_log("Function fired!");
-	$git = new GitUpdate(dirname(__FILE__) . "/../..");
+	$git = new GitUpdate();
 	$revision = ($git->hasGit) ? $git->revision : false;
+	write_log("REVISION: $revision","INFO", false, true);
 	return ($short && $revision) ? substr($revision, 0, 7) : $revision;
 }
 
 function installUpdate() {
 	write_log("Function firsssed!!");
-	$git = new GitUpdate(dirname(__FILE__) . "/../..");
+	$git = new GitUpdate();
 	$result = [];
 	if ($git->hasGit) {
 		write_log("We have gitUpdate!");
@@ -763,10 +763,30 @@ function verifyApiToken($apiToken) {
 	if (!$data) {
 		write_log("ERROR, api token $apiToken not recognized, called by " . getCaller(), "ERROR");
 		dumpRequest();
+		sendLogout();
+	} else {
+		if (!session_started()) {
+			$ok = @session_start();
+			if (!$ok) {
+				write_log("REGENERATING SESSION ID.", "WARN", false, true, true);
+				session_regenerate_id(true);
+				session_start();
+			}
+			write_log("Starting session.","ALERT", false, true,true);
+		}
+		writeSessionArray($data);
 	}
 	return $data;
 }
 
+function sendLogout() {
+	write_log("Terminating session.","INFO",false,true,true);
+	header("Content-Type: application/json");
+	clearSession();
+	$result['dologout'] = true;
+	echo json_encode($result);
+	die();
+}
 
 function checkGit() {
 	if (isset($_SESSION['hasGit'])) {
@@ -933,7 +953,16 @@ function verifyPlexToken($token) {
 
 	if ($user) {
 		write_log("We have the user, should be setting token here...");
-		$_SESSION['apiToken'] = $user['apiToken'];
+		if (!session_started()) {
+			$ok = @session_start();
+			if (!$ok) {
+				write_log("REGENERATING SESSION ID.", "WARN", false, true, true);
+				session_regenerate_id(true);
+				session_start();
+			}
+			write_log("Starting session.","ALERT", false, true,true);
+		}
+		writeSessionArray($user);
 		write_log("Session token: " . $_SESSION['apiToken']);
 		updateUserPreferenceArray($userData);
 	}
