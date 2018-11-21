@@ -4085,8 +4085,9 @@ function buildTitle($item) {
 function buildSWCache() {
 	$jsFiles = getDirContents('./js/');
 	$cssFiles = getDirContents('./css/');
+	$imgFiles = getDirContents('./img/');
 
-	$files = array_merge($jsFiles, $cssFiles);
+	$files = array_merge($jsFiles, $cssFiles, $imgFiles);
 
 	foreach($files as &$file) {
 		$file = str_replace(dirname(__FILE__),".",$file);
