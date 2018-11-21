@@ -25,3 +25,4 @@ sftp-config.json
 *.db
 .idea/workspace.xml
 .idea/deployment.xml
+cacheItems.json

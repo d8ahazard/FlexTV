@@ -3,14 +3,13 @@ require_once dirname(__FILE__) . '/php/vendor/autoload.php';
 require_once dirname(__FILE__) . "/php/webApp.php";
 require_once dirname(__FILE__) . '/php/util.php';
 require_once dirname(__FILE__) . "/api.php";
-
 require_once dirname(__FILE__) . "/php/digitalhigh/widget/src/widget.php";
 
 use digitalhigh\widget\widget;
 
 write_log("-------NEW REQUEST RECEIVED-------", "ALERT");
 scriptDefaults();
-
+buildSWCache();
 $defaults = checkDefaults();
 if ($defaults['migrated'] ?? false) header("Refresh:0");
 $forceSSL = $defaults['forceSSL'] ?? false;
@@ -366,7 +365,6 @@ function showError() {
         if ($GLOBALS['login']) {
             echo '<script type="text/javascript" src="./js/login.js" async></script>';
         } else {
-            echo '<script type="text/javascript" src="js/homebase.js" async></script>';
             echo '<script src="js/utilities.js"></script>';
             echo '<script src="./js/main.js"></script>';
         }

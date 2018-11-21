@@ -1064,7 +1064,7 @@ function scrapeServers($serverArray) {
 		}
 	}
 
-	if ($hasPlugin && $version !== "1.1.105") {
+	if ($hasPlugin && $version <"1.1.105") {
 		write_log("No version number detected!");
 		$message = "Your cast plugin is out of date. Please install the latest version for proper functionality.";
 		$alert = [
@@ -4080,6 +4080,38 @@ function buildTitle($item) {
 			$string = $item['title'];
 	}
 	return $string;
+}
+
+function buildSWCache() {
+	$jsFiles = getDirContents('./js/');
+	$cssFiles = getDirContents('./css/');
+
+	$files = array_merge($jsFiles, $cssFiles);
+
+	foreach($files as &$file) {
+		$file = str_replace(dirname(__FILE__),".",$file);
+	}
+
+//	header("Content-Type: text/plain");
+//	echo join(", \n", $files);
+	file_put_contents("./cacheItems.json", json_encode($files));
+
+
+}
+
+function getDirContents($dir, &$results = array()){
+	$files = scandir($dir);
+
+	foreach($files as $key => $value){
+		$path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+		if(!is_dir($path)) {
+			$results[] = $path;
+		} else if($value != "." && $value != "..") {
+			getDirContents($path, $results);
+		}
+	}
+
+	return $results;
 }
 
 function buildWidgets($widgets) {
