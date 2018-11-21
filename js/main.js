@@ -2,7 +2,6 @@ var action = "play";
 var apiToken, appName, bgs, cv, dvr, token, resultDuration, logLevel, itemJSON,
 	weatherClass, city, state, scrollTimer, direction, progressSlider;
 
-var firstPoll = true;
 var firstLoad = true;
 
 var cleanLogs=true, couchEnabled=false, lidarrEnabled=false, ombiEnabled=false, sickEnabled=false, sonarrEnabled=false, radarrEnabled=false,
@@ -246,26 +245,25 @@ function parseData(data) {
                         break;
                     case "widgets":
                         console.log("ALT Data: ", data.widgets);
-                        loadWidgetContainers(data['widgets'], firstLoad);
+                        loadWidgetContainers(data['widgets']);
                         break;
                     case "apps":
                         loadAppContainers(dataItem);
                         break;
                     case "userData":
-                        // MERGE THESE TWO FUNCTIONS
-                        updateUi(data['userData'], firstLoad);
+                        updateUi(data['userData']);
                         break;
                     case "fetchers":
                         updateFetchers(dataItem);
                         break;
                     case "devices":
-                        updateDevices(dataItem, firstLoad);
+                        updateDevices(dataItem);
                         break;
                     case "playerStatus":
                         updatePlayerStatus(dataItem);
                         break;
                     case "commands":
-                        console.log("Data hab sum commands...");
+                        console.log("Data hab sum commands...", dataItem);
                         updateCommands(dataItem);
                         break;
 
@@ -445,16 +443,12 @@ function buildUiDeferred() {
 }
 
 function fetchDeferredElements() {
-
     $.get('./php/body.php?apiToken=' + apiToken + "&bodyType=sections", function (data) {
         console.log("Loaded deferred content.");
-        $('#results-content').append(data);
-        $.get('./php/body.php?apiToken=' + apiToken + "&bodyType=body", function (data) {
-            console.log("Loaded more deferred content.");
-            $('body').append(data);
-            mergeSections();
-            fetchData();
-        });
+        $('#results-content').append(data[0]);
+        $('body').append(data[1]);
+        mergeSections();
+        fetchData();
     });
 }
 
@@ -582,10 +576,10 @@ function drawerClick(element) {
                 var frame = $('#logFrame');
 
                 if (linkVal === 'logTab') {
-                    $('.load-barz').show();
+                    //$('.load-barz').show();
                     frame.attr('src',"log.php?noHeader=true&apiToken=" + apiToken);
                 } else {
-                    $('.load-barz').hide();
+                    //$('.load-barz').hide();
                     frame.attr('src',"");
                 }
         }
@@ -671,7 +665,7 @@ function doLogout() {
     window.location.href = "?logout";
 }
 
-function updateDevices(newDevices, firstScan) {
+function updateDevices(newDevices) {
 	$(".remove").remove();
 	var newString = JSON.stringify(newDevices);
 	if (newString !== devices) {
@@ -690,7 +684,7 @@ function updateDevices(newDevices, firstScan) {
         }
         if (newDevices.hasOwnProperty("Dvr")) {
             var dvrGroup = $('#dvrGroup');
-            if (firstScan) {
+            if (firstLoad) {
                 if (newDevices["Dvr"].length > 0) {
                     dvrGroup.show();
                 } else {
@@ -715,7 +709,7 @@ function updateDevice(type, id) {
             clientDiv.addClass('dd-selected');
             $('.ddLabel').html($('.dd-selected').text());
         } else {
-            $('#loadbar').show();
+            //$('#loadbar').show();
         }
     }
 
@@ -727,7 +721,7 @@ function updateDevice(type, id) {
         updateDevices(data, false);
         if (id === 'rescan') {
             $.snackbar({content: "Device rescan completed."});
-            $('#loadbar').hide();
+            //$('#loadbar').hide();
         }
 
     });
@@ -789,7 +783,7 @@ function shadeColor(col, amt) {
 
 
 
-function updateUi(data, firstLoad) {
+function updateUi(data) {
     console.log("Update UI fired.");
     var appItems = {
         ignore: ["plexUserName", "plexEmail", "plexAvatar", "plexPassUser", "lastScan", "appLanguage", "hasPlugin", "masterUser", "alertPlugin", "plexClientId", "plexServerId", "plexDvrId", "ombiUrl", "ombiAuth", "deviceId", "isWebApp", "deviceName", "revision", "updates","quietEnd"],
@@ -1092,61 +1086,61 @@ function updatePlayerStatus(data) {
 	}
 }
 
-function updateCommands(data, prepend) {
-	if (prepend) {
-		if (!prepend) {
-			$('#resultsInner').html("");
-		}
+function updateCommands(data) {
 
-		$.each(data, function (i, value) {
-			if (value === []) return true;
-			try {
-				var timeStamp = (value.hasOwnProperty('timeStamp') ? $.trim(value.timeStamp) : '');
-				itemJSON = value;
-				var mediaDiv;
-				// Build our card
-				var cardResult = buildCards(value, i);
-				mediaDiv = cardResult[0];
-				var bgImage = cardResult[1];
-				var style = bgImage ? "data-src='" + bgImage + "'" : "style='background-color:'";
-				var className = bgImage ? " filled" : "";
-				var outLine =
-					"<div class='resultDiv card col-xl-5 col-lg-5-5 col-md-12 noHeight"+className+"' id='" + timeStamp + "'>" +
-					'<button id="CARDCLOSE' + i + '" class="cardClose"><span class="material-icons">close</span></button>' +
-					mediaDiv +
-					"<div class='cardColors'>" +
-					"<div class='cardImg lazy' " + style + "></div>" +
-					"<div class='card-img-overlay'></div>" +
-				"</div>";
+    if (firstLoad) {
+        $('#resultsInner').html("");
+    }
+    for (var i in data) {
+        var value = data[i];
+        console.log("Looping commands.");
+        if (value === []) return true;
+        try {
+            var timeStamp = (value.hasOwnProperty('stamp') ? $.trim(value.stamp) : '');
+            itemJSON = value;
+            var mediaDiv;
+            // Build our card
+            var cardResult = buildCards(value, i);
+            mediaDiv = cardResult[0];
+            var bgImage = cardResult[1];
+            var style = bgImage ? "data-src='" + bgImage + "'" : "style='background-color:'";
+            var className = bgImage ? " filled" : "";
+            var outLine =
+                "<div class='resultDiv card col-xl-5 col-lg-5-5 col-md-12 noHeight"+className+"' id='" + timeStamp + "'>" +
+                '<button id="CARDCLOSE' + i + '" class="cardClose"><span class="material-icons">close</span></button>' +
+                mediaDiv +
+                "<div class='cardColors'>" +
+                "<div class='cardImg lazy' " + style + "></div>" +
+                "<div class='card-img-overlay'></div>" +
+            "</div>";
 
-				if (prepend) {
-					$('#resultsInner').prepend(outLine);
-					displayCardModal(outLine);
-				} else {
-					$('#resultsInner').append(outLine);
-				}
-                $('#loadbar').hide();
-				setTimeout(function(){
-					var nh = $('.noHeight');
-					nh.slideDown();
-					nh.css("display", "");
-					nh.removeClass('noHeight');
-				},700);
+            if (!firstPoll) {
+                $('#resultsInner').prepend(outLine);
+                displayCardModal(outLine);
+            } else {
+                $('#resultsInner').append(outLine);
+            }
+            //$('#loadbar').hide();
+            setTimeout(function(){
+                var nh = $('.noHeight');
+                nh.slideDown();
+                nh.css("display", "");
+                nh.removeClass('noHeight');
+            },700);
 
-				$('.lazy').Lazy();
-			} catch (e) {
-				console.error(e, e.stack);
-			}
+            $('.lazy').Lazy();
+        } catch (e) {
+            console.error(e, e.stack);
+        }
 
-			Swiped.init({
-				query: '.resultDiv',
-				left: 1000,
-				onOpen: function () {
-					$('#CARDCLOSE' + i).trigger('click');
-				}
-			});
-		});
-	}
+        Swiped.init({
+            query: '.resultDiv',
+            left: 1000,
+            onOpen: function () {
+                $('#CARDCLOSE' + i).trigger('click');
+            }
+        });
+    }
 }
 
 function scaleSlider() {
@@ -1163,6 +1157,7 @@ function scaleSlider() {
 }
 
 function displayCardModal(card) {
+    console.log("CardModal fired");
 	if ($('#voiceTab').hasClass('active')) {
 	} else {
 		var cardModal = $('#cardModal');
@@ -1561,6 +1556,18 @@ function setListeners() {
         userScrolled = true;
     });
 
+    $(document).on('click', '#results', function() {
+        if ($('#widgetFab').hasClass('open')) {
+            $('#widgetDrawer').slideToggle();
+        }
+    });
+
+    $(document).on('click', '#widgetList', function() {
+        if ($('#widgetFab').hasClass('open')) {
+            $('#widgetDrawer').slideToggle();
+        }
+    });
+
     $(document).on('click', '.JSONPop', function() {
         var jsonData = decodeURIComponent($(this).data('json'));
         jsonData = JSON.parse(jsonData);
@@ -1643,6 +1650,7 @@ function setListeners() {
 	});
 
     $(document).on( 'click', "#homeEditBtn", function() {
+        drawerClick($('#homeBtn'));
         var wf = $('#widgetFab');
         var wd = $('widgetDeleteList');
         wf.toggleClass("open");
@@ -1839,10 +1847,10 @@ function setListeners() {
             clickCount = 0;
             console.log("Reloading frame source.");
             var frame = "#" + $(this).data('Frame');
-            $('.load-barz').show();
+            //$('.load-barz').show();
             $(frame,window.parent.document).attr('src',$(frame,window.parent.document).attr('src'));
             $(frame).load(function() {
-                $('#loadbar').hide();
+                //$('#loadbar').hide();
             });
         }
 	});
@@ -1880,7 +1888,7 @@ function setListeners() {
 	$(document).on('click', '#refresh', function () {
 	    console.log("Refreshing tab.");
 	    var frame = $('.frameDiv.active').find('iframe');
-        $('.load-barz').show();
+        //$('.load-barz').show();
         $(frame,window.parent.document).attr('src',$(frame,window.parent.document).attr('src'));
         // #TODO: Add an animation to rotate the icon here.
     });
@@ -1910,18 +1918,18 @@ function setListeners() {
     });
 
     $(document).on( 'click', "#smallSendBtn", function () {
-        $('.load-barz').show();
+        //$('.load-barz').show();
         var command = $('#commandTest').val();
         if (command !== '') {
             command = command.replace(/ /g, "+");
             var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
             apiToken = $('#apiTokenData').data('token');
             waiting = true;
-            setTimeout(function()  {
-                clearLoadBar();
-            },10000);
+            // setTimeout(function()  {
+            //     clearLoadBar();
+            // },10000);
             $.get(url, function () {
-                $('#loadbar').hide();
+                //$('#loadbar').hide();
                 waiting = false;
             });
         }
@@ -2345,7 +2353,7 @@ function saveAppContainers() {
     });
 }
 
-function loadWidgetContainers(data, firstLoad) {
+function loadWidgetContainers(data) {
     loadingWidgets = true;
     console.log("Loading widget containers...", data);
     var action = 'updateWidget';
@@ -2590,8 +2598,8 @@ function updateFetchers(userData) {
 
 function sendCommand() {
     console.log("Send button click.");
-    $('.load-barz').show();
     var command = $('#commandTest').val();
+    console.log("Command is " + command);
     if (command !== '') {
         if (command === 'I am a golden god.') {
             buildCards('gg');
@@ -2599,25 +2607,20 @@ function sendCommand() {
         }
         command = command.replace(/ /g, "+");
         var url = 'api.php?say&web=true&command=' + command + '&apiToken=' + apiToken;
-        waiting = true;
-        setTimeout(function()  {
-            clearLoadBar();
-        },10000);
-        $.get(url, function (data) {
-            $('#loadBar').hide();
+        $.getJSON(url, function (data) {
             if (data.hasOwnProperty('commands')) {
                 console.log("Data has commands...USE IT.");
+                updateCommands([data['commands']])
             }
-            waiting = false;
         });
     }
 }
 
-function clearLoadBar() {
-	if (waiting) {
-		$('.load-barz').hide();
-	}
-}
+// function clearLoadBar() {
+// 	if (waiting) {
+// 		$('.load-barz').hide();
+// 	}
+// }
 
 function closeDrawer() {
     $('#ghostDiv').addClass('fade');

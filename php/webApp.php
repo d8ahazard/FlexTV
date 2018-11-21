@@ -619,8 +619,7 @@ function fetchUser($userData) {
 	} else {
 		$selector = ['plexEmail' => $userData['plexEmail']];
 	}
-
-	$data = getPreference('userdata', false, false, $selector, true);
+	$data = getPreference('userdata', false, false, $selector);
 	return $data;
 }
 

@@ -12,12 +12,12 @@ if (isset($_GET['apiToken']) && isset($_GET['bodyType'])) {
 	if (verifyApiToken($_GET['apiToken'])) {
 		$user = fetchUser(['apiToken' => $_GET['apiToken']]);
 		$type = $_GET['bodyType'] ?? 'sections';
-		header('Content-type: text/html');
-		echo deferredContent($user, $type);
+		header('Content-type: application/json');
+		echo json_encode(deferredContent($user));
 	}
 }
 
-function deferredContent($user, $type = 'sections') {
+function deferredContent($user) {
 
 	$masterUser = $usee['masterUser'] ?? false;
 	$lang = checkSetLanguage();
@@ -662,7 +662,7 @@ function deferredContent($user, $type = 'sections') {
 			    <option>#a7401c</option>
 			    <option>#b90900</option>
             </datalist>';
-	return ($type === 'sections') ? $content : $content2;
+	return [$content, $content2];
 }
 
 function mainBody($defaults) {
