@@ -136,6 +136,9 @@ class PHPTail {
 		        if (strpos($line,"[INFO]") !== false || strpos($line,"[php7:notice]") !== false) $level = "INFO";
 		        if (strpos($line,"[WARN]") !== false || strpos($line,"[php7:warn]") !== false) $level = "WARN";
                 if (strpos($line,"[ALERT]") !== false || strpos($line,"[php7:alert]") !== false) $level = "ALERT";
+		        if (strpos($line,"[PINK]") !== false || strpos($line,"[php7:pink]") !== false) $level = "PINK";
+		        if (strpos($line,"[GREEN]") !== false || strpos($line,"[php7:green]") !== false) $level = "GREEN";
+		        if (strpos($line,"[ORANGE]") !== false || strpos($line,"[php7:orange]") !== false) $level = "ORANGE";
 		        $og = urlencode($og);
 		        $substr = explode(": ",$line);
 		        try {
@@ -246,6 +249,23 @@ class PHPTail {
 .contents {
     margin-top: 30px;
 }
+
+.GREEN {
+    color: #000000;
+    background-color: #37ca00 !important;
+}
+
+.PINK {
+    color: #000000;
+    background-color: #ca008f !important;
+}
+
+.ORANGE {
+    color: #000000;
+    background-color: #ca4400 !important;
+}
+
+
 .WARN {
     color: #cecece;
 	background-color: #ca9000 !important;
