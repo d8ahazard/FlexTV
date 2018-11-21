@@ -484,7 +484,8 @@
                         ]
                     });
 
-                    widget.on('gsresizestop', function() {
+                    $(document).on('gsresizestop', widget, function() {
+                        console.log("REFLOW TRIGGERED.");
                        serverOverviewBars.reflow();
                     });
                     break;
