@@ -571,7 +571,7 @@ a:hover:not(#executeButton) {
     border-radius: 0;
 }
 
-.drawer-item .barIcon, .colorItem {
+.drawer-item .barIcon {
     font-size: 25px !important;
 }
 
@@ -1320,6 +1320,12 @@ pre.prettyprint {
     border-color: var(--theme-accent-dark) !important;
 }
 
+.btn-fab {
+    width: 56px !important;
+    height: 56px !important;
+    webkit-box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2)
+}
 
 .custom-select:focus {
     border-color: var(--theme-accent);
