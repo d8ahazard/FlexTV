@@ -12,10 +12,10 @@ class widgetSystemMonitor {
 	// Required values in order for other things to work
 	const required = ['uri','token'];
 	// Set these accordingly
-	const maxWidth = 3;
-	const maxHeight = 3;
-	const minWidth = 1;
-	const minHeight = 1;
+	const maxWidth = 6;
+	const maxHeight = 6;
+	const minWidth = 3;
+	const minHeight = 3;
 	const refreshInterval = 15;
 	const type = "systemMonitor";
 	/**
@@ -78,9 +78,9 @@ class widgetSystemMonitor {
 		// As odd as it may seem, this is where we set our "default" values for the widget.
 		// Auto-position will be turned off when the widget is created.
 		$attributes = [
-			'gs-x' => 7,
-			'gs-y' => 0,
-			'gs-width' =>3,
+			'gs-x' => 1,
+			'gs-y' => 1,
+			'gs-width' =>4,
 			'gs-height' => 3,
 			'type' => self::type,
 			'gs-min-width' => self::minWidth,
@@ -93,12 +93,10 @@ class widgetSystemMonitor {
 		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
 		$attributeString = join(" ", $attributeStrings);
 		return '
-		<div class="widgetCard card m-0 grid-stack-item '.self::type.'" '.$attributeString.'>
-			<div class="grid-stack-item-content">
-				<!-- Optional header to show buttons, drag handle, and a title -->
-				<h4 class="card-header d-flex justify-content-between align-items-center text-white px-3">
+		<div class="widgetCard card grid-stack-item '.self::type.'" '.$attributeString.'>
+			<h4 class="card-header d-flex justify-content-between align-items-center text-white px-3">
 					<span class="d-flex align-items-center">
-						<i class="material-icons dragHandle editItem">drag_indicator</i></span>Server Status
+						<i class="material-icons dragHandle editItem">drag_indicator</i></span>Server Overview
 					<span>
 						<button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<i class="material-icons">more_vert</i>
@@ -112,26 +110,17 @@ class widgetSystemMonitor {
 					</span>
 				</h4>
 				
-				<!-- Card body goes here -->
-				<div class="card-content">
-					<div class="canvas">
-						<div class="progress">
-	                        <div class="progress-bar cpu-progress" role="progressbar" style="width: 25%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">25%</div>
-						</div>
-						<div class="progress">
-	                        <div class="progress-bar memory-progress" role="progressbar" style="width: 25%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">25%</div>
-						</div>
-					</div>
+			<div class="card-body">
+				<div class="serverOverviewBars" style="width: 100%;height: 100%;"></div>
+			</div>
+		
+			<div class="card-settings">
+				<!-- Card setting markup goes here -->
+				<div class="form-group">
+					<label class="appLabel" for="serverList">Target</label>
+					<select class="form-control custom-select serverList statInput" data-for="target" title="Target">
+					</select>
 				</div>
-				
-				<div class="card-settings">
-                    <!-- Card setting markup goes here -->
-                    <div class="form-group">
-                        <label class="appLabel" for="serverList">Target</label>
-                        <select class="form-control custom-select serverList statInput" data-for="target" title="Target">
-                        </select>
-                    </div>
-	            </div>
 			</div>
 		</div>
 		';

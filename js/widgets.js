@@ -48,7 +48,8 @@
                 acceptWidgets: true,
                 animate: true,
                 float: true,
-                height: 10
+                height: 10,
+                handle: '.dragHandle'
             };
 
             if (data.hasOwnProperty('main')) {
@@ -86,7 +87,8 @@
 
                 var addOptions = {
                     cellHeight: 70,
-                    acceptWidgets: false
+                    acceptWidgets: false,
+                    handle: '.dragHandle'
                 };
 
                 wt.gridstack(addOptions);
@@ -386,6 +388,105 @@
                     var list = widget.find('.serverList');
                     console.log("Setting serverList to " + devOutput, list);
                     list.html(devOutput);
+                    var bars = widget.find('.serverOverviewBars');
+                    var serverOverviewBars = Highcharts.chart(bars[0], {
+                        chart: {
+                            type: 'bar',
+                            spacing: [0, 1, 0, 0]
+                        },
+                        title: {
+                            text: null
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        tooltip: {
+                            outside: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            max: 100,
+                            minTickInterval: 10,
+                            title: {
+                                text: null
+                            },
+                            labels: {
+                                formatter: function () {
+                                    return Math.abs(this.value) + '%';
+                                }
+                            }
+                        },
+                        plotOptions: {
+                            series: {
+                                borderWidth: 0
+                            },
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.percent}%'
+                                }
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'Used',
+                                data: [
+                                    {
+                                        name: 'CPU',
+                                        y: 32.74,
+                                        value: 32.74,
+                                        percent: 32.74,
+                                        color: '#3E9A99'
+                                    },
+                                    {
+                                        name: 'Memory',
+                                        y: 16.66,
+                                        value: 3000000000,
+                                        percent: 16.66,
+                                        color: '#83D973'
+                                    },
+                                    {
+                                        name: 'Network In',
+                                        y: 9,
+                                        value: 27000,
+                                        percent: 9,
+                                        color: '#DE5353'
+                                    },
+                                    {
+                                        name: 'Network Out',
+                                        y: 10,
+                                        value: 2000,
+                                        percent: 10,
+                                        color: '#DE5353'
+                                    },
+                                    {
+                                        name: 'Disk: Boot',
+                                        y: 80,
+                                        value: 88.78,
+                                        percent: 80,
+                                        color: '#FFE066'
+                                    },
+                                    {
+                                        name: 'Disk: Media',
+                                        y: 45,
+                                        value: 2528.2,
+                                        percent: 45,
+                                        color: '#FFE066'
+                                    }
+                                ]
+                            }
+                        ]
+                    });
+
+                    widget.on('gsresizestop', function() {
+                       serverOverviewBars.reflow();
+                    });
                     break;
 
                 case 'statusMonitor':
