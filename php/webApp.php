@@ -771,7 +771,6 @@ function verifyApiToken($apiToken) {
 				session_regenerate_id(true);
 				session_start();
 			}
-			write_log("Starting session.","ALERT", false, true,true);
 		}
 		writeSessionArray($data);
 	}
@@ -959,7 +958,6 @@ function verifyPlexToken($token) {
 				session_regenerate_id(true);
 				session_start();
 			}
-			write_log("Starting session.","ALERT", false, true,true);
 		}
 		writeSessionArray($user);
 		write_log("Session token: " . $_SESSION['apiToken']);
