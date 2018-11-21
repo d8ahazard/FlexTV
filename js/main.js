@@ -1114,7 +1114,7 @@ function updateCommands(data) {
                 "<div class='card-img-overlay'></div>" +
             "</div>";
 
-            if (!firstPoll) {
+            if (!firstLoad) {
                 $('#resultsInner').prepend(outLine);
                 displayCardModal(outLine);
             } else {
