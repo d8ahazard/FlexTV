@@ -232,6 +232,10 @@ class widget {
 				margin: 0;
 			}
 			
+			.widgetMenu {
+			    color: white;
+			}
+			
 			.dropdown-item {
 				width: 100%;
 				margin: 0;
@@ -245,6 +249,11 @@ class widget {
 			
 			.card-settings {
 				display: none;
+				position: relative;
+			}
+			
+			.form-group {
+				z-index: 8;
 			}
 		";
 

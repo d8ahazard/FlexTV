@@ -3,6 +3,7 @@ var apiToken, appName, bgs, cv, dvr, token, resultDuration, logLevel, itemJSON,
 	weatherClass, city, state, scrollTimer, direction, progressSlider;
 
 var firstLoad = true;
+var cmdLoad = true;
 
 var cleanLogs=true, couchEnabled=false, lidarrEnabled=false, ombiEnabled=false, sickEnabled=false, sonarrEnabled=false, radarrEnabled=false,
 	headphonesEnabled=false, watcherEnabled=false, delugeEnabled=false, downloadstationEnabled=false, sabnzbdEnabled=false, utorrentEnabled=false,
@@ -191,9 +192,8 @@ function fetchData() {
         $.getJSON(uri, function (data) {
             if (data !== null) {
                 parseData(data);
+                polling = false;
             }
-            polling = false;
-            firstLoad = false;
             dfd.resolve("Success");
         });
 
@@ -312,6 +312,8 @@ function parseData(data) {
     } else {
         $('#installUpdates').show();
     }
+
+    firstLoad = false;
 
     // And this
     $('.queryBtnGrp').removeClass('show');
@@ -1238,7 +1240,6 @@ function updatePlayerStatus(data) {
 			$('.wrapperArt').css('background-image', 'url(' + artPath + ')');
 			if ((!(footer.is(":visible"))) && (!(footer.hasClass('reHide')))) {
 				footer.slideDown(1000);
-
 				scaleSlider();
 				footer.addClass("playing");
 			}
@@ -1282,7 +1283,7 @@ function updateCommands(data) {
                 "<div class='card-img-overlay'></div>" +
             "</div>";
 
-            if (!firstLoad) {
+            if (!cmdLoad) {
                 $('#resultsInner').prepend(outLine);
                 displayCardModal(outLine);
             } else {
@@ -1309,6 +1310,8 @@ function updateCommands(data) {
             }
         });
     }
+    cmdLoad = false;
+    console.info("CmdLoad is ", cmdLoad);
 }
 
 function scaleSlider() {
@@ -1725,17 +1728,6 @@ function setListeners() {
     });
 
 
-    $(document).on('click', '#results', function() {
-        if ($('#widgetFab').hasClass('open')) {
-            $('#widgetDrawer').slideToggle();
-        }
-    });
-
-    $(document).on('click', '#widgetList', function() {
-        if ($('#widgetFab').hasClass('open')) {
-            $('#widgetDrawer').slideToggle();
-        }
-    });
 
     $(document).on('click', '.JSONPop', function() {
         var jsonData = decodeURIComponent($(this).data('json'));
@@ -1822,23 +1814,24 @@ function setListeners() {
         drawerClick($('#homeBtn'));
         var wf = $('#widgetFab');
         var wd = $('widgetDeleteList');
-        wf.toggleClass("open");
-        // var tableState = widgetTable.option("disabled");
-        // console.log("Setting widget table option to " + !tableState);
-        // widgetTable.option("disabled", !tableState);
+        var wl = $('#widgetList');
+        $(this).toggleClass("open");
         editingWidgets = !editingWidgets;
         wf.slideToggle();
         $('.editItem').toggle();
-        var grid = $('#widgetList').data('gridstack');
-        if (wf.hasClass('open')) {
+        var grid = wl.data('gridstack');
+        console.log("GRID: ", grid);
+        if ($(this).hasClass('open')) {
             grid.enable();
-            grid.resizable(this.container.children('.' + this.opts.itemClass), true);
-            $('#widgetDrawer').slideUp();
+            grid.enableResize(true, true);
+            grid.resizable('.grid-stack-item', true);
             wd.show();
         } else {
             grid.disable();
-            grid.resizable(this.container.children('.' + this.opts.itemClass), false);
+            grid.enableResize(false, true);
+            grid.resizable('.grid-stack-item', false);
             wd.hide();
+            $('#widgetDrawer').slideUp();
         }
 
 

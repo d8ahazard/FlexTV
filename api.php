@@ -4088,14 +4088,16 @@ function buildSWCache() {
 	$imgFiles = getDirContents('./img/');
 
 	$files = array_merge($jsFiles, $cssFiles, $imgFiles);
-
-	foreach($files as &$file) {
+	$files = array_merge($files, $imgFiles);
+	$out = [];
+	foreach($files as $file) {
 		$file = str_replace(dirname(__FILE__),".",$file);
+		if (!preg_match("/main.js/", $file)) array_push($out, $file);
 	}
 
 //	header("Content-Type: text/plain");
 //	echo join(", \n", $files);
-	file_put_contents("./cacheItems.json", json_encode($files));
+	file_put_contents("./cacheItems.js", "var cacheData = " . json_encode($out));
 
 
 }

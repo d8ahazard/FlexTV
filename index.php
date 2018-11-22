@@ -378,7 +378,7 @@ function showError() {
 	<script>
         var noWorker = true;
 		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('service-worker.js').then(function (registration) {
+            navigator.serviceWorker.register('./service-worker.js').then(function (registration) {
 				console.log("Service worker registered.");
 				noWorker = false;
 			}).catch(function (err) {

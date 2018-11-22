@@ -85,7 +85,7 @@ class widgetStatusMonitor {
 			'gs-min-height' => self::minHeight,
 			'gs-max-width' => self::maxWidth,
 			'gs-max-height' => self::maxHeight,
-			'gs-auto-position' => true
+			'gs-auto-position' => "1"
 		];
 		$attributeStrings = [];
 		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
@@ -98,7 +98,12 @@ class widgetStatusMonitor {
 						</div>
 						<div class="service-text p-3">
 							<div class="row">
+								
 								<div class="col">
+									<span class="d-flex align-items-center">
+										<i class="material-icons dragHandle editItem">drag_indicator</i></span>
+									<span>
+										
 									<h4 class="card-title text-white my-0 statTitle">No Services...</h4>
 								</div>
 								<div class="col d-flex align-items-center justify-content-end">
@@ -109,6 +114,7 @@ class widgetStatusMonitor {
 										
 										<span class="offline-indicator">Offline</span>
 										<svg class="svg-inline--fa fa-exclamation-circle fa-w-16 fa-fw offline-indicator" title="Service Offline" data-fa-transform="grow-3" aria-labelledby="svg-inline--fa-title-3" data-prefix="fas" data-icon="exclamation-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" style="transform-origin: 0.5em 0.5em;"><title id="svg-inline--fa-title-3">Tautulli Offline</title><g transform="translate(256 256)"><g transform="translate(0, 0)  scale(1.1875, 1.1875)  rotate(0 0 0)"><path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z" transform="translate(-256 -256)"></path></g></g></svg>
+										
 										<button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											<i class="material-icons">more_vert</i>
 										</button>
@@ -126,7 +132,7 @@ class widgetStatusMonitor {
 						<div class="card-settings">
 		                    <!-- Card setting markup goes here -->
 		                    <div class="form-group">
-                                <label class="appLabel" for="serverList">Target</label>
+                                <label for="serverList">Target</label>
                                 <select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
                                 </select>
                         	</div>
@@ -145,6 +151,22 @@ class widgetStatusMonitor {
 			    height: 100%;
 			    overflow: hidden;
 			}
+			
+			.service-text {
+			    padding: 20px !important;
+		    }
+		    
+		    .dragHandle {
+		        position: absolute;
+                left: -10px;
+                top: 2px;
+		    }
+		    
+		    .widgetMenu {
+			    position: absolute;
+			    right: -10px;
+			    top: 2px;
+		    }
 		
 			.service-icon {
 			    font-size: 100px;

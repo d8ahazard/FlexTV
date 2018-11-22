@@ -107,9 +107,6 @@
                 var parent = $(this).closest('.widgetCard');
                 parent.find('.card-settings').slideToggle();
                 parent.toggleClass('editCard');
-                var noResize = parent.hasClass('editCard');
-                parent.attr('data-gs-no-resize', noResize);
-                //parent.toggleClass('editCard ui-resizable-autohide');
                 if (! parent.hasClass('editCard')) {
                     $('.clickJack').show();
                 }
@@ -145,19 +142,16 @@
                 });
             }
 
-            if (data.hasOwnProperty('templates')) {
-                var drawer = data['templates'];
-                if (data.hasOwnProperty('list')) {
-                    $(document).on('click', data['list'], function () {
-                        $(drawer).slideUp();
-                    });
-                }
-
-                if (data.hasOwnProperty('main')) {
-                    $(document).on('click', data['main'], function () {
-                        $(drawer).slideUp();
-                    });
-                }
+            if (data.hasOwnProperty('drawer')) {
+                var drawer = $(data['drawer']);
+                $('#widgetList').on('click', function() {
+                    // Check for left button
+                    console.log("DOC CLICK.");
+                    if (drawer.is(':visible')) {
+                        console.log("Hiding");
+                        drawer.slideUp();
+                    }
+                });
             }
         }
 
@@ -192,10 +186,7 @@
                         var inputItem = '.' + type + key + "Input";
                         var inputTarget = clone.find(inputItem);
                         if (inputTarget.length) inputTarget.val(widget[key]);
-
                     }
-                    clone.attr('data-gs-auto-position', 0);
-                    clone.attr('data-gs-no-resize', 0);
 
                     result = true;
                     var id = false;
@@ -203,7 +194,8 @@
                     if (id === false) id = Math.floor((Math.random() * 100000) + 1000);
                     clone.attr('id',id);
                     clone.attr('data-gs-id',widget['gs-id']);
-                    clone.appendTo($('#widgetList'));
+                    //clone.appendTo($('#widgetList'));
+                    widgetList.addWidget(clone,widget['gs-x'], widget['gs-y'], widget['gs-width'], widget['gs-height'], 0, widget['gs-min-width'], widget['gs-max-width'], widget['gs-min-height'], widget['gs-max-height'], widget['gs-id']);
                     widgetList.makeWidget(clone);
                     initWidget($(id));
                 }
@@ -332,7 +324,7 @@
             console.log("ItemEL: ", widget);
             var type = widget.data('type');
             var targetId = widget.data('target');
-            widget.attr('data-gs-auto-position', 0);
+            widget.attr('data-gs-auto-position', "0");
             console.log("Type is " + type, "target is " + targetId);
             var id = Math.floor((Math.random() * 100000) + 1000);
             widget.attr('id', "widget" + id);
@@ -520,7 +512,7 @@
                         var label = dataSet['label'];
                         var url = dataSet['url'];
                         var color = dataSet['color'];
-                        var color2 = shadeColor(color, -30);
+                        var color2 = shadeColor(color, -100);
                         var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
                         widget.attr('data-target', id);
                         widget.attr('data-icon', icon);

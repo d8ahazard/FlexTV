@@ -26,3 +26,4 @@ sftp-config.json
 .idea/workspace.xml
 .idea/deployment.xml
 cacheItems.json
+cacheItems.js

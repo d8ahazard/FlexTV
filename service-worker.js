@@ -1,16 +1,11 @@
 importScripts('./js/lib/cache-polyfill.js');
-var request = new XMLHttpRequest();
+importScripts('./cacheItems.js');
 
-request.onload = addListeners;
-request.open("get", "datas.json", true);
-request.send();
-
-function addListeners(json) {
     self.addEventListener('install', function (e) {
         e.waitUntil(
             caches.open('phlex').then(function (cache) {
                 console.log("opening caches?");
-                return cache.addAll(json);
+                return cache.addAll(cacheData);
             })
         );
     });
@@ -24,7 +19,7 @@ function addListeners(json) {
         );
     });
 
-}
+
 function reload() {
 	fetchData(true);
 }
