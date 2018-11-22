@@ -68,82 +68,82 @@ function deferredContent($user) {
 
 	$masterBtn = $masterDiv = "";
 	write_log("DEFERRED STILL ALIVE", "ALERT", false, true);
-	if ($masterUser) {
-		$masterBtn = '
-		 			<div class="drawer-item btn" data-link="userSettingsTab" data-label="Users">
-                        <span class="barBtn"><i class="material-icons colorItem barIcon">people</i></span>Users
-                    </div>
-		';
-
-		$userData = getPreference('userdata', false, false, false, false);
-		$users = [];
-		$userDiv = "";
-		foreach ($userData as $user) {
-			array_push($users, $user);
-		}
-
-		if (count($users)) {
-			$headers = ["#", 'Name', 'Plex Email', 'Master User'];
-			$apps = ['ombi', 'couch', 'radarr', 'watcher', 'sonarr', 'sick', 'lidarr', 'headphones', 'deluge', 'downloadstation', 'nzbhydra'];
-			$headerStrings = [];
-			foreach ($headers as $header) $headerStrings[] = $header;
-			foreach ($apps as $header) $headerStrings[] = ucfirst($header);
-			$tableHeads = "";
-			foreach ($headerStrings as $title) {
-				$tableHeads .= "<th scope='col'>$title</th>" . PHP_EOL;
-			}
-
-			$userStrings = "";
-			$i = 1;
-			foreach ($users as $user) {
-				$values = "";
-				foreach ($headers as $header) {
-					$value = "";
-					foreach ($user as $key => $check) {
-						$lowKey = strtolower(str_replace(" ", "", $key));
-						$lowHead = strtolower(str_replace(" ", "", $header));
-						if ($lowKey === $lowHead) {
-							$value = $check;
-						}
-						if ($key === "Name") $value = $user['plexUserName'];
-					}
-					if ($header !== "#") $values .= "<td>$value</td>" . PHP_EOL;
-				}
-				$userString = '
-					<tr>
-						<th scope="row">' . $i . '</th>
-						' . $values . '
-					</tr>
-					';
-				$i++;
-				$userStrings .= $userString . PHP_EOL;
-			}
-
-			$userDiv = '
-			<table class="table-responsive">
-				<thead>
-					<tr>
-						' . $tableHeads . '
-					</tr>
-				</thead>
-				<tbody>
-					' . $userStrings . '
-				</tbody>
-			</table>
-			';
-		}
-
-		$masterDiv = '
-					<div class="view-tab settingPage container fade" id="userSettingsTab">
-						<div class="card">
-							<div class="form-group bmd-form-group" id="userGroup">
-								' . $userDiv . '
-							</div>
-						</div>
-					</div>
-			
-		';
-	}
+//	if ($masterUser) {
+//		$masterBtn = '
+//		 			<div class="drawer-item btn" data-link="userSettingsTab" data-label="Users">
+//                        <span class="barBtn"><i class="material-icons colorItem barIcon">people</i></span>Users
+//                    </div>
+//		';
+//
+//		$userData = getPreference('userdata', false, false, false, false);
+//		$users = [];
+//		$userDiv = "";
+//		foreach ($userData as $user) {
+//			array_push($users, $user);
+//		}
+//
+//		if (count($users)) {
+//			$headers = ["#", 'Name', 'Plex Email', 'Master User'];
+//			$apps = ['ombi', 'couch', 'radarr', 'watcher', 'sonarr', 'sick', 'lidarr', 'headphones', 'deluge', 'downloadstation', 'nzbhydra'];
+//			$headerStrings = [];
+//			foreach ($headers as $header) $headerStrings[] = $header;
+//			foreach ($apps as $header) $headerStrings[] = ucfirst($header);
+//			$tableHeads = "";
+//			foreach ($headerStrings as $title) {
+//				$tableHeads .= "<th scope='col'>$title</th>" . PHP_EOL;
+//			}
+//
+//			$userStrings = "";
+//			$i = 1;
+//			foreach ($users as $user) {
+//				$values = "";
+//				foreach ($headers as $header) {
+//					$value = "";
+//					foreach ($user as $key => $check) {
+//						$lowKey = strtolower(str_replace(" ", "", $key));
+//						$lowHead = strtolower(str_replace(" ", "", $header));
+//						if ($lowKey === $lowHead) {
+//							$value = $check;
+//						}
+//						if ($key === "Name") $value = $user['plexUserName'];
+//					}
+//					if ($header !== "#") $values .= "<td>$value</td>" . PHP_EOL;
+//				}
+//				$userString = '
+//					<tr>
+//						<th scope="row">' . $i . '</th>
+//						' . $values . '
+//					</tr>
+//					';
+//				$i++;
+//				$userStrings .= $userString . PHP_EOL;
+//			}
+//
+//			$userDiv = '
+//			<table class="table-responsive">
+//				<thead>
+//					<tr>
+//						' . $tableHeads . '
+//					</tr>
+//				</thead>
+//				<tbody>
+//					' . $userStrings . '
+//				</tbody>
+//			</table>
+//			';
+//		}
+//
+//		$masterDiv = '
+//					<div class="view-tab settingPage container fade" id="userSettingsTab">
+//						<div class="card">
+//							<div class="form-group bmd-form-group" id="userGroup">
+//								' . $userDiv . '
+//							</div>
+//						</div>
+//					</div>
+//
+//		';
+//	}
 
 	$content = '<div class="view-tab fade show active settingPage container" id="customSettingsTab">     
 	                        <div class="tableContainer">
