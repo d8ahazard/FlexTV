@@ -667,7 +667,7 @@ function deferredContent($user) {
             </datalist>';
 	write_log("Ready to return deferred...","ALERT", false, true);
 	$output = [$content, $content2];
-	write_log("OUTPUT: ".json_encode($output), "PINK", false, true);
+	//write_log("OUTPUT: ".json_encode($output), "PINK", false, true);
 	return $output;
 }
 
