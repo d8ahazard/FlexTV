@@ -4092,7 +4092,12 @@ function buildSWCache() {
 	$out = [];
 	foreach($files as $file) {
 		$file = str_replace(dirname(__FILE__),".",$file);
-		if (!preg_match("/main.js/", $file)) array_push($out, $file);
+		$ignore = ["main.js", ".placeholder", "Thumbs.db"];
+		$add = true;
+		foreach ($ignore as $check) {
+			if (preg_match("/$check/", $file)) $add = false;
+		}
+		if ($add) array_push($out, $file);
 	}
 
 //	header("Content-Type: text/plain");
