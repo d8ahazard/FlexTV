@@ -209,17 +209,6 @@
         function updateWidget(widgetData) {
             var widgetId = widgetData['gs-id'];
             var target = $('#widget' + widgetId);
-            target.bind("DOMSubtreeModified", function () {
-                console.log("Element readY??");
-            });
-            var checkCount = 0;
-            console.log("Targeting widget with ID of " + widgetId, target);
-            while(!target.length && checkCount < 20) {
-
-                console.log("NO ELEMENT, Re-checking...");
-                target = $('#widget' + widgetId);
-                checkCount++;
-            }
             var type = widgetData['type'];
 
 
@@ -234,40 +223,39 @@
 
                 case 'systemMonitor':
                     var devOutput = "";
-                    if (window.hasOwnProperty(devices)) {
-                        console.log("We have a device list.");
-                        var deviceList = JSON.parse(window['devices']);
-                        if (deviceList.hasOwnProperty('Server')) {
-                            var serverList = deviceList['Server'];
-                            var i = 0;
-                            var widgetTarget = false;
-                            if (widgetData.hasOwnProperty('target')) {
-                                widgetTarget = widgetData['target'];
-                            }
-                            $.each(serverList, function (key, device) {
-                                var selected = "";
-                                if (widgetTarget) {
-                                    if (widgetTarget = device['Id']) {
-                                        selected = " selected";
-                                    }
-                                } else {
-                                    if (i = 0) {
-                                        selected = " selected";
-                                    }
-                                }
-                                var id = device["Id"];
-                                var name = device["Name"];
-                                if (device['HasPlugin']) {
-                                    devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
-                                    if (selected !== "") {
-                                        widgetData['target'] = id;
-                                        widgetData['uri'] = device['Uri'];
-                                        widgetData['token'] = device['Token'];
-                                    }
-                                }
-                            });
+                    console.log("We have a device list.");
+                    var deviceList = devices;
+                    if (deviceList.hasOwnProperty('Server')) {
+                        var serverList = deviceList['Server'];
+                        var i = 0;
+                        var widgetTarget = false;
+                        if (widgetData.hasOwnProperty('target')) {
+                            widgetTarget = widgetData['target'];
                         }
+                        $.each(serverList, function (key, device) {
+                            var selected = "";
+                            if (widgetTarget) {
+                                if (widgetTarget = device['Id']) {
+                                    selected = " selected";
+                                }
+                            } else {
+                                if (i = 0) {
+                                    selected = " selected";
+                                }
+                            }
+                            var id = device["Id"];
+                            var name = device["Name"];
+                            if (device['HasPlugin']) {
+                                devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                if (selected !== "") {
+                                    widgetData['target'] = id;
+                                    widgetData['uri'] = device['Uri'];
+                                    widgetData['token'] = device['Token'];
+                                }
+                            }
+                        });
                     }
+
                     var list = target.find('.serverList');
                     console.log("Setting serverList to " + devOutput, list);
                     list.html(devOutput);
@@ -292,7 +280,6 @@
                         widgetData['color'] = dataSet['color'];
                         widgetData['url'] = dataSet['url'];
                     }
-
                     target.find('.service-icon').attr('class', 'service-icon ' + widgetData['icon']);
                     target.find('.statTitle').text(widgetData['label']);
                     console.log("Widget service status is " + widgetData['service-status']);
@@ -327,6 +314,9 @@
             widget.attr('data-gs-auto-position', "0");
             console.log("Type is " + type, "target is " + targetId);
             var id = Math.floor((Math.random() * 100000) + 1000);
+            if (widget.attr(id) !== undefined) {
+                id = widget.attr('id');
+            }
             widget.attr('id', "widget" + id);
             widget.attr('data-gs-id',id);
 
@@ -340,7 +330,6 @@
                     break;
 
                 case 'serverStatus':
-
                     console.log("Trying to add server status widget...");
                     if (window.hasOwnProperty('plexServerId')) {
                         console.log("We have a server ID.");
@@ -352,15 +341,15 @@
 
                 case 'systemMonitor':
                     var devOutput = "";
-                    if (window.hasOwnProperty(devices)) {
-                        console.log("We have a device list.");
-                        var deviceList = JSON.parse(window['devices']);
+                        console.log("We have a device list.", devices)  ;
+                        var deviceList = devices;
                         if (deviceList.hasOwnProperty('Server')) {
                             var serverList = deviceList['Server'];
                             var i = 0;
                             $.each(serverList, function (key, device) {
                                 var selected = "";
-                                    if (i = 0) {
+                                    if (i === 0) {
+                                        console.log("Selecting");
                                         selected = " selected";
                                     }
                                 var id = device["Id"];
@@ -368,6 +357,7 @@
                                 if (device['HasPlugin']) {
                                     devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
                                     if (selected !== "") {
+                                        console.log("Setting attributes...");
                                         widget.attr('data-target', id);
                                         widget.attr('data-uri', device['Uri']);
                                         widget.attr('data-token', device['Token']);
@@ -376,7 +366,7 @@
                                 i++;
                             });
                         }
-                    }
+
                     var list = widget.find('.serverList');
                     console.log("Setting serverList to " + devOutput, list);
                     list.html(devOutput);

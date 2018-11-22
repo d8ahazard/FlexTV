@@ -34,7 +34,7 @@ var widgetList;
 var addDrawerCount;
 
 var lastUpdate = [];
-var devices = "foo";
+var devices = {};
 var staticCount = 0;
 var javaStrings = [];
 
@@ -257,6 +257,7 @@ function parseData(data) {
                         updateFetchers(dataItem);
                         break;
                     case "devices":
+                        devices = dataItem;
                         updateDevices(dataItem);
                         break;
                     case "playerStatus":

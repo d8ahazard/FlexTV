@@ -30,12 +30,12 @@ class widgetSystemMonitor {
 			if (!isset($data[$key])) throw new widgetException("Missing required key $key");
 		}
 		$this->data = $data;
-		$this->data['service-status'] = $data['service-status'] ?? "offline";
 		$this->data['gs-max-width'] = self::maxWidth;
 		$this->data['gs-min-width'] = self::minWidth;
 		$this->data['gs-max-height'] = self::maxHeight;
 		$this->data['gs-min-height'] = self::minHeight;
 		$this->data['limit'] = $data['limit'] ?? 20;
+		write_log("WE HAVE VALUES.", "INFO", false, true);
 	}
 
 
@@ -48,24 +48,18 @@ class widgetSystemMonitor {
 			$this->data['lastUpdate'] = time();
 			// Do stuff here to update
 			$stats = $this->fetchSystemStats();
-			if ($stats) {
-				unset($stats['size']);
-				$stats['stamp'] = $now;
-				$data = $this->data['stats'] ?? [];
-				array_push($data,$stats);
-				$data = array_slice($data, 0, $this->data['limit']);
-				$this->data['stats'] = $data;
-			}
+			$this->data['stats'] = $stats;
 		}
 		return $this->serialize();
 	}
 
 	private function fetchSystemStats() {
-		$server = findDevice("Id", $this->data['target'], "Server");
-		$uri = $server['Uri'];
-		$token = $server['Token'];
+		write_log("WE ARE FETCHING STATS.", "PINK", false, true);
+		$uri = $this->data['uri'];
+		$token = $this->data['token'];
 		$url = "$uri/stats/system?X-Plex-Accept=json&X-Plex-Token=$token";
-		$data = new curlGet($url);
+		$data = curlGet($url, false, 10);
+		write_log("RAW RESULT from $url: ".json_encode($data), "ORANGE", false, true);
 		return $data['MediaContainer'] ?? false;
 	}
 

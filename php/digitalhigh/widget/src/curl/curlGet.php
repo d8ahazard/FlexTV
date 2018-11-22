@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: digitalhigh
- * Date: 11/13/2018
- * Time: 9:49 PM
- */
 
 namespace digitalhigh\widget\curl;
 
@@ -18,8 +12,10 @@ class curlGet {
 	 * @param bool $decode
 	 * @param bool $log
 	 */
+
+	public $result;
+
 	function __construct($url, $headers = false, $timeout = 4, $decode = true, $log = false) {
-		$cert = getCert();
 		if ($log) write_log("GET url $url", "INFO", "curlGet");
 		$url = filter_var($url, FILTER_SANITIZE_URL);
 		if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -31,7 +27,7 @@ class curlGet {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-		curl_setopt($ch, CURLOPT_CAINFO, $cert);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 		if ($headers) {
 			if (is_string($headers)) $headers = [$headers];
 			if (is_array($headers)) {
@@ -60,6 +56,7 @@ class curlGet {
 				if ($log) write_log("Curl result(RAW): " . json_encode($result));
 			}
 		}
+		$this->result = $result;
 		return $result;
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace digitalhigh\widget;
 
-$paths = ['template', 'exception'];
+$paths = ['template', 'exception', 'curl', 'parser'];
 foreach ($paths as $path) {
 	$items = array_slice(scandir(dirname(__FILE__) . "/$path"), 2);
 	foreach ($items as $item) {

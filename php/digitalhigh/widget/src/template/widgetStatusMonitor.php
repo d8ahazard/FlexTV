@@ -13,7 +13,7 @@ class widgetStatusMonitor {
 	// Set these accordingly
 	const maxWidth = 8;
 	const maxHeight = 3;
-	const minWidth = 2;
+	const minWidth = 3;
 	const minHeight = 1;
 	const refreshInterval = 5;
 	const type = "statusMonitor";
@@ -96,14 +96,13 @@ class widgetStatusMonitor {
 						<div class="service-icon-wrapper">
 							<i class="muximux-sonarr service-icon"></i>
 						</div>
+						<span class="d-flex align-items-center">
+							<i class="material-icons dragHandle editItem">drag_indicator</i></span>
+						<span>
+								
 						<div class="service-text p-3">
 							<div class="row">
-								
 								<div class="col">
-									<span class="d-flex align-items-center">
-										<i class="material-icons dragHandle editItem">drag_indicator</i></span>
-									<span>
-										
 									<h4 class="card-title text-white my-0 statTitle">No Services...</h4>
 								</div>
 								<div class="col d-flex align-items-center justify-content-end">
@@ -159,7 +158,7 @@ class widgetStatusMonitor {
 		    .dragHandle {
 		        position: absolute;
                 left: -10px;
-                top: 2px;
+                top: 21px;
 		    }
 		    
 		    .widgetMenu {
