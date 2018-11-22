@@ -23,7 +23,7 @@ function deferredContent($user) {
 	$lang = checkSetLanguage();
 	$defaults['lang'] = $lang;
 	$hide = $defaults['isWebApp'];
-
+	write_log("SENDING DEFERRED CONTENT.", "PINK", false, true);
 	$hidden = $hide ? " remove" : "";
 	$webAddress = serverAddress();
 	$apiToken = $user['apiToken'];
@@ -67,7 +67,7 @@ function deferredContent($user) {
 	}
 
 	$masterBtn = $masterDiv = "";
-
+	write_log("DEFERRED STILL ALIVE", "ALERT", false, true);
 	if ($masterUser) {
 		$masterBtn = '
 		 			<div class="drawer-item btn" data-link="userSettingsTab" data-label="Users">
@@ -662,6 +662,7 @@ function deferredContent($user) {
 			    <option>#a7401c</option>
 			    <option>#b90900</option>
             </datalist>';
+	write_log("Ready to return deferred...","ALERT", false, true);
 	return [$content, $content2];
 }
 
