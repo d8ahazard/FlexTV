@@ -27,3 +27,5 @@ sftp-config.json
 .idea/deployment.xml
 cacheItems.json
 cacheItems.js
+web.config
+cacheItems.js
