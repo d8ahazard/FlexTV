@@ -392,7 +392,7 @@ function getUiData($force = false) {
 	$devices = selectDevices(scanDevices(false));
 	$apps = fetchAppArray();
 	if ($force) {
-		$widgetData = updateWidgets();
+		$widgetData = fetchWidgetArray();
 		write_log("Sending forced data.","ALERT",false,true);
 		$lang = checkSetLanguage();
 		$result = [

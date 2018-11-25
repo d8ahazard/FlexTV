@@ -131,7 +131,7 @@
                 $(data['main']).on('added', function(evt, items) {
                     for (var i = 0; i < items.length; i++) {
                         var item = $(items[i]['el'][0]);
-                        initWidget(item);
+                        initWidget(item, false);
                     }
                 });
             }
@@ -144,14 +144,14 @@
 
             if (data.hasOwnProperty('drawer')) {
                 var drawer = $(data['drawer']);
-                $('#widgetList').on('click', function() {
-                    // Check for left button
-                    console.log("DOC CLICK.");
-                    if (drawer.is(':visible')) {
-                        console.log("Hiding");
-                        drawer.slideUp();
-                    }
-                });
+                // $('#widgetList').on('click', function() {
+                //     // Check for left button
+                //     console.log("DOC CLICK.");
+                //     if (drawer.is(':visible')) {
+                //         console.log("Hiding");
+                //         drawer.slideUp();
+                //     }
+                // });
             }
         }
 
@@ -194,10 +194,9 @@
                     if (id === false) id = Math.floor((Math.random() * 100000) + 1000);
                     clone.attr('id',id);
                     clone.attr('data-gs-id',widget['gs-id']);
-                    //clone.appendTo($('#widgetList'));
                     widgetList.addWidget(clone,widget['gs-x'], widget['gs-y'], widget['gs-width'], widget['gs-height'], 0, widget['gs-min-width'], widget['gs-max-width'], widget['gs-min-height'], widget['gs-max-height'], widget['gs-id']);
-                    widgetList.makeWidget(clone);
-                    initWidget($(id));
+                    console.log("About to init widget here: ", widget);
+                    initWidget($(id), widget);
                 }
             } else {
                 console.error("Widget data doesn't have a type...");
@@ -263,6 +262,16 @@
                     if (widgetData.hasOwnProperty('stats')) {
                         var statData = widgetData['stats'];
                         console.log("We have statData: ", statData);
+                        var barObj = target.find('.serverOverviewBars');
+                        console.log("BarObj: ", barObj);
+                        var bars = barObj.highcharts();
+                        var chartData = buildChart('systemMonitor', statData);
+                        var seriesData = chartData[0];
+                        var drillDownData = chartData[1]['series'];
+                        console.log("Setting series data: ", seriesData);
+                        bars.series[0].setData(seriesData[0]['data']);
+                        console.log("Setting drilldown data: ", drillDownData);
+                        bars.options.drilldown.series[0] = drillDownData;
                     }
                     break;
 
@@ -307,15 +316,16 @@
         }
 
         // Initialize a widget added to the grid via drag/drop
-        function initWidget(widget) {
-            console.log("ItemEL: ", widget);
+        function initWidget(widget, widgetData) {
+            console.log("ItemEL: ", widget, widgetData);
             var type = widget.data('type');
             var targetId = widget.data('target');
             widget.attr('data-gs-auto-position', "0");
             console.log("Type is " + type, "target is " + targetId);
             var id = Math.floor((Math.random() * 100000) + 1000);
-            if (widget.attr(id) !== undefined) {
-                id = widget.attr('id');
+            var checkId = widget.attr('id');
+            if (typeof checkId !== typeof undefined && checkId !== false) {
+                id = widget.attr('id').replace("widget", "");
             }
             widget.attr('id', "widget" + id);
             widget.attr('data-gs-id',id);
@@ -371,10 +381,14 @@
                     console.log("Setting serverList to " + devOutput, list);
                     list.html(devOutput);
                     var bars = widget.find('.serverOverviewBars');
-                    var serverOverviewBars = Highcharts.chart(bars[0], {
+                    var chartData = buildChart('systemMonitor', widgetData['stats']);
+                    console.log("Chart data from widgetData", widgetData, chartData);
+                    var seriesData = chartData[0];
+                    var drillDownData = chartData[1];
+
+                    var chartOpts = {
                         chart: {
-                            type: 'bar',
-                            spacing: [0, 1, 0, 0]
+                            type: 'bar'
                         },
                         title: {
                             text: null
@@ -394,7 +408,6 @@
                         yAxis: {
                             min: 0,
                             max: 100,
-                            minTickInterval: 10,
                             title: {
                                 text: null
                             },
@@ -415,56 +428,11 @@
                                 }
                             }
                         },
-                        series: [
-                            {
-                                name: 'Used',
-                                data: [
-                                    {
-                                        name: 'CPU',
-                                        y: 32.74,
-                                        value: 32.74,
-                                        percent: 32.74,
-                                        color: '#3E9A99'
-                                    },
-                                    {
-                                        name: 'Memory',
-                                        y: 16.66,
-                                        value: 3000000000,
-                                        percent: 16.66,
-                                        color: '#83D973'
-                                    },
-                                    {
-                                        name: 'Network In',
-                                        y: 9,
-                                        value: 27000,
-                                        percent: 9,
-                                        color: '#DE5353'
-                                    },
-                                    {
-                                        name: 'Network Out',
-                                        y: 10,
-                                        value: 2000,
-                                        percent: 10,
-                                        color: '#DE5353'
-                                    },
-                                    {
-                                        name: 'Disk: Boot',
-                                        y: 80,
-                                        value: 88.78,
-                                        percent: 80,
-                                        color: '#FFE066'
-                                    },
-                                    {
-                                        name: 'Disk: Media',
-                                        y: 45,
-                                        value: 2528.2,
-                                        percent: 45,
-                                        color: '#FFE066'
-                                    }
-                                ]
-                            }
-                        ]
-                    });
+                        series: seriesData,
+                        drilldown: drillDownData
+                    };
+                    console.log("Chart options: ", chartOpts);
+                    var serverOverviewBars = Highcharts.chart(bars[0], chartOpts);
 
                     $(document).on('gsresizestop', widget, function() {
                         console.log("REFLOW TRIGGERED.");
@@ -502,30 +470,28 @@
                         var label = dataSet['label'];
                         var url = dataSet['url'];
                         var color = dataSet['color'];
-                        var color2 = shadeColor(color, -100);
-                        var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
                         widget.attr('data-target', id);
                         widget.attr('data-icon', icon);
                         widget.attr('data-label', label);
                         widget.attr('data-color', color);
                         widget.attr('data-url', url);
-
                         widget.find('.service-icon').attr('class', 'service-icon ' + icon);
                         widget.find('.statTitle').text(label);
-                        widget.attr('style', colString);
                     }
-                    if (widget.attr('data-service-status') !== undefined) {
-                        if (widget.attr('data-service-status') === "online") {
-                            widget.find('.offline-indicator').hide();
-                            widget.find('.online-indicator').show();
-                        }
+                    var shade = -100;
+                    if (widget.attr('data-service-status') === "online") {
+                        widget.find('.offline-indicator').hide();
+                        widget.find('.online-indicator').show();
                     } else {
                         widget.attr('data-service-status', "offline");
                         widget.find('.offline-indicator').show();
                         widget.find('.online-indicator').hide();
-
+                        shade = 100;
                     }
+                    var color2 = shadeColor(color, shade);
+                    var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
 
+                    widget.attr('style', colString);
 
                     $(document).on('change', '.serviceList', function() {
                         console.log("Service list changed, we need to do some magic...");
@@ -552,6 +518,118 @@
             $.each(widgetList, function(widget) {
                 updateWidget(widget);
             });
+        }
+
+        function buildChart(chartType, widgetData) {
+            var seriesData = [];
+            var drillDownData = [];
+            if (chartType === 'systemMonitor') {
+                var cpuPct = 0;
+                var memPct = 0;
+                var netTxPct = 0;
+                var netRxPct = 0;
+                var hddPct = 0;
+                var nicTxArray = [];
+                var nicRxArray = [];
+                var nicName = "";
+                var hddName = "";
+                var hddArray = [];
+                if (widgetData) {
+                    cpuPct = widgetData['Cpu'][0]['cpu_pct_used'];
+                    memPct = widgetData["Mem"][0]['mem_pct_used'];
+                    netTxPct = widgetData['Net'][0]['Interface'][0]['net_tx_pct'];
+                    netRxPct = widgetData['Net'][0]['Interface'][0]['net_rx_pct'];
+                    nicName = widgetData['Net'][0]['Interface'][0]['nic_name'];
+                    hddPct = widgetData['Hdd'][0]['Disk'][0]['hdd_pct_used'];
+                    hddName = widgetData['Hdd'][0]['Disk'][0]['hdd_path'];
+                    var hddData = widgetData['Hdd'][0]['Disk'];
+                    $.each(hddData, function(key, data) {
+                        hddArray.push({
+                            name: data['hdd_name'],
+                            y: data['hdd_pct_used'],
+                            percent: data['hdd_pct_used']
+                        });
+                    });
+                    var netData = widgetData['Net'][0]['Interface'];
+                    $.each(netData, function(key, data) {
+                        nicRxArray.push({
+                            name: data['nic_name'],
+                            y: data['nic_rx_pct'],
+                            percent: data['nic_rx_pct']
+                        });
+                        nicTxArray.push({
+                            name: data['nic_name'],
+                            y: data['nic_tx_pct'],
+                            percent: data['nic_tx_pct']
+                        });
+                    });
+                }
+
+                var seriesSet = [
+                    {
+                        name: 'CPU',
+                        y: cpuPct,
+                        percent: cpuPct,
+                        color: '#3E9A99',
+                        drilldown: null
+                    },
+                    {
+                        name: 'Memory',
+                        y: memPct,
+                        percent: memPct,
+                        color: '#83D973',
+                        drilldown: null
+                    },
+                    {
+                        name: 'Tx - ' + nicName,
+                        y: netTxPct,
+                        percent: netRxPct,
+                        color: '#DE5353',
+                        drilldown: 'Network In'
+                    },
+                    {
+                        name: 'Rx - ' + nicName,
+                        y: netRxPct,
+                        percent: netTxPct,
+                        color: '#DE5353',
+                        drilldown: 'Network Out'
+                    },
+                    {
+                        name: hddName,
+                        y: hddPct,
+                        percent: hddPct,
+                        color: '#FFE066',
+                        drilldown: "Storage"
+                    }
+                ];
+
+                var drillDownSet = [
+                    {
+                        id: 'Network In',
+                        data: nicRxArray
+                    },
+                    {
+                        id: 'Network Out',
+                        data: nicTxArray
+                    },
+                    {
+                        id: 'Storage',
+                        data: hddArray
+                    }
+                ];
+
+                seriesData = [
+                    {
+                        name: 'Used',
+                        data: seriesSet
+                    }
+                ];
+
+                drillDownData = {
+                    series: drillDownSet
+                };
+            }
+            return [seriesData, drillDownData]
         }
     }
 }( jQuery );

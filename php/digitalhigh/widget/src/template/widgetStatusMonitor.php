@@ -97,8 +97,8 @@ class widgetStatusMonitor {
 							<i class="muximux-sonarr service-icon"></i>
 						</div>
 						<span class="d-flex align-items-center">
-							<i class="material-icons dragHandle editItem">drag_indicator</i></span>
-						<span>
+							<i class="material-icons dragHandle editItem">drag_indicator</i>
+						</span>
 								
 						<div class="service-text p-3">
 							<div class="row">
@@ -131,7 +131,7 @@ class widgetStatusMonitor {
 						<div class="card-settings">
 		                    <!-- Card setting markup goes here -->
 		                    <div class="form-group">
-                                <label for="serverList">Target</label>
+                                <label for="serviceList">Target</label>
                                 <select class="form-control custom-select serviceList statInput" data-for="target" title="Target">
                                 </select>
                         	</div>

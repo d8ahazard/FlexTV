@@ -14,9 +14,9 @@ class widgetSystemMonitor {
 	// Set these accordingly
 	const maxWidth = 6;
 	const maxHeight = 6;
-	const minWidth = 3;
-	const minHeight = 3;
-	const refreshInterval = 15;
+	const minWidth = 2;
+	const minHeight = 2;
+	const refreshInterval = 5;
 	const type = "systemMonitor";
 	/**
 	 * widgetSystemMonitor constructor.
