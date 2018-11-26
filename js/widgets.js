@@ -12,7 +12,15 @@
 //
 // ]
 
+var cols = 12;
+var rows = 12;
+var vmargin = 20;
+var hmargin = 20;
 
+var width = 0;
+var height = 0;
+var lastHeight = 0;
+var gridObj = 0;
 
 !function($) {
     $.flexWidget = function(data, param) {
@@ -52,6 +60,24 @@
                 handle: '.dragHandle'
             };
 
+            var gridOptions = {
+                width: cols,
+                height: 10,
+                float: true,
+                animate: true,
+                disableResize: false,
+                disableDrag: false,
+                cellHeight: 70,
+                removable: '',
+                removeTimeout: 100,
+                verticalMargin: vmargin,
+                horizontalMargin: hmargin,
+                acceptWidgets: '.grid-stack-item',
+                handle: '.dragHandle',
+                resizable: { handles: 'se, sw' },
+                alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            };
+
             if (data.hasOwnProperty('main')) {
                 if (data.hasOwnProperty('delete')) {
                     options['removable'] = data['delete'];
@@ -59,7 +85,7 @@
                 var mainTarget = data['main'];
                 var wl = $(mainTarget);
 
-                wl.gridstack(options);
+                wl.gridstack(gridOptions);
 
                 wl.on('dragstop', function () {
                     console.log('Drag stop');
@@ -71,6 +97,8 @@
                     returnFunc(serialize());
                 });
                 widgetList = wl.data('gridstack');
+                widgetList._updateHeightsOnResize = function() { resize(); };
+                widgetList.onResizeHandler();
                 returns['list'] = widgetList;
             }
 
@@ -156,7 +184,8 @@
         }
 
         function serialize() {
-            var widgets = $('#widgetList').find('.widgetCard');
+            var wl = $('#widgetList');
+            var widgets = wl.find('.widgetCard');
             var widgetData = [];
             $.each(widgets, function() {
                 var elemData = $(this).info();
@@ -267,11 +296,15 @@
                         var bars = barObj.highcharts();
                         var chartData = buildChart('systemMonitor', statData);
                         var seriesData = chartData[0];
-                        var drillDownData = chartData[1]['series'];
+                        var drillDownData = chartData[1];
+                        var currentData = bars.options;
+                        console.log("Current data before replace: ", currentData);
                         console.log("Setting series data: ", seriesData);
                         bars.series[0].setData(seriesData[0]['data']);
                         console.log("Setting drilldown data: ", drillDownData);
-                        bars.options.drilldown.series[0] = drillDownData;
+                        bars.options.drilldown = drillDownData;
+                        currentData = bars.options;
+                        console.log("New options: ", currentData);
                     }
                     break;
 
@@ -292,6 +325,7 @@
                     target.find('.service-icon').attr('class', 'service-icon ' + widgetData['icon']);
                     target.find('.statTitle').text(widgetData['label']);
                     console.log("Widget service status is " + widgetData['service-status']);
+                    var shade = -100;
                     if (widgetData['service-status'] === "online") {
                         console.log("OI: ", target.find('.offline-indicator'));
                         target.find('.offline-indicator').hide();
@@ -299,8 +333,9 @@
                     } else {
                         target.find('.offline-indicator').show();
                         target.find('.online-indicator').hide();
+                        shade = 100;
                     }
-                    var color2 = shadeColor(widgetData['color'], -30);
+                    var color2 = shadeColor(widgetData['color'], shade);
                     var colString = "background: linear-gradient(60deg, "+widgetData['color']+", "+color2+");";
                     var ss = target.find(".card.m-0.service-status");
                     ss.attr('style', colString);
@@ -520,6 +555,24 @@
             });
         }
 
+        function resize() {
+            width = $(id).parent().width();
+            height = $(id).parent().height() - ((rows - 1) * vmargin);
+
+            if (0 >= height)
+            {
+                setTimeout(gridObj.onResizeHandler, 1000);
+                return;
+            }
+
+            if (lastHeight === height)
+                return;
+
+            lastHeight = height;
+            gridObj.cellHeight(parseInt(height / rows) + 'px');
+
+        }
+
         function buildChart(chartType, widgetData) {
             var seriesData = [];
             var drillDownData = [];
@@ -544,24 +597,12 @@
                     hddName = widgetData['Hdd'][0]['Disk'][0]['hdd_path'];
                     var hddData = widgetData['Hdd'][0]['Disk'];
                     $.each(hddData, function(key, data) {
-                        hddArray.push({
-                            name: data['hdd_name'],
-                            y: data['hdd_pct_used'],
-                            percent: data['hdd_pct_used']
-                        });
+                        hddArray.push([data['hdd_name'], data['hdd_pct_used']]);
                     });
                     var netData = widgetData['Net'][0]['Interface'];
                     $.each(netData, function(key, data) {
-                        nicRxArray.push({
-                            name: data['nic_name'],
-                            y: data['nic_rx_pct'],
-                            percent: data['nic_rx_pct']
-                        });
-                        nicTxArray.push({
-                            name: data['nic_name'],
-                            y: data['nic_tx_pct'],
-                            percent: data['nic_tx_pct']
-                        });
+                        nicRxArray.push([data['nic_name'], data['nix_rx_pct']]);
+                        nicTxArray.push([data['nic_name'], data['nic_tx_pct']]);
                     });
                 }
 
@@ -583,37 +624,40 @@
                     {
                         name: 'Tx - ' + nicName,
                         y: netTxPct,
-                        percent: netRxPct,
+                        percent: netTxPct,
                         color: '#DE5353',
-                        drilldown: 'Network In'
+                        drilldown: 'net_tx'
                     },
                     {
                         name: 'Rx - ' + nicName,
                         y: netRxPct,
-                        percent: netTxPct,
+                        percent: netRxPct,
                         color: '#DE5353',
-                        drilldown: 'Network Out'
+                        drilldown: 'net_tx'
                     },
                     {
                         name: hddName,
                         y: hddPct,
                         percent: hddPct,
                         color: '#FFE066',
-                        drilldown: "Storage"
+                        drilldown: "hdd"
                     }
                 ];
 
                 var drillDownSet = [
                     {
-                        id: 'Network In',
+                        id: 'net_rx',
+                        name: "Rx",
                         data: nicRxArray
                     },
                     {
-                        id: 'Network Out',
+                        id: 'net_tx',
+                        name: "Tx",
                         data: nicTxArray
                     },
                     {
-                        id: 'Storage',
+                        id: 'hdd',
+                        name: "Storage",
                         data: hddArray
                     }
                 ];

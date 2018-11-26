@@ -37,23 +37,29 @@ class widgetStatusMonitor {
 	}
 
 	public function testConnection() {
-			//check, if a valid url is provided
-			if(!filter_var($this->data['url'], FILTER_VALIDATE_URL)) {
-				$this->data['service-status'] = "offline";
-			} else {
-				$curlInit = curl_init($this->data['url']);
-				curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 10);
-				curl_setopt($curlInit, CURLOPT_HEADER, true);
-				curl_setopt($curlInit, CURLOPT_NOBODY, true);
-				curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($curlInit, CURLOPT_SSL_VERIFYPEER, false);
+		//check, if a valid url is provided
+		$url = $this->data['url'];
+		if(!filter_var($url, FILTER_VALIDATE_URL)) {
+			$this->data['service-status'] = "offline";
+		} else {
+			$agent= 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
 
-				$response = curl_exec($curlInit);
-				curl_close($curlInit);
+			$curlInit = curl_init($url);
+			curl_setopt($curlInit, CURLOPT_CONNECTTIMEOUT, 10);
+			curl_setopt($curlInit, CURLOPT_HEADER, true);
+			curl_setopt($curlInit, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($curlInit, CURLOPT_USERAGENT, $agent);
+			curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($curlInit, CURLOPT_SSL_VERIFYHOST, false);
+			curl_setopt($curlInit, CURLOPT_SSL_VERIFYPEER, false);
 
-				$result = ($response !== false) ? "online" : "offline";
-				$this->data['service-status'] = $result ?? "offline";
-			}
+			$response = curl_exec($curlInit);
+
+			$httpCode = curl_getinfo($curlInit, CURLINFO_HTTP_CODE);
+			curl_close($curlInit);
+			$result = ($httpCode === 200 || strpos($response, "window.location")) ? "online" : "offline";
+			$this->data['service-status'] = $result ?? "offline";
+		}
 	}
 
 	public function update($force=false) {
