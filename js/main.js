@@ -38,6 +38,8 @@ var devices = {};
 var staticCount = 0;
 var javaStrings = [];
 
+var flexWidget = 0;
+
 var grid = null;
 
 var buildingApps = false;
@@ -159,7 +161,8 @@ $(function () {
         "save": saveWidgetContainers
     };
 
-    $.flexWidget(options);
+    flexWidget = new FlexWidget(options);
+
     bgs = $('.bg');
 	logLevel = "ALL";
 
@@ -1889,6 +1892,7 @@ function setListeners() {
 		}
 
 		if ($(this).hasClass("linkBtn")) {
+			serverAddress = $("#publicAddress").val();
 			regUrl = false;
 			action = $(this).data('action');
 			serverAddress = encodeURIComponent(serverAddress);
@@ -2529,7 +2533,14 @@ function loadWidgetContainers(data) {
     for (var key in data) {
         console.log("Widget action is " + action + ": ", data[key]);
         if (data.hasOwnProperty('status')) console.log("Data Item has status here: " + data['status']);
-        if (data.hasOwnProperty(key)) $.flexWidget(action, data[key]);
+        if (data.hasOwnProperty(key)) {
+            if (firstLoad) {
+                flexWidget.addWidget(data[key]);
+            } else {
+                flexWidget.updateWidget(data[key]);
+            }
+
+        }
     }
     if (firstLoad) $('#widgetList').data('gridstack').disable();
     loadingWidgets = false;

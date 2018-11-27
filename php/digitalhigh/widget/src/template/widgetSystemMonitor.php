@@ -15,7 +15,7 @@ class widgetSystemMonitor {
 	const maxWidth = 6;
 	const maxHeight = 6;
 	const minWidth = 2;
-	const minHeight = 2;
+	const minHeight = 3;
 	const refreshInterval = 5;
 	const type = "systemMonitor";
 	/**
@@ -142,10 +142,101 @@ class widgetSystemMonitor {
 
 
 	public static function widgetJS() {
-		$init = '
-		if window.hasOwnProperty("devices") {
+		$init = /** @lang JavaScript */
+			'
+		var devOutput = "";
+                        console.log("We have a device list.", devices)  ;
+                        var deviceList = devices;
+                        if (deviceList.hasOwnProperty(\'Server\')) {
+                            var serverList = deviceList[\'Server\'];
+                            var i = 0;
+                            $.each(serverList, function (key, device) {
+                                var selected = "";
+                                    if (i === 0) {
+                                        console.log("Selecting");
+                                        selected = " selected";
+                                    }
+                                var id = device["Id"];
+                                var name = device["Name"];
+                                if (device[\'HasPlugin\']) {
+                                    devOutput += "<option data-type=\'Server\' value=\'" + id + "\'" + selected + ">" + name + "</option>";
+                                    if (selected !== "") {
+                                        console.log("Setting attributes...");
+                                        widget.attr(\'data-target\', id);
+                                        widget.attr(\'data-uri\', device[\'Uri\']);
+                                        widget.attr(\'data-token\', device[\'Token\']);
+                                    }
+                                }
+                                i++;
+                            });
+                        }
+
+                    var list = widget.find(\'.serverList\');
+                    console.log("Setting serverList to " + devOutput, list);
+                    list.html(devOutput);
+                    var bars = widget.find(\'.serverOverviewBars\');
+                    var chartData = buildChart(\'systemMonitor\', widgetData[\'stats\']);
+                    console.log("Chart data from widgetData", widgetData, chartData);
+                    var seriesData = chartData[0];
+                    var drillDownData = chartData[1];
+
+                    var chartOpts = {
+                        chart: {
+                            type: \'bar\'
+                        },
+                        title: {
+                            text: null
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        tooltip: {
+                            outside: true
+                        },
+                        xAxis: {
+                            type: \'category\',
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            max: 100,
+                            title: {
+                                text: null
+                            },
+                            labels: {
+                                formatter: function () {
+                                    return Math.abs(this.value) + \'%\';
+                                }
+                            }
+                        },
+                        plotOptions: {
+                            series: {
+                                borderWidth: 0
+                            },
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    format: \'{point.percent}%\'
+                                }
+                            }
+                        },
+                        series: seriesData,
+                        drilldown: drillDownData
+                    };
+                    console.log("Chart options: ", chartOpts);
+                    var serverOverviewBars = Highcharts.chart(bars[0], chartOpts);
+
+                    $(document).on(\'gsresizestop\', widget, function() {
+                        console.log("REFLOW TRIGGERED.");
+                       serverOverviewBars.reflow();
+                    });
+		';
+
+		$update = /** @lang JavaScript */
+		'
 		
-		}
 		';
 		return [];
 	}
