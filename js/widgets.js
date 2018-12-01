@@ -515,8 +515,8 @@ function FlexWidget(data) {
         if (chartType === 'systemMonitor') {
             var cpuPct = 0;
             var memPct = 0;
-            var netTxPct = 0;
-            var netRxPct = 0;
+            var netTx = 0;
+            var netRx = 0;
             var hddPct = 0;
             var nicTxArray = [];
             var nicRxArray = [];
@@ -526,8 +526,23 @@ function FlexWidget(data) {
             if (widgetData) {
                 cpuPct = widgetData['Cpu'][0]['cpu_pct_used'];
                 memPct = widgetData["Mem"][0]['mem_pct_used'];
-                netTxPct = widgetData['Net'][0]['Interface'][0]['net_tx_pct'];
-                netRxPct = widgetData['Net'][0]['Interface'][0]['net_rx_pct'];
+                netTx = widgetData['Net'][0]['Interface'][0]['net_tx'];
+                netRx = widgetData['Net'][0]['Interface'][0]['net_rx'];
+                var steps = [
+                    "KB/s",
+                    "MB/s",
+                    "GB/s",
+                    "TB/s"
+                ];
+                var tag = "B/s";
+                $.each(steps, function(i){
+                    if (netRx < 1024) {
+                        tag = steps[i];
+                        return false;
+                    }
+                    netRx /= 1024;
+                    netTx /= 1024;
+                });
                 nicName = widgetData['Net'][0]['Interface'][0]['nic_name'];
                 hddPct = widgetData['Hdd'][0]['Disk'][0]['hdd_pct_used'];
                 hddName = widgetData['Hdd'][0]['Disk'][0]['hdd_path'];
@@ -537,8 +552,8 @@ function FlexWidget(data) {
                 });
                 var netData = widgetData['Net'][0]['Interface'];
                 $.each(netData, function(key, data) {
-                    nicRxArray.push([data['nic_name'], data['nix_rx_pct']]);
-                    nicTxArray.push([data['nic_name'], data['nic_tx_pct']]);
+                    nicRxArray.push([data['nic_name'], data['nix_rx']]);
+                    nicTxArray.push([data['nic_name'], data['nic_tx']]);
                 });
             }
 
@@ -559,15 +574,17 @@ function FlexWidget(data) {
                 },
                 {
                     name: 'Tx - ' + nicName,
-                    y: netTxPct,
-                    percent: netTxPct,
+                    y: netTx,
+                    percent: netTx,
+                    value: netRx + tag,
                     color: '#DE5353',
                     drilldown: 'net_tx'
                 },
                 {
                     name: 'Rx - ' + nicName,
-                    y: netRxPct,
-                    percent: netRxPct,
+                    y: netRx,
+                    percent: netRx,
+                    value: netRx + tag,
                     color: '#DE5353',
                     drilldown: 'net_tx'
                 },

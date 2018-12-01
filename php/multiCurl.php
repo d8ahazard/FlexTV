@@ -8,17 +8,20 @@ class multiCurl
     private $urls;
     private $timeout;
     private $files;
+    private $log;
 
-    /**
-     * multiCurl constructor.
-     * @param $urls
-     * @param int $timeout
-     * @param string | bool $filePath - If specified, try to save data to a file.
-     */
-    function __construct($urls, $timeout=10, $filePath=false) {
+	/**
+	 * multiCurl constructor.
+	 * @param $urls
+	 * @param int $timeout
+	 * @param string | bool $filePath - If specified, try to save data to a file.
+	 * @param bool $log
+	 */
+    function __construct($urls, $timeout=10, $filePath=false, $log=false) {
         $this->urls = $urls;
         $this->timeout = $timeout;
         $this->files = $filePath;
+        $this->log = $log;
     }
 
     function process() {
@@ -107,7 +110,7 @@ class multiCurl
                 file_put_contents($filePath, $response);
                 $results["$url"] = $filePath;
             } else {
-            	$results[$url] = $this->decodeCurl($response,$types[$url]);
+            	$results[$url] = $this->decodeCurl($response,$types[$url], $this->log);
             }
         }
         unset($mh);
@@ -169,16 +172,19 @@ class multiCurl
 	    if (is_array($result)) {
 		    if ($log) write_log("Returning result(ARRAY): ".json_encode($result));
 	    }
-	    $contentType = explode(";",$contentType)[0] ?? $contentType;
+	    if (is_bool($result)) {
+	    	return $result;
+	    }
+	    $contentType = trim(explode(";",$contentType)[0] ?? $contentType);
 	    write_log("Content type is $contentType");
-	    if (is_string($result) && $contentType) {
+	    if ($contentType) {
 		    if ($contentType === 'application/json') {
 			    $result = json_decode($result,true);
 			    if ($log) write_log("Decoded by content-type: ".json_encode($result));
 			    if ($result) return $result;
 		    }
-		    if ($contentType === 'application/xml') {
-			    $result = (new JsonXmlElement($result))->asArray();
+		    if ($contentType === 'application/xml' || $contentType === 'text/xml') {
+		    	$result = (new JsonXmlElement($result))->asArray();
 			    if ($log) write_log("Decoded by content-type: ".json_encode($result));
 			    if (is_array($result)) return $result;
 		    }

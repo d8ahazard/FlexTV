@@ -3,7 +3,7 @@ importScripts('./cacheItems.js');
 
     self.addEventListener('install', function (e) {
         e.waitUntil(
-            caches.open('phlex').then(function (cache) {
+            caches.open('flextv').then(function (cache) {
                 console.log("opening caches?");
                 return cache.addAll(cacheData);
             })

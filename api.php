@@ -30,7 +30,6 @@ function analyzeRequest() {
 	if (!$post) write_log("-------NEW REQUEST RECEIVED-------", "ALERT");
 	scriptDefaults();
 	checkDefaults();
-
 	if (isset($_GET['revision'])) {
 		$rev = $GLOBALS['config']->get('general', 'revision', false);
 		echo $rev ? substr($rev, 0, 8) : "unknown";
@@ -110,6 +109,13 @@ function initialize() {
 		echo 'success';
 		bye();
 	}
+
+	if (isset($_GET['recommend'])) {
+		header("Content-Type: application/json");
+		echo json_encode(getRecommendations($_GET['recommend']));
+		die();
+	}
+
 	if (isset($_GET['test'])) {
 		$result = [];
 		$status = testConnection($_GET['test']);
@@ -4091,7 +4097,8 @@ function buildSWCache() {
 	$files = array_merge($files, $imgFiles);
 	$out = [];
 	foreach($files as $file) {
-		$file = str_replace(dirname(__FILE__),".",$file);
+		$hash = md5_file($file);
+		$file = str_replace(dirname(__FILE__),".",$file) . "?hash=$hash";
 		$ignore = ["main.js", ".placeholder", "Thumbs.db"];
 		$add = true;
 		foreach ($ignore as $check) {
@@ -4102,6 +4109,7 @@ function buildSWCache() {
 
 //	header("Content-Type: text/plain");
 //	echo join(", \n", $files);
+	$out = array_unique($out);
 	file_put_contents("./cacheItems.js", "var cacheData = " . json_encode($out));
 
 
@@ -4120,6 +4128,116 @@ function getDirContents($dir, &$results = array()){
 	}
 
 	return $results;
+}
+
+function getRecommendations($type) {
+	$response = [];
+
+	$server = findDevice(false, false, 'Server');
+	if (! $server) {
+		write_log("No server!", "ERROR");
+	}
+	$uri = $server['Uri'];
+	$key = $server['Token'];
+	write_log("SERVER: ".json_encode($server));
+	$sections = json_decode($server['Sections'], true);
+	$sectionId = false;
+	foreach($sections as $section) {
+		write_log("Section: ".json_encode($section));
+		if ($section['type'] == $type) {
+			$sectionId = $section['id'];
+		}
+	}
+	$user = $_SESSION['plexUserName'];
+	$urls = [
+		"user" => "$uri/stats/user?X-Plex-Username=$user&X-Plex-Type=$type&X-Plex-Token=$key",
+		"popular" => "$uri/stats/library/popular?X-Plex-Token=$key&X-Plex-Type=$type&X-Plex-Container-Size=10000",
+		//"genres" => "$uri/stats/tag/genre?X-Plex-Token=$key",
+		"added" => "$uri/library/sections/$sectionId/recentlyAdded?X-Plex-Token=$key",
+		"unwatched" => "$uri/library/sections/$sectionId/unwatched?X-Plex-Token=$key"
+	];
+	if ($type !== 'music') $urls['newest'] = "$uri/library/sections/$sectionId/newest?X-Plex-Token=$key";
+	$results = (new multiCurl($urls))->process();
+
+	$userItems = $results['user']['MediaContainer']['User'][0]['Views'][0][ucfirst($type)][0][ucfirst($type)] ?? [];
+	$popularItems = $results['popular']['MediaContainer']['Hub'][0]['Video'] ?? [];
+	write_log("Raw pop: ".json_encode($results['user']));
+
+	unset($results['user']);
+	unset($results['popular']);
+
+	$genreCounts = [];
+	$watchedItems = [];
+
+	foreach($userItems as $item) {
+		array_push($watchedItems, $item['ratingKey']);
+		$genres = explode("|",$item['genre']);
+		foreach($genres as $genre) {
+			$count = ($genreCounts[$genre] ?? 0);
+			$count++;
+			$genreCounts[$genre] = $count;
+		}
+	}
+	arsort($genreCounts);
+
+	write_log("We have " . count($popularItems) . " items.");
+	$popularKeys = [];
+	foreach($popularItems as &$item) {
+		unset($item['Users']);
+		array_push($popularKeys, $item['ratingKey']);
+	}
+
+	$rawItems = [];
+	$rawKeys = [];
+	$keys = ['art', 'rating', 'year', 'thumb', 'title', 'contentRating', 'ratingKey', 'Genre'];
+
+	foreach($results as $section => $result) {
+		write_log("Looping $section");
+		$list = $result['MediaContainer']['Video'] ?? [];
+		foreach ($list as $item) {
+			$media = [];
+			$ratingKey = $item['ratingKey'];
+			if (!in_array($ratingKey, $rawKeys)) {
+				foreach ($keys as $key) $media[$key] = $item[$key];
+				$rawItems[] = $media;
+				array_push($rawKeys, $ratingKey);
+			}
+		}
+	}
+
+	$matched = array_values(array_intersect($rawKeys, $popularKeys));
+	$matched = array_values(array_diff($matched, $watchedItems));
+	foreach($matched as $find) {
+		foreach($rawItems as $item) {
+			if ($item['ratingKey'] == $find) {
+				write_log("TITLE - ".$item['title']);
+			}
+		}
+	}
+
+	$genres = array_slice(array_keys($genreCounts),0, 5);
+
+	$recommendedItems = [];
+	foreach($rawItems as $item) {
+		$genreSets = $item['Genre'];
+		$keep = false;
+		foreach($genreSets as $set) {
+			if (in_array($set['tag'], $genres)) $keep = true;
+		}
+		if (in_array($item['ratingKey'], $watchedItems)) $keep = false;
+		if ($keep) array_push($recommendedItems, $item);
+	}
+
+	usort($recommendedItems, function ($item1, $item2) {
+		return $item2['rating'] <=> $item1['rating'];
+	});
+
+
+	write_log("Matched: ".json_encode($matched));
+	write_log("Genres: ".json_encode($genres));
+	write_log("Popular: ".json_encode($recommendedItems));
+
+	return $recommendedItems;
 }
 
 function buildWidgets($widgets) {

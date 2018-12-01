@@ -39,7 +39,7 @@ $pushDefault = true;
 foreach ($testPaths as $name=>$testPath) {
     foreach($testPath as $path) {
         //$path = realpath($path);
-        if (file_exists($path)) {
+        if (file_exists($path) && is_readable($path)) {
             if ($path == $logPath) {
                 $pushDefault = false;
             }

@@ -2613,13 +2613,13 @@ function write_log($text, $level = false, $caller = false, $force = false, $skip
 	$date = $now->format("m-d-Y H:i:s.u");
 	$level = $level ? $level : "DEBUG";
 	$user = $_SESSION['plexUserName'] ?? false;
-	$user = $user ? "[$user] " : "";
+	$user = $user ? $user : "";
 	$caller = $caller ? getCaller($caller) : getCaller();
 	if (!$skip) $text = protectMessage(($text));
 
 	if ((isset($_GET['fetchData']) || isset($_GET['passive'])) || ($text === "") || !file_exists($log)) return;
 
-	$line = "[$date] [$level] " . $user . "[$caller] - $text" . PHP_EOL;
+	$line = "[$date] [$level] [$user] [$caller] - $text" . PHP_EOL;
 
 	if ($pp) $_GET['fetchData'] = true;
 	if (!is_writable($log)) return;
@@ -2661,14 +2661,3 @@ function writeSessionArray($array, $unset = false) {
 	}
 }
 
-function xmlToJson($data) {
-	$arr = $response = false;
-	if (!$data) return [];
-	try {
-		$temp = new JsonXmlElement($data);
-		$arr = $temp->asArray();
-	} catch (Exception $e) {
-		write_log("This is exceptional. '$e'", "ERROR", false, true);
-	}
-	return is_array($arr) ? $arr : $response;
-}
