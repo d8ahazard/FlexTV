@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__FILE__) . '/php/vendor/autoload.php';
-require_once dirname(__FILE__) . "/php/webApp.php";
-require_once dirname(__FILE__) . '/php/util.php';
+require_once dirname(__FILE__) . '/../php/vendor/autoload.php';
+require_once dirname(__FILE__) . "/../php/webApp.php";
+require_once dirname(__FILE__) . '/../php/util.php';
 require_once dirname(__FILE__) . '/MultiTail.php';
 use digitalhigh\MultiTail;
 
@@ -17,57 +17,62 @@ if (!session_started()) {
 		session_start();
 	}
 }
-
-$logs = array(
-	"Main"      => realpath(dirname(__FILE__) . "/logs/Phlex.log.php"),
-	"Updates"   => realpath(dirname(__FILE__) . "/logs/Phlex_update.log.php"),
-	"Phlex Error" => realpath(dirname(__FILE__) . "/logs/Phlex_error.log.php"),
-);
-
-$testPaths = [
-	"Apache Error"         => [
-		"/var/log/apache2/error.log", "/var/log/httpd/apache24-error_log", "/var/log/httpd/apache23-error_log"
-	],
-	"NGINX Error"          => ["/var/log/nginx/nginx_error.log", "/usr/local/var/log/nginx/error.log"],
-	"IIS Error"            => [
-		'C:\Windows\Temp\PHP70_errors.log', 'C:\Windows\Temp\PHP71_errors.log', 'C:\Windows\Temp\PHP72_errors.log'
-	],
-	"Synology (PHP) Error" => ["/var/log/httpd/php_error.log"],
-	"Cast Plugin"    => [
-		'%LOCALAPPDATA%\Plex Media Server\Logs\PMS Plugin Logs/com.plexapp.plugins.Cast.log',
-		"~/Library/Logs/Plex Media Server/PMS Plugin Logs/com.plexapp.plugins.Cast.log",
-		"/sdcard/Plex Media Server/Logs/PMS Plugin Logs/com.plexapp.plugins.Cast.log",
-		'$PLEX_HOME/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/com.plexapp.plugins.Cast.log'
-	]
-];
-
-
-$logPath = ini_get("error_log");
-$pushDefault = true;
-foreach ($testPaths as $name => $testPath) {
-	foreach ($testPath as $path) {
-		try {
-			//$path = realpath($path);
-			if (file_exists($path) && is_readable($path)) {
-				if ($path == $logPath) {
-					$pushDefault = false;
-				}
-				$logs[$name] = $path;
-			}
-		} catch (Exception $e) {
-			continue;
-		}
-	}
+if (isset($_GET['test'])) {
+    header("Content-Type: text/plain");
+	echo ini_get('open_basedir').PHP_EOL;
+	echo php_ini_loaded_file().PHP_EOL;
 }
 
-if ($pushDefault && trim($logPath) && is_readable($logPath)) $logs['PHP Error'] = $logPath;
+$logPath = realpath(ini_get("error_log"));
+$output['PHP Error'] = $logPath;
+
+$config = parse_ini_file("./config.ini", true);
+
+$files = $config['files'] ?? false;
+$directories = $config['directories']['path'] ?? false;
+
+
+if ($files) {
+    foreach($files as $key => $fileCheck) {
+	    if (isset($_GET['test'])) echo "$key for $fileCheck" . PHP_EOL;
+
+	    if (is_array($fileCheck)) {
+            foreach($fileCheck as $file) {
+                $valid = validLog($file);
+                if ($valid && !in_array($valid, $output)) {
+                    $output[$key] = $valid;
+                    break;
+                }
+            }
+        } else if (is_string($fileCheck)) {
+	        $valid = validLog($fileCheck);
+	        if ($valid && !in_array($valid, $output)) $output[$key] = $valid;
+        }
+    }
+}
+
+if ($directories) {
+    if (isset($_GET['test'])) echo json_encode($directories) . PHP_EOL;
+    foreach($directories as $name => $dir) {
+        $files = glob("$dir/*log*");
+        foreach($files as $file) {
+            if (!preg_match("/old/", $file)) {
+	            $valid = validLog($file);
+	            if ($valid && !in_array($valid, $output)) $output[$name."_".basename($valid)] = $valid;
+            }
+        }
+    }
+}
+
 $out = [];
-foreach ($logs as $name => $path) {
+foreach ($output as $name => $path) {
 	$out[$name] = [
 		"path" => $path,
 		"line" => 0
 	];
 }
+
+if (isset($_GET['test'])) echo json_encode($out, JSON_PRETTY_PRINT) . PHP_EOL;
 $logs = $out;
 
 $noHeader = $_GET['noHeader'] ?? false;
@@ -95,6 +100,21 @@ if(isset($_GET['fetch']))  {
 	die();
 }
 
+function validLog($file) {
+    $result = false;
+	try {
+		$path = realpath($file);
+		if (is_readable($path)) {
+			$result = $path;
+		}
+	} catch (Exception $e) {
+	}
+	if (isset($_GET['test'])) echo ($result ? "$file is valid" : "$file is not valid") . PHP_EOL;
+	return $result;
+}
+
+if (isset($_GET['test'])) die;
+
 ?>
 
 <!DOCTYPE html>
@@ -108,8 +128,6 @@ if(isset($_GET['fetch']))  {
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css"/>
 	<link rel="stylesheet" href="./css/log.css" />
-
-    <script type="text/javascript" src="./js/clipboard.min.js" defer></script>
 
 	<script type="text/javascript">
 
@@ -130,8 +148,8 @@ if(isset($_GET['fetch']))  {
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <div class="form-group">
-                        <label for="docSelect" class="dd-label btn btn-info">Select All</label>
-                        <select multiple class="form-control" id="docSelect">
+                        <label for="docSelect" class="dd-label btn btn-info selectAll">Select All</label>
+                        <select multiple class="form-control tableFilter" id="docSelect">
 
                         </select>
                     </div>
@@ -143,12 +161,14 @@ if(isset($_GET['fetch']))  {
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <div class="form-group">
-                        <label for="levelSelect" class="dd-label btn btn-info">Select All</label>
-                        <select multiple class="form-control" id="levelSelect">
+                        <label for="levelSelect" class="dd-label btn btn-info selectAll">Select All</label>
+                        <select multiple class="form-control tableFilter" id="levelSelect">
                             <option value="DEBUG" selected>Debug</option>
                             <option value="INFO" selected>Info</option>
                             <option value="WARN" selected>Warn</option>
                             <option value="ERROR" selected>Error</option>
+                            <option value="CRITICAL" selected>Critical</option>
+                            <option value="FATAL" selected>Fatal</option>
                             <option value="ALERT" selected>Alert</option>
                             <option value="ORANGE" selected>Orange</option>
                             <option value="PINK" selected>Pink</option>
@@ -158,7 +178,7 @@ if(isset($_GET['fetch']))  {
             </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Filter" aria-label="Filter" id="filterText">
+            <input class="form-control mr-sm-2" type="text" placeholder="Filter" aria-label="Filter" id="textFilter">
             <div class="btn-group">
                 <button class="btn btn-outline-info my-2 my-sm-0" id="filterLog"><i class="fas fa-filter"></i></button>
                 <button class="btn btn-outline-warn my-2 my-sm-0" id="clearFilter"><i class="fas fa-times"></i></button>
@@ -169,13 +189,15 @@ if(isset($_GET['fetch']))  {
 <div class="contents table-responsive-md">
     <table class="table table-striped table-dark table-bordered table-hover table-sm" id="log">
         <thead>
-        <tr id="headerRow">
-            <th scope="col">#</th>
-            <th scope="col">Doc</th>
-            <th scope="col">Level</th>
-            <th scope="col">Stamp</th>
-            <th scope="col">Body</th>
-        </tr>
+            <tr id="headerRow">
+                <th scope="col">#</th>
+                <th scope="col">Doc</th>
+                <th scope="col">Level</th>
+                <th scope="col">Stamp</th>
+                <th scope="col">User</th>
+                <th scope="col" class="funcCol">Function</th>
+                <th scope="col">Body</th>
+            </tr>
         </thead>
         <tbody id="results" class="results">
         </tbody>
@@ -187,7 +209,6 @@ if(isset($_GET['fetch']))  {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script src="./js/lib/stickyTableHeaders.min.js"></script>
 <script type="text/javascript">
     var logData = JSON.parse('<?php echo json_encode($_SESSION['logs']); ?>');
 </script>

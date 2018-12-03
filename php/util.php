@@ -2585,7 +2585,7 @@ function translateControl($string, $searchArray) {
 }
 
 function write_log($text, $level = false, $caller = false, $force = false, $skip = false) {
-	$log = file_build_path(dirname(__FILE__), '..', 'logs', "Phlex.log.php");
+	$log = file_build_path(dirname(__FILE__), '..', 'logs', "Main.log.php");
 	$pp = false;
 	if ($force && isset($_GET['fetchData'])) {
 		$pp = true;
@@ -2598,7 +2598,7 @@ function write_log($text, $level = false, $caller = false, $force = false, $skip
 		file_put_contents($log, $authString);
 	}
 	if (filesize($log) > 4194304) {
-		$oldLog = file_build_path(dirname(__FILE__), "..", 'logs', "Phlex.log.php.old");
+		$oldLog = file_build_path(dirname(__FILE__), "..", 'logs', "Main.log.php.old");
 		if (file_exists($oldLog)) unlink($oldLog);
 		rename($log, $oldLog);
 		touch($log);
@@ -2612,8 +2612,7 @@ function write_log($text, $level = false, $caller = false, $force = false, $skip
 	if (is_bool($now)) $now = DateTime::createFromFormat('U.u', $aux += 0.001);
 	$date = $now->format("m-d-Y H:i:s.u");
 	$level = $level ? $level : "DEBUG";
-	$user = $_SESSION['plexUserName'] ?? false;
-	$user = $user ? $user : "";
+	$user = $_SESSION['plexUserName'] ?? "unknown";
 	$caller = $caller ? getCaller($caller) : getCaller();
 	if (!$skip) $text = protectMessage(($text));
 

@@ -6,10 +6,50 @@ var scroll = true;
 var loaded = false;
 var count = 0;
 var odd = true;
-var filtering = false;
+var classFilters = [];
+var stringFilter = "";
+$("head").append("<style id='dynamicStylesheet'></style>");
+var styles = $("#dynamicStylesheet");
+var textFilter = $('#textFilter');
+
+var myStyles = (function() {
+    // Use the first style sheet for convenience
+    var sheet = $('#dynamicStylesheet')[0].sheet;
+
+    // Delete a rule from sheet based on the selector
+    function deleteRule(selector) {
+        // Get rules
+
+        var rules = sheet.rules || sheet.cssRules; // Cover W3C and IE models
+        // Search for rule and delete if found
+        $.each(rules, function(key) {
+            if (selector === rules[key].selectorText) {
+                sheet.deleteRule(key);
+            }
+        });
+    }
+
+    // Add a rule to sheet given a selector and CSS text
+    function addRule(selector, text) {
+        console.log("SHEETS: ", document.styleSheets);
+
+        console.log("Adding rule for selector " + selector);
+        // First delete the rule if it exists
+        deleteRule(selector);
+        // Then add it
+        sheet.insertRule(selector + text);
+        console.log("SHEET: ", sheet);
+    }
+
+    // Return object with methods
+    return {
+        'addRule': addRule,
+        'deleteRule': deleteRule
+    };
+}());
 
 $(document).ready(function() {
-
+    buildList();
     $(document).on('click', '.jsonParse',function(e) {
         e.preventDefault();
         console.log("Form submitted.");
@@ -32,68 +72,27 @@ $(document).ready(function() {
         document.body.removeChild(dummy);
     });
 
-    // Setup the settings dialog
-    $("#settings").dialog({
-        modal : true,
-        resizable : false,
-        draggable : false,
-        autoOpen : false,
-        width : 590,
-        height : 270,
-        buttons : {
-            Close : function() {
-                $(this).dialog("close");
-            }
-        },
-        open : function(event, ui) {
-            scrollToBottom();
-        },
-        close : function(event, ui) {
-            grep = $("#grep").val();
-            invert = $('#invert input:radio:checked').val();
-            $("#results").text("");
-            lastSize = 0;
-            $("#grepspan").html("Grep keyword: \"" + grep + "\"");
-            $("#invertspan").html("Inverted: " + (invert == 1 ? 'true' : 'false'));
-        }
-    });
-    //Close the settings dialog after a user hits enter in the textarea
-    var grepBtn = $('#grep');
-    grepBtn.keyup(function(e) {
-        if (e.keyCode == 13) {
-            $("#settings").dialog('close');
-        }
-    });
-    $('#filterLog').on('click', function(){filterLog()});
-    $('#clearFilter').on('click', function() {showAll()});
-    $('#filterText').keypress(function(e){
-        if(e.keyCode===13)
-            filterLog();
-    });
-    //Focus on the textarea
-    grepBtn.focus();
-    //Settings button into a nice looking button with a theme
-    //Settings button opens the settings dialog
-    $("#grepKeyword").click(function() {
-        $("#settings").dialog('open');
-        $("#grepKeyword").removeClass('ui-state-focus');
+    $(document).on('click', '.selectAll', function(){
+        $(this).siblings('select').find('option').prop('selected', true);
+        updateFilters();
     });
 
+    $(document).on('click', '#filterLog', function(){filterLines()});
 
-    //Some window scroll event to keep the menu at the top
-    $(window).scroll(function(e) {
-        if ($(window).scrollTop() > 0) {
-            $('.float').css({
-                position : 'fixed',
-                top : '0',
-                left : 'auto'
-            });
-        } else {
-            $('.float').css({
-                position : 'static'
-            });
-        }
+    $(document).on('click', '#clearFilter', function() {
+        textFilter.val("");
+        textFilter.text("");
+        filterLines();
     });
+
+    $(document).on('change', '.tableFilter', function() {
+        updateFilters();
+    });
+
+    $(document).on('keypress', textFilter, function(e){
+        if(e.keyCode===13) filterLines();
+    });
+
     //If window is resized should we scroll to the bottom?
     $(window).resize(function() {
         if (scroll) {
@@ -110,78 +109,94 @@ $(document).ready(function() {
             scroll = false;
         }
     });
-scrollToBottom();
-updateLog();
-setInterval(function(){
-    if (loaded) updateLog();
-},1000);
 
+    updateLog();
+    scrollToBottom();
+    setInterval(function(){
+        if (loaded) updateLog();
+    },1000);
 });
+
 //This function scrolls to the bottom
 function scrollToBottom() {
     $("html, body").animate({scrollTop: $(document).height()}, "fast");
 }
+
 //This function queries the server for updates.
 function updateLog() {
     var url = '?fetch=true&apiToken=foo';
+    var results = $('#results');
+    var lines = [];
     if (loaded) url += "&refresh=true";
     $.getJSON(url, function(data) {
+        if (data != null) {
+            $.each(data, function (key, value) {
+                var line = formatLine(value);
+                if (loaded) {
+                    results.append(line);
+                } else {
+                    lines.push(line);
+                }
+            });
+        }
         if (!loaded) {
             $('.load-div').hide();
+            results.append(lines);
             console.log("DATA: ",data);
             loaded = true;
         }
-        if (data != null) {
-            var levels = [];
-            var docs = [];
-            $.each(data, function (key, value) {
-                $("#results").append(formatLine(value));
-            });
 
-            if (filtering) filterLog();
-        }
         if (scroll) {
             scrollToBottom();
         }
     });
 }
 
-function filterLog() {
-    var search = $('#filterText').val();
-    if (search === "") {
-        showAll();
-    } else {
-        console.log("Filtering for " + search);
-        filtering = search;
-        $("tr").not(':first').hide();
-        $("tr:contains(" + search + ")").show();
+function filterLines() {
+    stringFilter = $('#textFilter').val();
+    $('.textFilter').removeClass('textFilter');
+    if (stringFilter !== "") {
+        $('tr.line:not(:contains('+ stringFilter +'))').addClass('textFilter');
     }
 }
 
-function showAll() {
-    filtering = false;
-    $("tr").show();
-    $("#filter").val("");
-    $("#filter").text("");
+function updateFilters() {
+    var filters = [];
+    var levelFilters = $('#levelSelect').find('option:not(:selected)');
+    var docFilters = $('#docSelect').find('option:not(:selected)');
+    $.each(levelFilters, function(){
+        filters.push(".line." + $(this).val().toLowerCase());
+    });
+    $.each(docFilters, function(){
+        filters.push(".line." + $(this).val());
+    });
+    console.log("FILTERS: ", filters);
+    // Filters cleared
+    if (JSON.stringify(filters) !== JSON.stringify(classFilters)) {
+        classFilters = filters;
+        setRules();
+    }
 }
+
 
 function formatLine(line) {
     console.log("FORMATTING: ", line);
+    var doc = titleCase(line.doc.replace("_", " "));
+    doc = doc.replace(".log", "");
+    doc = doc.replace(".php", "");
     var numSpan = '<th scope="row" class=lineNo>' + line.line + '</th>';
-    var stamp = line.params.shift();
-    if (stamp === undefined) stamp = "";
-    var stampSpan = '<td class="stamp">' + stamp + '</td>';
-    var rowClass = "";
+    var stamp = line.stamp;
+    var userName = line.user;
+    var functionName = line.func;
+    var stampSpan = '<td class="stamp stampCol">' + stamp + '</td>';
     if (~line.doc.indexOf("Error")) {
-        rowClass = " error";
         line.level = "ERROR";
     }
-    var docSpan = "<td><span class='doc'>" + line.doc + '</span></td>';
+    var lineClass = line.doc.replace(" ", "_").toLowerCase();
+    var classes = ["line", lineClass, doc.replace(" ", "_")].join(" ");
+    var docSpan = "<td><span class='doc'>" + doc + '</span></td>';
     var levelSpan = "<td><span class='badge level-badge " + line.level + "'>" + line.level + '</span></td>';
-    var paramString = "";
-    $.each(line.params, function(key, param){
-        paramString += "<td class='param'>" + param + "</td>";
-    });
+    var paramString = "<td class='userCol'>" + userName + "</td><td class='funcCol'>" + functionName + "</td>";
     var body = line.body;
     if (line.url) {
         console.log("Line has a url.");
@@ -197,7 +212,7 @@ function formatLine(line) {
     var bodySpan = "<td class='bodySpan'>" + body + "</td>";
 
     odd = !odd;
-    return "<tr class='line" + rowClass + "'>" + numSpan + docSpan + levelSpan + stampSpan  + bodySpan + "</tr>";
+    return "<tr class='" + classes + "'>" + numSpan + docSpan + levelSpan + stampSpan  + paramString + bodySpan + "</tr>";
 }
 
 function loadJson(path, params, method) {
@@ -257,4 +272,40 @@ function urlencode(str) {
         .replace(/\)/g, '%29')
         .replace(/\*/g, '%2A')
         .replace(/%20/g, '+')
+}
+
+function buildList() {
+    var options = "";
+    $.each(logData, function(key) {
+        key = titleCase(key.replace("_", " "));
+        key = key.replace(".log", "");
+        key = key.replace(".php", "");
+        var value = key.replace(" ", "_");
+        options += '<option value="'+value+'" selected>'+key+'</option>'
+    });
+    $('#docSelect').html(options);
+}
+
+function setRules() {
+    var sheet = $('#dynamicStylesheet')[0].sheet;
+    var rules = sheet.rules || sheet.cssRules; // Cover W3C and IE models
+
+    $.each(rules, function(key) {
+        try {
+            sheet.deleteRule(key);
+        } catch (DOMException) {
+
+        }
+    });
+
+    $.each(classFilters, function(key, selector){
+        sheet.insertRule(selector + " { display: none }");
+    });
+
+}
+
+function titleCase(str) {
+    return str.split(' ').map(function(word) {
+        return (word.charAt(0).toUpperCase() + word.slice(1));
+    }).join(' ');
 }

@@ -70,13 +70,28 @@
     color: #000000;
 }
 
+.NOTICE {
+    background-color: #00b1ff;
+    color: #000000;
+}
+
 .ALERT {
     color: #000000;
     background-color: #ffffff !important;
 }
 
 .ERROR {
+    background-color: #ff0009 !important;
+    color: #cecece;
+}
+
+.CRITICAL {
     background-color: #ab0006 !important;
+    color: #cecece;
+}
+
+.FATAL {
+    background-color: #000000 !important;
     color: #cecece;
 }
 
@@ -112,9 +127,19 @@
     height: 64px;
 }
 
+.textFilter {
+    display: none;
+}
+
 .dd-label {
     width: 100%;
     text-align: center;
+}
+
+.funcCol {
+    max-width: 150px;
+    width: 150px;
+    word-wrap: break-word;
 }
 
 .load-div div {

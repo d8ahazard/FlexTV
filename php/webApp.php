@@ -191,7 +191,7 @@ function installUpdate() {
 }
 
 function scriptDefaults() {
-	$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Phlex_error.log.php');
+	$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Error.log.php');
 	ini_set("log_errors", 1);
 	ini_set("display_errors", 0);
 	ini_set("display_startup_errors", 0);
@@ -811,9 +811,9 @@ function checkFiles() {
 	$genDir = file_build_path($dbDir, "general");
 	$userDir = file_build_path($dbDir, "userdata");
 	$cmdDir = file_build_path($dbDir, "commands");
-	$logPath = file_build_path($logDir, "Phlex.log.php");
-	$errorLogPath = file_build_path($logDir, "Phlex_error.log.php");
-	$updateLogPath = file_build_path($logDir, "Phlex_update.log.php");
+	$logPath = file_build_path($logDir, "Main.log.php");
+	$errorLogPath = file_build_path($logDir, "Error.log.php");
+	$updateLogPath = file_build_path($logDir, "Update.log.php");
 
 	$dirs = [$rwDir, $dbDir, $logDir, $genDir, $userDir, $cmdDir];
 
