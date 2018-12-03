@@ -213,8 +213,9 @@ function formatLine(line) {
 
     if (line.json) {
         console.log("Line has json.");
-        var jsonString = JSON.stringify(line.json);
-        var jsonLink = '<a href="" class="jsonParse" title="' + htmlentities(jsonString) + '" data-json="' + urlencode(jsonString) + '">[JSON]</a>';
+        var jsonString = JSON.stringify(line.json,null,2);
+        var jsonLink = '<a href="" class="jsonParse" onmouseenter="showJson(this)" onmouseleave="hideJson(this)">[JSON]</a>' +
+            '<div class="jsonPop" onmouseleave="$(this).hide();"><pre class="prettyprint"><code class="lang-json">' + htmlentities(jsonString) + '</code></pre></div>';
         body = body.replace("[JSON]",jsonLink);
     }
     var bodySpan = "<td class='bodySpan'>" + body + "</td>";
@@ -310,6 +311,32 @@ function setRules() {
         sheet.insertRule(selector + " { display: none }");
     });
 
+}
+
+function showJson(el) {
+    var target = $(el);
+    console.log("SHOW: ", target, target.top, target.left);
+    var json = target.siblings('.jsonPop');
+    var offset = target.offset();
+    var topOffset = target.offset().top- $(window).scrollTop();
+
+    json.css('top', (topOffset + 25) + "px");
+    json.css('left', (offset.left + 25) + "px");
+    json.show();
+
+}
+
+function hideJson(el) {
+    setTimeout(function() {
+        var target = $(el);
+
+        var pop = target.siblings(".jsonPop");
+        console.log("HIDEcheck: ", pop);
+        if (!pop.is(":hover")) {
+            console.log("HIDING");
+            target.siblings('.jsonPop').hide();
+        }
+    }, 500);
 }
 
 function titleCase(str) {

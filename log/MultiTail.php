@@ -9,14 +9,19 @@ class MultiTail {
 
 	public $lineCounts = [];
 	public $logs;
+	public $formats;
+	public $expressions;
+
 	private $maxLines;
 	private $noHeader;
 
 
-	function __construct($logs, $noHeader, $maxLines = 5000) {
+	function __construct($logs, $noHeader, $expressions, $formats, $maxLines = 5000) {
 		$this->logs = $logs;
 		$this->noHeader = $noHeader;
 		$this->maxLines = $maxLines;
+		$this->expressions = $expressions;
+		$this->formats = $formats;
 	}
 
 	public function fetch() {
@@ -49,7 +54,6 @@ class MultiTail {
 		//usort($contents, 'cmp');
 		$stamps = array_column($contents, 'unix');
 		array_multisort($stamps, SORT_ASC, $contents);
-
 		return array_slice($contents, ($this->maxLines) * -1);
 	}
 
@@ -57,9 +61,13 @@ class MultiTail {
 		$dateFormat = '%m-%d-%Y %H:%M:%S';
 		if ($line == "; <?php die('Access denied'); ?>" . PHP_EOL) return false;
 		$level = preg_match("/error/", strtolower($file)) ? "ERROR" : "DEBUG";
-		$app = explode("_",$file)[0];
-		$ms = false;
+		$app = explode("_", $file)[0];
 		switch(true) {
+			case array_key_exists($app, $this->expressions):
+				debug("CUSTOM REGEX MATCH.");
+				$regex = $this->expressions[$app];
+				$format = $this->formats[$app];
+				break;
 			case preg_match("/nginx/", strtolower($file)):
 				$regex = '~^(?P<stamp>[\d+/ :]+) \[(?P<level>.+)\] .*?: (?P<body>.+), client: (?P<user>.+), server: (?P<server>.+), request: (?P<doc>.+), host: (?P<host>.+)$~';
 				$format = '%Y/%m/%d %H:%M:%S';
@@ -104,11 +112,9 @@ class MultiTail {
 						$ftime['tm_yday'] + 1,
 						$ftime['tm_year'] + 1900
 					);
-					debug("UNIX: ".json_encode($unix));
 					$stamp = strftime($dateFormat, $unix);
 					$matches['unix'] = $unix;
 					if ($ms) $stamp .= ".$ms";
-					//debug("Stamp: $stamp");
 				}
 			}
 		} catch (Exception $e) {}

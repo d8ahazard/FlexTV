@@ -6,6 +6,23 @@
     margin-top: 56px;
 }
 
+.jsonPop {
+    color: white;
+    background: black;
+    display: none;
+    position: fixed;
+    width: 500px;
+    height: 500px !important;
+    
+}
+
+.language-json, .lang-json {
+    color: white;
+    width: 500px;
+    height: 500px;
+    display: block;
+}
+
 #current {
     right: 15px;
     position: absolute;
