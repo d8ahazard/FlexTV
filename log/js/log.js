@@ -101,13 +101,7 @@ $(document).ready(function() {
     });
     //Handle if the window should be scrolled down or not
     $(window).scroll(function() {
-        documentHeight = $(document).height();
-        scrollPosition = $(window).height() + $(window).scrollTop();
-        if (documentHeight <= scrollPosition) {
-            scroll = true;
-        } else {
-            scroll = false;
-        }
+        checkScroll();
     });
 
     updateLog();
@@ -117,9 +111,21 @@ $(document).ready(function() {
     },1000);
 });
 
+function checkScroll() {
+    var st = $(window).scrollTop();
+    var wh = $(window).height();
+    var dh = $(document).height();
+    scroll = ($(window).scrollTop() + $(window).height() >= $(document).height() - 2);
+    console.log("SCROLL is " + scroll, st + wh, dh);
+}
+
 //This function scrolls to the bottom
 function scrollToBottom() {
+    console.log("Scrolling to bottom.");
     $("html, body").animate({scrollTop: $(document).height()}, "fast");
+    setTimeout(function() {
+        checkScroll();
+    }, 100);
 }
 
 //This function queries the server for updates.
@@ -146,7 +152,7 @@ function updateLog() {
             loaded = true;
         }
 
-        if (scroll) {
+        if (scroll && data.length) {
             scrollToBottom();
         }
     });
@@ -193,7 +199,9 @@ function formatLine(line) {
         line.level = "ERROR";
     }
     var lineClass = line.doc.replace(" ", "_").toLowerCase();
-    var classes = ["line", lineClass, doc.replace(" ", "_")].join(" ");
+    lineClass = lineClass.replace(".log.php", "");
+    lineClass = lineClass.replace(".log", "");
+    var classes = ["line", lineClass].join(" ");
     var docSpan = "<td><span class='doc'>" + doc + '</span></td>';
     var levelSpan = "<td><span class='badge level-badge " + line.level + "'>" + line.level + '</span></td>';
     var paramString = "<td class='userCol'>" + userName + "</td><td class='funcCol'>" + functionName + "</td>";
@@ -280,7 +288,7 @@ function buildList() {
         key = titleCase(key.replace("_", " "));
         key = key.replace(".log", "");
         key = key.replace(".php", "");
-        var value = key.replace(" ", "_");
+        var value = key.replace(" ", "_").toLowerCase();
         options += '<option value="'+value+'" selected>'+key+'</option>'
     });
     $('#docSelect').html(options);

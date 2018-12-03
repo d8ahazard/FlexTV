@@ -75,7 +75,7 @@ class MultiTail {
 				break;
 			case preg_match("/flextv/", strtolower($file)):
 			case preg_match("/phlex/", strtolower($file)):
-				$regex = '~\[(?P<stamp>.*?)\] \[(?P<level>.*?)\] \[(?P<user>.*?)\] \[(?P<func>.*?)\] - (?P<body>.*)$~';
+				$regex = '~\[(?P<stamp>.*?)\].*\[(?P<level>.*?)\].*\[(?P<user>.*?)\].*\[(?P<func>.*?)\] - (?P<body>.*)$~';
 				$format = '%m-%d-%Y %H:%M:%S';
 				break;
 			case preg_match("/php/", strtolower($file)):
@@ -177,7 +177,7 @@ class MultiTail {
 				break;
 			}
 		}
-		
+
 		$line = [
 			'stamp' => $stamp,
 			'level' => $level,

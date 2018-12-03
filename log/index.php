@@ -9,7 +9,7 @@ error_reporting(0);
 if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) {
 	if(!ob_start("ob_gzhandler")) ob_start();
 } else ob_start();
-if (!session_started()) {
+if (session_status() === PHP_SESSION_NONE) {
 	$ok = @session_start();
 	if (!$ok) {
 		write_log("REGENERATING SESSION ID.", "WARN", false, true, true);
@@ -17,6 +17,7 @@ if (!session_started()) {
 		session_start();
 	}
 }
+
 if (isset($_GET['test'])) {
     header("Content-Type: text/plain");
 	echo ini_get('open_basedir').PHP_EOL;
