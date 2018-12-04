@@ -9,9 +9,6 @@ class MultiTail {
 
 	public $lineCounts = [];
 	public $logs;
-	public $formats;
-	public $expressions;
-
 	private $maxLines;
 	private $noHeader;
 
@@ -30,38 +27,41 @@ class MultiTail {
 		$contents = [];
 		foreach ($logs as $name => $data) {
 			$lastStamp = false;
-			$path = $data['path'];
+			$path = trim($data['path']);
 			$lineNumber = $data['line'];
-			$file = new SplFileObject($path);
-			if (!$file->eof()) {
-				$file->seek($lineNumber);
-				while ($file->valid()) {
-					$parsed = $this->parseLine($file->fgets(), $name, $lastStamp);
-					if ($parsed && trim($parsed['body'])) {
-						$parsed['line'] = $lineNumber;
-						$parsed['doc'] = $name;
-						$lastStamp = (($parsed['stamp'] ?? "") !== "") ? $parsed['stamp'] : false;
-						$contents[] = $parsed;
+			if (trim($path) && is_file($path)) {
+				$file = new SplFileObject($path);
+				if (!$file->eof()) {
+					$file->seek($lineNumber);
+					while ($file->valid()) {
+						$parsed = $this->parseLine($file->fgets(), $name, $lastStamp);
+						if ($parsed && trim($parsed['body'])) {
+							$parsed['line'] = $lineNumber;
+							$parsed['doc'] = $name;
+							$lastStamp = (($parsed['stamp'] ?? "") !== "") ? $parsed['stamp'] : false;
+							$contents[] = $parsed;
+						}
+						$lineNumber++;
 					}
-					$lineNumber++;
 				}
+				$data['line'] = $lineNumber;
+				$logs[$name] = $data;
+				$file = null;
 			}
-			$data['line'] = $lineNumber;
-			$logs[$name] = $data;
-			$file = null;
 		}
 		$this->logs = $logs;
-		//usort($contents, 'cmp');
 		$stamps = array_column($contents, 'unix');
 		array_multisort($stamps, SORT_ASC, $contents);
-		return array_slice($contents, ($this->maxLines) * -1);
+		//if ($this->maxLines) $contents = array_slice($contents, ($this->maxLines) * -1);
+		return $contents;
 	}
 
 	private function parseLine($line, $file, $lastStamp = false) {
 		$dateFormat = '%m-%d-%Y %H:%M:%S';
 		if ($line == "; <?php die('Access denied'); ?>" . PHP_EOL) return false;
 		$level = preg_match("/error/", strtolower($file)) ? "ERROR" : "DEBUG";
-		$app = explode("_", $file)[0];
+		$app = explode("_",$file)[0];
+		$ms = false;
 		switch(true) {
 			case array_key_exists($app, $this->expressions):
 				debug("CUSTOM REGEX MATCH.");

@@ -173,6 +173,7 @@ $(function () {
     // Load content window "stuff"
     buildUiDeferred().then(fetchData()).then(initTimers());
     setListeners();
+
 });
 
 // This fires after the page is completely ready
@@ -1072,6 +1073,7 @@ function updateUi(data) {
                 }
             }
         }
+        $(document).bootstrapMaterialDesign();
         toggleGroups();
     }
 }

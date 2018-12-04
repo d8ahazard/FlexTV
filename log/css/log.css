@@ -1,3 +1,15 @@
+html {
+    background: #32383e;
+}
+
+table{
+    table-layout: fixed;
+}
+
+td{
+    word-wrap:break-word;
+}
+
 #grepKeyword, #settings {
     font-size: 80%;
 }
@@ -53,6 +65,12 @@
 .level-badge {
     width: 100%;
     text-align: center;
+}
+
+.tCell {
+    display: table-cell;
+    vertical-align: middle;
+    border: 1px solid #32383e;
 }
 
 .jsonParse {
@@ -117,11 +135,46 @@
     color: #cecece;
 }
 
-.table-dark.table-striped tbody tr.error:nth-of-type(odd) {
+.numSpan {
+    width: 45px;
+    text-align: center;
+}
+
+.stampSpan {
+    width: 185px;
+}
+
+.levelSpan {
+    width: 50px;
+    text-align: center;
+}
+
+.docSpan {
+    width: 90px;
+    text-align: center;
+}
+
+.funcSpan {
+    width: 150px;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+.userSpan {
+    width: 90px;
+    text-align: center;
+}
+
+#results > div:nth-of-type(odd) {
+    background-color: rgba(255,255,255,.05);
+}
+
+
+#results > div.error:nth-of-type(odd) {
     background-color: rgba(255,0,0,.05);
 }
 
-.table-dark.table-striped tbody tr.error:nth-of-type(even) {
+#results > div.error:nth-of-type(even) {
     background-color: rgba(255,0,0,.1);
 }
 
@@ -153,11 +206,6 @@
     text-align: center;
 }
 
-.funcCol {
-    max-width: 150px;
-    width: 150px;
-    word-wrap: break-word;
-}
 
 .load-div div {
     display: inline-block;

@@ -111,6 +111,7 @@ $(document).ready(function() {
     },1000);
 });
 
+
 function checkScroll() {
     var st = $(window).scrollTop();
     var wh = $(window).height();
@@ -130,30 +131,39 @@ function scrollToBottom() {
 
 //This function queries the server for updates.
 function updateLog() {
-    var url = '?fetch=true&apiToken=foo';
-    var results = $('#results');
+    var url = 'index.php?fetch=true&apiToken=foo';
+    var resultsDiv = $('#results');
     var lines = [];
     if (loaded) url += "&refresh=true";
-    $.getJSON(url, function(data) {
-        if (data != null) {
+    $.ajax
+    ({
+        type: "GET",
+        url: url,
+        crossDomain: true,
+        dataType: 'json',
+        async: false,
+        headers: {
+            "Authorization": "Basic " + btoa("digitalhigh:BlueBox42!")
+        },
+        success: function (data){
             $.each(data, function (key, value) {
                 var line = formatLine(value);
                 if (loaded) {
-                    results.append(line);
+                    resultsDiv.append(line);
                 } else {
                     lines.push(line);
                 }
             });
-        }
-        if (!loaded) {
-            $('.load-div').hide();
-            results.append(lines);
-            console.log("DATA: ",data);
-            loaded = true;
-        }
+            if (!loaded) {
+                $('.load-div').hide();
+                resultsDiv.append(lines);
+                console.log("DATA: ",data);
+                loaded = true;
+            }
 
-        if (scroll && data.length) {
-            scrollToBottom();
+            if (scroll && data.length) {
+                scrollToBottom();
+            }
         }
     });
 }
@@ -190,11 +200,9 @@ function formatLine(line) {
     var doc = titleCase(line.doc.replace("_", " "));
     doc = doc.replace(".log", "");
     doc = doc.replace(".php", "");
-    var numSpan = '<th scope="row" class=lineNo>' + line.line + '</th>';
     var stamp = line.stamp;
     var userName = line.user;
     var functionName = line.func;
-    var stampSpan = '<td class="stamp stampCol">' + stamp + '</td>';
     if (~line.doc.indexOf("Error")) {
         line.level = "ERROR";
     }
@@ -202,9 +210,6 @@ function formatLine(line) {
     lineClass = lineClass.replace(".log.php", "");
     lineClass = lineClass.replace(".log", "");
     var classes = ["line", lineClass].join(" ");
-    var docSpan = "<td><span class='doc'>" + doc + '</span></td>';
-    var levelSpan = "<td><span class='badge level-badge " + line.level + "'>" + line.level + '</span></td>';
-    var paramString = "<td class='userCol'>" + userName + "</td><td class='funcCol'>" + functionName + "</td>";
     var body = line.body;
     if (line.url) {
         console.log("Line has a url.");
@@ -218,10 +223,15 @@ function formatLine(line) {
             '<div class="jsonPop" onmouseleave="$(this).hide();"><pre class="prettyprint"><code class="lang-json">' + htmlentities(jsonString) + '</code></pre></div>';
         body = body.replace("[JSON]",jsonLink);
     }
-    var bodySpan = "<td class='bodySpan'>" + body + "</td>";
 
-    odd = !odd;
-    return "<tr class='" + classes + "'>" + numSpan + docSpan + levelSpan + stampSpan  + paramString + bodySpan + "</tr>";
+    var numSpan = '<div class="numSpan tCell">' + line.line + '</div>\n';
+    var stampSpan = '<div class="stamp stampSpan tCell">' + stamp + '</div>\n';
+    var levelSpan = "<div class='levelSpan tCell'><span class='badge level-badge " + line.level + "'>" + line.level + '</span></div>\n';
+    var docSpan = "<div class='docSpan tCell'><span class='doc'>" + doc + '</span></div>\n';
+    var userSpan = "<div class='userSpan tCell'>" + userName + "</div>\n";
+    var funcSpan = "<div class='funcSpan tCell'>" + functionName + "</div>\n";
+    var bodySpan = "<div class='col bodySpan tCell'>" + body + "</div>\n";
+    return "<div class='row " + classes + "'>" + numSpan + stampSpan + levelSpan + docSpan + userSpan + funcSpan + bodySpan + "</div>";
 }
 
 function loadJson(path, params, method) {
