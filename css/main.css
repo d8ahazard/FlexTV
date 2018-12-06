@@ -117,16 +117,9 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-75) !important;
 }
 
-/*
 .dd-selected, a:hover:not(#executeButton), .btn-primary:hover, .btn-info {
     background-color: var(--theme-primary-inverse-50) !important;
-} */
-
-/*
-.dd-selected, .btn-primary:hover, .btn-info {
-    background-color: var(--theme-primary-inverse-50) !important;
 }
-*/
 
 .form-control-sm {
     /*display: inline-block !important;*/
@@ -170,7 +163,7 @@ a:hover:not(#executeButton) {
     color: var(--theme-primary-shade2) !important;
 }
 
-a.dropdown-item:hover {
+.btn-info:hover, a.dropdown-item:hover {
     background-color: var(--theme-accent-light) !important;
 }
 
@@ -913,6 +906,11 @@ html {
     padding-right: 12px;
 }
 
+#searchAccuracy, #rescanTime, #returnItems, #plexDvrStartOffset, #plexDvrEndOffset {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
 div.card-img-overlay > p.card-text.card-base {
     margin-top: 5px;
     width: 100%;
@@ -1012,10 +1010,6 @@ p.card-subtitle {
 
 .dropdown-item {
     color: var(--theme-primary-shade2);
-}
-
-.dropdown-menu .dropdown-item {
-    max-width: 100%;
 }
 
 #stopBtn {
@@ -1167,31 +1161,6 @@ p.card-subtitle {
     padding-right: 0;
 }
 
-.btn-100 {
-    width: 100px;
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.btn-google {
-    background-color: #dd4b39;
-    color: #fff;
-}
-
-.btn-google:hover {
-    color: #fff;
-    background-color: #ba3f30;
-}
-
-.btn-amazon {
-    background-color: #f9ae32;
-    color: #fff;
-}
-
-.btn-amazon:hover {
-    color: #fff;
-    background-color: #db9829;
-}
 
 .iconpicker-popover .form-control {
     width: 100% !important;
@@ -1209,7 +1178,11 @@ input[type="color"] {
     background: var(--theme-primary-50);
 }
 
-
+.btn-100 {
+    width: 100px;
+    padding-left: 0;
+    padding-right: 0;
+}
 
 .ddLabel {
     position: absolute;
@@ -1447,14 +1420,6 @@ input[type=checkbox] {
     font-weight: 100;
 }
 
-.custom-file-control:disabled, .form-control:disabled, .form-control[readonly], [readonly].custom-file-control {
-    background-color: var(--theme-primary-inverse-25);
-    color: var(--theme-primary-50) !important;
-    padding: 7px;
-}
-
-
-
 .userGroup {
     width: 100%;
 }
@@ -1510,18 +1475,8 @@ input[type=checkbox] {
     width: 100%;
 }
 
-.switch label .bmd-switch-track {
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.26) 50%, var(--theme-accent-light) 50%, var(--theme-accent-light) 100%);
-    right: 0;
-    left: auto;
-}
-
-.switch label {
-    padding-left: 0;
-}
-
-.switch label input:checked + .bmd-switch-track::after {
-    background-color: var(--theme-accent);
+.toggle {
+    float: right;
 }
 
 #resultsInner {
@@ -1586,7 +1541,9 @@ var(--theme-primary) -space: -o-pre-wrap; /* Opera 7 */
     font-size: x-large;
 }
 
-
+span.toggle {
+    margin-right: 5px !important;
+}
 
 .card-subtitle {
     color: var(--theme-primary-75);
