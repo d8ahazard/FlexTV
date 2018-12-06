@@ -41,33 +41,29 @@ function deferredContent($user) {
 			        <div class="card-body">
 			            <h4 class="card-title">' . $lang['uiSettingUpdates'] . '</h4>
 			            <div class="form-group bmd-form-group">
-			                <div class="togglebutton">
+			                <div class="switch togglebutton">
 			                    <label for="autoUpdate" class="appLabel checkLabel">' . $lang['uiSettingAutoUpdate'] . '
 			                        <input id="autoUpdate" type="checkbox" class="appInput appToggle" data-app="autoUpdate"/>
-	                                <span class="toggle"></span>
 			                    </label>
 			                </div>
-			                <div class="togglebutton">
+			                <div class="switch togglebutton">
 			                    <label for="notifyUpdate" class="appLabel checkLabel">' . $lang['uiSettingNotifyUpdate'] . '
 			                        <input id="notifyUpdate" type="checkbox" class="appInput"' . ($_SESSION["notifyUpdate"] ? "checked" : "") . '/>
-	                                <span class="toggle"></span>
 			                    </label>
 			                </div>
 			                <div class="form-group bmd-form-group">
 			                    <div id="updateContainer" class="info">
 			                    </div>
 			                </div>
-			                <div class="text-center">
-			                    <div class="form-group btn-group">
-			                        <button id="checkUpdates" value="checkUpdates" class="btn btn-raised btn-info btn-100" type="button">' . $lang['uiSettingRefreshUpdates'] . '</button>
-			                        <button id="installUpdates" value="installUpdates" class="btn btn-raised btn-danger btn-100" type="button">' . $lang['uiSettingInstallUpdates'] . '</button>
-			                    </div>
+			                <div class="text-center pt-4 mb-3">
+                                <button id="checkUpdates" value="checkUpdates" class="btn btn-raised btn-dark btn-100" type="button">' . $lang['uiSettingRefreshUpdates'] . '</button>
+                                <button id="installUpdates" value="installUpdates" class="btn btn-raised btn-primary btn-100" type="button">' . $lang['uiSettingInstallUpdates'] . '</button>
 			                </div>
 			            </div>
 			        </div>
 			    </div>
 			</div>';
-	}
+    }
 
 	$masterBtn = $masterDiv = "";
 	write_log("DEFERRED STILL ALIVE", "ALERT", false, true);
@@ -150,7 +146,7 @@ function deferredContent($user) {
 
 	$content = '<div class="view-tab fade show active settingPage container" id="customSettingsTab">     
 	                        <div class="tableContainer">
-								<div id="appList" class="row">
+								<div id="appList" class="row justify-content-center">
 				                </div>
 				                <div id="appDeleteList">
 				                </div>    
@@ -160,22 +156,21 @@ function deferredContent($user) {
 		                    </div>
 	                    </div>
 		            	<div class="view-tab fade settingPage container" id="plexSettingsTab">
-				            <div class="row">
+				            <div class="row justify-content-center">
 				                <div class="col-12 col-lg-6 mb-4">
                                     <div class="appContainer card h-100">
                                         <div class="card-body">
                                             <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
                                             <div class="form-group bmd-form-group ">
                                                 <label for="serverList" class="appLabel bmd-label-static">' . $lang['uiSettingPlaybackServer'] . '</label>
-                                                <select id="serverList" class="form-control selectpicker serverList" data-style="btn-secondary" title="' . $lang["uiSettingPlaybackServerHint"] . '">
-                                                </select>
+                                                <select id="serverList" class="selectpicker serverList" data-style="btn-raised btn-dark" data-width="100%" data-size="7" title="' . $lang["uiSettingPlaybackServerHint"] . '"></select>
                                             </div>
                                             <div class="form-group bmd-form-group">
                                                 <label for="returnItems" class="appLabel bmd-label-static">' . $lang['uiSettingOndeckRecent'] . '</label>
                                                 <input id="returnItems" class="appInput form-control" type="number" min="1" max="20" value="' . $_SESSION["returnItems"] . '" />
                                             </div>
-                                            <div class="form-group bmd-form-group text-center mb-0">
-                                                <button class="btn btn-raised btn-primary logBtn" id="castLogs" data-action="castLogs">' . $lang['uiSettingCastLogs'] . '</button><br>
+                                            <div class="text-center pt-4 mb-3">
+                                                <button class="btn btn-raised btn-primary logBtn" id="castLogs" data-action="castLogs">' . $lang['uiSettingCastLogs'] . '</button>
                                             </div>
                                         </div>
                                     </div>
@@ -271,20 +266,20 @@ function deferredContent($user) {
 				        ' . $masterDiv . '
 				        
 						<div class="view-tab fade settingPage container" id="generalSettingsTab">     
-                            <div class="row">
+                            <div class="row justify-content-center">
                                 <div class="col-12 col-lg-6 mb-4">
                                     <div class="appContainer card h-100">
                                         <div class="card-body">
                                             <h4 class="card-title">' . $lang['uiSettingGeneral'] . '</h4>
                                             <div class="form-group bmd-form-group">
                                                 <label class="appLabel" for="appLanguage">' . $lang['uiSettingLanguage'] . '</label>
-                                                <select id="appLanguage" class="form-control selectpicker " data-style="select-with-transition" title="Single Select" data-size="7">
+                                                <select id="appLanguage" class="selectpicker " data-style="btn-raised btn-dark" data-width="100%" title="Select App Language" data-size="7">
                                                     ' . listLocales() . '
                                                 </select>
                                             </div>
                                             <div class="form-group bmd-form-group' . $hidden . '">
-                                                <label for="apiToken" class="appLabel bmd-label-floating">' . $lang['uiSettingApiKey'] . '</label>
-                                                <input id="apiToken" class="appInput form-control" type="text" value="' . $apiToken . '" readonly="readonly"/>
+                                                <label for="apiToken" class="appLabel">' . $lang['uiSettingApiKey'] . '</label>
+                                                <input id="apiToken" class="appInput form-control" type="text" value="' . $apiToken . '" readonly/>
                                                 <span class="bmd-help">Your API Token can be used to access FlexTV from other services.</span>
                                             </div>
                                             <div class="form-group bmd-form-group' . ($hide ? ' hidden' : '') . '">
@@ -298,35 +293,32 @@ function deferredContent($user) {
                                                 <span class="bmd-help">' . $lang['uiSettingRescanHint'] . '</span>
                                             </div>
                                             
-                                            <div class="form-group bmd-form-group">
-                                                <div class="noNewUsersGroup togglebutton' . $hidden . '">
+                                            <div class="pt-4">
+                                                <div class="noNewUsersGroup switch togglebutton' . $hidden . '">
                                                     <label for="noNewUsers" class="appLabel checkLabel">' . $lang['uiSettingNoNewUsers'] . '
                                                         <input id="noNewUsers" title="' . $lang['uiSettingNoNewUsersHint'] . '" class="appInput" type="checkbox" ' . ($_SESSION["noNewUsers"] ? "checked" : "") . '/>
-                                                        <span class="toggle"></span>
                                                     </label>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="shortAnswers" class="appLabel checkLabel">' . $lang['uiSettingShortAnswers'] . '
                                                         <input id="shortAnswers" class="appInput" type="checkbox" ' . ($_SESSION["shortAnswers"] ? "checked" : "") . '/>
-                                                        <span class="toggle"></span>
                                                     </label>
                                                 </div>
-                                                <div class="togglebutton' . $hidden . '">
+                                                <div class="switch togglebutton' . $hidden . '">
                                                     <label for="cleanLogs" class="appLabel checkLabel">' . $lang['uiSettingObscureLogs'] . '
                                                         <input id="cleanLogs" type="checkbox" class="appInput" ' . ($_SESSION["cleanLogs"] ? "checked" : "") . '/>
-                                                        <span class="toggle"></span>
                                                     </label>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="darkTheme" class="appLabel checkLabel">' . $lang['uiSettingThemeColor'] . '
                                                         <input id="darkTheme" class="appInput" type="checkbox" ' . ($_SESSION["darkTheme"] ? "checked" : "") . '/>
-                                                        <span class="toggle"></span>
                                                     </label>
                                                 </div>
-                                                <div class="togglebutton' . $hidden . '">
+                                            </div>
+                                            <div class="form-group bmd-form-group pt-0">
+                                                <div class="switch togglebutton' . $hidden . '">
                                                     <label for="forceSSL" class="appLabel checkLabel">' . $lang['uiSettingForceSSL'] . '
                                                         <input id="forceSSL" class="appInput" type="checkbox" ' . ($_SESSION["forceSSL"] ? "checked" : "") . '/>
-                                                        <span class="toggle"></span>
                                                     </label>
                                                     <span class="bmd-help">' . $lang['uiSettingForceSSLHint'] . '</span>
                                                 </div>
@@ -337,18 +329,18 @@ function deferredContent($user) {
                                 ' . $gitDiv . '
                                 <div class="col-12 col-lg-6 mb-4">
                                     <div class="appContainer card h-100">
-                                        <div class="card-body">
+                                        <div class="card-body text-center">
                                             <h4 class="card-title">' . $lang['uiSettingAccountLinking'] . '</h4>
-                                            <div class="form-group text-center">
-                                                <div class="form-group bmd-form-group">
-                                                    <button class="btn btn-raised linkBtn btn-primary testServer' . $hidden . '" id="testServer" data-action="test">' . $lang['uiSettingTestServer'] . '</button><br>
-                                                    <button id="linkAccountv2" data-action="googlev2" class="btn btn-raised linkBtn btn-danger">' . $lang['uiSettingLinkGoogle'] . '</button>
-                                                    <button id="linkAmazonAccount" data-action="amazon" class="btn btn-raised linkBtn btn-info">' . $lang['uiSettingLinkAmazon'] . '</button>
-                                                </div>
+                                            <div class="pt-4">
+                                                <button class="btn btn-raised linkBtn btn-primary testServer' . $hidden . '" id="testServer" data-action="test">' . $lang['uiSettingTestServer'] . '</button><br>
                                             </div>
-                                            <div class="text-center">
+                                            <div class="pt-4 mb-3">
+                                                <button id="linkAccountv2" data-action="googlev2" class="btn btn-raised linkBtn btn-google">' . $lang['uiSettingLinkGoogle'] . '</button>
+                                                <button id="linkAmazonAccount" data-action="amazon" class="btn btn-raised linkBtn btn-amazon">' . $lang['uiSettingLinkAmazon'] . '</button>
+                                            </div>
+                                            <div class="pt-4">
                                                 <label for="sel1">' . $lang['uiSettingCopyIFTTT'] . '</label><br>
-                                                <button id="sayURL" class="copyInput btn btn-raised btn-primary btn-70" type="button"><i class="material-icons colorItem">message</i></button>
+                                                <button id="sayURL" class="copyInput btn btn-raised btn-dark btn-70" type="button"><i class="material-icons">assignment</i></button>
                                             </div>
                                         </div>
                                     </div>
@@ -359,21 +351,24 @@ function deferredContent($user) {
                                             <h4 class="card-title">Notifications</h4>
                                             <div class="form-group bmd-form-group">
                                                 <label class="appLabel" for="broadcastList">' . $lang['uiSettingBroadcastDevice'] . '</label>
-                                                <select class="form-control custom-select deviceList" id="broadcastList" title="' . $lang["uiSettingBroadcastDeviceHint"] . '">
-                                                </select>
+                                                <select id="broadcastList" title="' . $lang["uiSettingBroadcastDeviceHint"] . '" class="selectpicker deviceList" data-style="btn-raised btn-dark" data-width="100%" data-size="7"></select>
                                             </div>
-                                            <div class="form-group center-group">
-                                                <label for="appt-time">Start:</label>
+                                            <div class="form-row pt-4 mb-3">
+                                                <div class="col">
+                                                    <label for="quietStart">Start:</label>
                                                 <input type="time" id="quietStart" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
-                                                <label for="appt-time">Stop:</label>
+                                                </div>
+                                                <div class="col">
+                                                    <label for="quietStop">Stop:</label>
                                                 <input type="time" id="quietStop" class="form-control form-control-sm appInput" min="0:00" max="23:59"/>
+                                                </div>
                                             </div>
-                                            <div class="fetchNotify">
-                                                <button id="copyBroadcast" class="hookLnk btn btn-raised btn-warn btn-100" title="Copy WebHook Notification URL">
-                                                    <i class="material-icons colorItem">assignment</i>
+                                            <div class="fetchNotify pt-4">
+                                                <button id="copyBroadcast" class="hookLnk btn btn-raised btn-dark btn-100" title="Copy WebHook Notification URL">
+                                                    <i class="material-icons">assignment</i>
                                                 </button>
-                                                <button id="testBroadcast" value="broadcast" class="testInput btn btn-info btn-raised btn-100" title="Test WebHook Notification">
-                                                    <i class="material-icons colorItem">send</i>
+                                                <button id="testBroadcast" value="broadcast" class="testInput btn btn-raised btn-primary btn-100" title="Test WebHook Notification">
+                                                    <i class="material-icons">send</i>
                                                 </button>
                                             </div>
                                         </div>
@@ -383,14 +378,14 @@ function deferredContent($user) {
                                     <div class="appContainer card h-100">
                                         <div class="card-body">
                                             <h4 class="card-title">' . $lang['uiSettingHookLabel'] . '</h4>
-                                            <div class="togglebutton">
+                                            <div class="switch togglebutton">
                                                 <label for="hook" class="appLabel checkLabel">' . $lang['uiSettingEnable'] . '
                                                     <input id="hook" type="checkbox" data-app="hook" class="appInput appToggle"/>
                                                     <span class="toggle"></span>
                                                 </label>
                                             </div>
                                             <div class="form-group bmd-form-group" id="hookGroup">
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookSplit" class="appLabel checkLabel">' . $lang['uiSettingSeparateHookUrl'] . '
                                                         <input id="hookSplit" type="checkbox" class="appInput appToggle"/>
                                                         <span class="toggle"></span>
@@ -402,7 +397,7 @@ function deferredContent($user) {
                                                         <span class="bmd-help">' . $lang['uiSettingHookPlayHint'] . '</span>
                                                     </label>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookPlay" class="appLabel checkLabel">' . $lang['uiSettingHookPlayback'] . '
                                                         <input id="hookPlay" type="checkbox" data-app="hookPlay" class="appInput appToggle"/>
                                                         <span class="toggle"></span>
@@ -416,7 +411,7 @@ function deferredContent($user) {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookPause" class="appLabel checkLabel">' . $lang['uiSettingHookPause'] . '
                                                         <input id="hookPause" type="checkbox" data-app="hookPause" class="appInput appToggle"/>
                                                         <span class="toggle"></span>
@@ -429,7 +424,7 @@ function deferredContent($user) {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookStop" class="appLabel checkLabel">' . $lang['uiSettingHookStop'] . '
                                                         <input id="hookStop" type="checkbox" data-app="hookStop" class="appInput appToggle">
                                                         <span class="toggle"></span>
@@ -442,7 +437,7 @@ function deferredContent($user) {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookFetch" class="appLabel checkLabel">' . $lang['uiSettingHookFetch'] . '
                                                         <input id="hookFetch" type="checkbox" class="appInput appToggle hookToggle"/>
                                                         <span class="toggle"></span>
@@ -455,7 +450,7 @@ function deferredContent($user) {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="togglebutton">
+                                                <div class="switch togglebutton">
                                                     <label for="hookCustom" class="appLabel checkLabel">' . $lang['uiSettingHookCustom'] . '
                                                         <input id="hookCustom" type="checkbox" data-app="hookCustom" class="appInput appToggle"/>
                                                         <span class="toggle"></span>
@@ -474,11 +469,9 @@ function deferredContent($user) {
                                                         <input id="hookCustomReply" class="appInput form-control Webhooks" type="text" value="' . $_SESSION["hookCustomReply"] . '"/>
                                                     </label>
                                                 </div>
-                                                <div class="text-center">
-                                                    <div class="form-group btn-group">
-                                                        <button value="Webhooks" class="testInput btn btn-raised btn-info" type="button">' . $lang['uiSettingBtnTest'] . '</button>
-                                                        <button id="resetCouch" value="Webhooks" class="resetInput btn btn-raised btn-danger btn-100" type="button">' . $lang['uiSettingBtnReset'] . '</button>
-                                                    </div>
+                                                <div class="text-center pt-4 mb-3">
+                                                    <button id="resetCouch" value="Webhooks" class="resetInput btn btn-raised btn-danger btn-100" type="button">' . $lang['uiSettingBtnReset'] . '</button>
+                                                    <button value="Webhooks" class="testInput btn btn-raised btn-primary btn-100" type="button">' . $lang['uiSettingBtnTest'] . '</button>
                                                 </div>
                                             </div>
                                         </div>
