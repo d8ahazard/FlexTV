@@ -173,7 +173,6 @@ $(function () {
     // Load content window "stuff"
     buildUiDeferred().then(fetchData()).then(initTimers());
     setListeners();
-
 });
 
 // This fires after the page is completely ready
@@ -196,6 +195,7 @@ function fetchData() {
         $.getJSON(uri, function (data) {
             if (data !== null) {
                 parseData(data);
+                $('body').bootstrapMaterialDesign();
                 polling = false;
             }
             dfd.resolve("Success");
@@ -433,7 +433,6 @@ function buildUiDeferred() {
     $(".remove").remove();
 
     // Initialize other stuffs...
-    materialInit();
     scaleElements();
     checkUpdate();
 	setTime();
@@ -861,9 +860,9 @@ function updateDevices(newDevices) {
             var dvrGroup = $('#dvrGroup');
             if (firstLoad) {
                 if (newDevices["Dvr"].length > 0) {
-                    dvrGroup.show();
+                    dvrGroup.parent('.col-12').show();
                 } else {
-                    dvrGroup.hide();
+                    dvrGroup.parent('.col-12').hide();
                 }
 
                 $('#dvrList').html(deviceHtml('Dvr', newDevices.Dvr));
@@ -1073,7 +1072,6 @@ function updateUi(data) {
                 }
             }
         }
-        $(document).bootstrapMaterialDesign();
         toggleGroups();
     }
 }

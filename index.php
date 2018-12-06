@@ -91,7 +91,7 @@ function showLogin() {
 										<img class="loginLogo" src="./img/phlex-med.png" alt="Card image">
 										<div class="card-subtitle">Please log in below to begin.</div>
 										<div id="loginForm">
-											<button class="btn btn-primary btn-link btn-wd" id="plexAuth">DO IT!</button>
+											<button class="btn btn-primary btn-wd" id="plexAuth">DO IT!</button>
 											<br><br>
 											<a href="http://phlexchat.com/Privacy.html" class="card-link">Privacy Policy</a>
 										</div>
@@ -141,7 +141,7 @@ function showError() {
 	<link rel="shortcut icon" href="./img/favicon.ico">
     <link rel="stylesheet" href="css/loadingAnimation.css">
     <!-- Material Kit/Bootstrap4 CSS, Material Icons-->
-    <!-- <link href="css/material-kit_custom.css?v=2.0.4" rel="stylesheet" /> -->
+<!--    <link href="css/material-kit_custom.css?v=2.0.4" rel="stylesheet" />-->
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Flex TV CSS Files-->
@@ -184,7 +184,6 @@ function showError() {
 
 <body style="background-color:black">
     <noscript id="deferred-styles">
-        <link href="css/lib/snackbar.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.4.0/gridstack.min.css" />
         <link rel="stylesheet" href="css/font/font-muximux.css">
@@ -245,11 +244,10 @@ function showError() {
     <script type="text/javascript" src="js/lib/jquery-3.3.1.min.js"></script>
     <!-- material kit stuff -->
     <script src="js/lib/popper.min.js" type="text/javascript"></script>
-    <script src="js/lib/bootstrap-material-design.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
     <script src="js/lib/moment.min.js"></script>
     <script src="js/lib/nouislider.min.js" type="text/javascript"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <script src="js/lib/material-kit.js?v=2.0.4" type="text/javascript"></script>
 
     <script src="js/widgets.js" type="text/javascript"></script>
 
@@ -277,7 +275,7 @@ function showError() {
     <!-- Snakbar, sort table, swipe to close, cache pfill for service worker -->
     <script defer type="text/javascript" src="js/lib/snackbar.min.js"></script>
     <script defer type="text/javascript" src="js/lib/swiped.min.js"></script>
-    <script src="https://rubaxa.github.io/Sortable/Sortable.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js" integrity="sha256-ncVUo40HSaxFORNNlffKfkkhbsUHNLAzQ2SFlRUw7gA=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/cache-polyfill.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/js/bootstrap-select.min.js" integrity="sha256-APwNt/Yju1ZD+yBddFqLhJsk21FXdiNGUuISL4EkUs4=" crossorigin="anonymous"></script>
