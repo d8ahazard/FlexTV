@@ -29,3 +29,5 @@ cacheItems.json
 cacheItems.js
 web.config
 cacheItems.js
+.idea/webServers.xml
+.idea/encodings.xml
