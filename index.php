@@ -23,6 +23,7 @@ if ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") && $forceSSL) {
 }
 
 header('Cache-Control: max-age=86400');
+header('Access-Control-Allow-Origin:*');
 
 if (!session_started()) {
 	session_start();
