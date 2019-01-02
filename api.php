@@ -125,6 +125,37 @@ function initialize() {
 		echo json_encode($result);
 		bye();
 	}
+	if (isset($_GET['testFc'])) {
+		$uri = $_GET['uri'] ?? '';
+		$result = "Failure";
+		write_log("We be testin $uri");
+		if (trim($uri)) {
+			$testUri = $uri . "/test";
+			write_log("Curling: $testUri");
+			$data = curlGet($testUri,false, 4,false,true);
+			write_log("DATA: $data");
+			$result = ($data === 'Success') ? $data : "Failure";
+		}
+		write_log("Result: $result");
+		echo $result;
+		bye();
+	}
+
+	if (isset($_GET['setFc'])) {
+		$string = json_decode($_GET['setFc'], true);
+		$result = "Failure";
+		write_log("FC JSON: ".json_encode($string));
+
+		if (is_array($string)) {
+			write_log("Setting...");
+			updateUserPreference('fcArray', $string);
+			$result = "Success";
+		}
+		echo $result;
+		bye();
+	}
+
+
 	if (isset($_GET['registerServer'])) {
 		write_log("Registering server with phlexchat.com", "INFO");
 		sendServerRegistration();
@@ -399,13 +430,15 @@ function getUiData($force = false) {
 	$apps = fetchAppArray();
 	if ($force) {
 		$widgetData = fetchWidgetArray();
+		$fcArray = getPreference('userdata', ['fcArray'],[],['apiToken'=>$_SESSION['apiToken']], true);
 		write_log("Sending forced data.","ALERT",false,true);
 		$lang = checkSetLanguage();
 		$result = [
 			'devices' => $devices,
 			'strings' => $lang['javaStrings'] ?? [],
 			'widgets' => $widgetData,
-			'apps' => $apps
+			'apps' => $apps,
+			'fcArray' => $fcArray
 		];
 		$_SESSION['settings'] = [];
 		return $result;
@@ -457,11 +490,12 @@ function getUiData($force = false) {
 			}
 		}
 
-		$removes = ['appArray', 'jsonAppArray', 'appList', 'jsonWidgetArray', 'commands', 'fetchers', 'widgets'];
+		$removes = ['appArray', 'jsonAppArray', 'appList', 'jsonWidgetArray', 'commands', 'fetchers', 'widgets', 'fcArray'];
 		$apps = $updated['jsonAppArray'] ?? [];
 		$commands = $updated['commands'] ?? [];
 		$fetchers = $updated['fetchers'] ?? [];
 		$widgets = $updated['widgets'] ?? [];
+		$fcArray = $updated['fcArray'] ?? [];
 
 		if (count($apps)) $result['apps'] = $apps;
 		if (count($widgets)) {
@@ -469,6 +503,7 @@ function getUiData($force = false) {
 		}
 		if (count($commands)) $result['commands'] = $commands;
 		if (count($fetchers)) $result['fetchers'] = $commands;
+		if (count($fcArray)) $results['fcArray'] = $fcArray;
 		foreach ($removes as $remove) if (isset($updated[$remove])){
 			unset($updated[$remove]);
 		}
@@ -1003,6 +1038,20 @@ function scrapeServers($serverArray) {
 		$urls["${deviceId}_cast"] = ["$serverUri/chromecast/clients?X-Plex-Token=$token", ['Accept: application/json']];
 		$urls["${deviceId}_dvr"] = ["$serverUri/livetv/dvrs?X-Plex-Token=$token", ['Accept: application/json']];
 	}
+
+	$fc = $_SESSION['fcArray'] ?? [];
+	$server = findDevice(false, false, 'Server');
+	$token = $server['Token'];
+	$defaultParent = $server['Id'];
+
+	$i = 0;
+	foreach ($fc as $plugin) {
+		write_log("Adding $plugin");
+		$deviceId = base64_encode($plugin);
+		$urls["fc_${deviceId}_cast"] = ["$plugin/cast/clients?X-Plex-Token=$token", ['Accept: application/json']];
+		$i++;
+	}
+
 	$results = false;
 	if (count($urls)) {
 		$results = (new multiCurl($urls))->process();
@@ -1017,6 +1066,8 @@ function scrapeServers($serverArray) {
 			$token = $device['Token'];
 			$cast = $results["${id}_cast"] ?? false;
 			$dvr = $results["${id}_dvr"]['MediaContainer']['Dvr'] ?? false;
+			if ($cast) unset($results["${id}_cast"]);
+			if ($dvr) unset($results["${id}_dvr"]);
 			if ($cast) {
 				$device['hasPlugin'] = true;
 				write_log("Cast devices found for $name: " . json_encode($cast));
@@ -1045,7 +1096,6 @@ function scrapeServers($serverArray) {
 				}
 			}
 
-
 			if ($dvr) {
 				write_log("DVR for $name: " . json_encode($dvr));
 				$key = $dvr[0]['key'] ?? false;
@@ -1065,6 +1115,41 @@ function scrapeServers($serverArray) {
 					}
 					$device['zip'] = $lineup;
 					array_push($dvrs, $device);
+				}
+			}
+		}
+	}
+
+	if (count($results)) {
+		write_log("We got our leftovers...");
+		$cast = [];
+		foreach($results as $name => $man) {
+			if (preg_match("/fc_/", $name)) $cast = $man;
+			$parent = base64_decode(explode("_", $name)[1]);
+			if (count($cast)) {
+				$device['hasPlugin'] = true;
+				$devVersion = $cast['version'] ?? false;
+				if ($devVersion) {
+					if (!$version || $devVersion > $version) $version = $devVersion;
+				}
+
+				if (!$hasPlugin) updateUserPreference('hasPlugin', true);
+				$castDevices = $cast['MediaContainer']['Device'] ?? [];
+				foreach ($castDevices as $castDevice) {
+					if (isset($castDevice['name'])) {
+						$type = $castDevice['type'];
+						$type = ($type == 'audio' || $type == 'group' || $type == 'cast') ? 'Cast' : $type;
+						$newDevice = [
+							'Name'    => $castDevice['name'],
+							'Id'      => $castDevice['id'],
+							'Product' => $type,
+							'Type'    => $castDevice['type'],
+							'Token'   => $token,
+							'Parent'  => $parent,
+							'Uri'     => $castDevice['uri']
+						];
+						array_push($clients, $newDevice);
+					}
 				}
 			}
 		}
@@ -2548,6 +2633,16 @@ function sendMedia($media, $shuffle = false) {
 			return false;
 		}
 		if ($client['Product'] === 'Cast') {
+			$clientUri = $client['Parent'];
+			$fc = $_SESSION['fcArray'] ?? [];
+			foreach($fc as $check) {
+				write_log("Checking $clientUri against ". $check);
+				if ($check === $clientUri) {
+					write_log("Sending command to flexConnect standalone: ".json_encode($client));
+					$parent['Uri'] = $check;
+					$token = $_SESSION['plexToken'];
+				}
+			}
 			$isAudio = ($media['type'] == 'album' || $media['type'] == 'artist' || $media['type'] == 'track');
 			$userName = $_SESSION['plexUserName'];
 			$version = explode("-", $parent['Version'])[0];

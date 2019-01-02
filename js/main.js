@@ -4,6 +4,7 @@ var apiToken, appName, bgs, cv, dvr, token, resultDuration, logLevel, itemJSON,
 
 var firstLoad = true;
 var cmdLoad = true;
+var fcLink = false;
 
 var cleanLogs=true, couchEnabled=false, lidarrEnabled=false, ombiEnabled=false, sickEnabled=false, sonarrEnabled=false, radarrEnabled=false,
 	headphonesEnabled=false, watcherEnabled=false, delugeEnabled=false, downloadstationEnabled=false, sabnzbdEnabled=false, utorrentEnabled=false,
@@ -217,7 +218,7 @@ function fetchData() {
 function parseData(data) {
     //console.log("Parse data called.", data);
     // Check for these items, in order of priority, and "do stuff" with them
-    var properties = ["strings", "messages", "dologout", "apps", "widgets", "fetchers", "userData", "devices", "playerStatus", "commands"];
+    var properties = ["strings", "messages", "dologout", "apps", "widgets", "fetchers", "userData", "devices", "playerStatus", "commands", "fcArray"];
 
     for (var property in properties) {
         var propertyName = properties[property];
@@ -271,6 +272,11 @@ function parseData(data) {
                         console.log("Data hab sum commands...", dataItem);
                         updateCommands(dataItem);
                         break;
+                    case "fcArray":
+                        $.each(dataItem, function(key, value){
+                            console.log("Value: ", value);
+                            tableRowAdd(value, false);
+                        });
 
                 }
                 var checkVal2 = dataItem;
@@ -796,8 +802,11 @@ function deviceHtml(type, deviceData) {
                         clientSpan + "</span>";
                 }
             } else {
+                if (type === 'StatServer' && !device['HasPlugin']) {
+                    skip = true;
+                    if (firstLoad) tableRowAdd(device['Uri'], true);
+                }
 
-                if (type === 'StatServer' && !device['HasPlugin']) skip = true;
                 string = "<option data-type='" + type + "' value='" + id + "'" + selected + ">" + name + "</option>";
             }
             if (device.hasOwnProperty('Product')) {
@@ -1074,6 +1083,36 @@ function updateUi(data) {
         }
         toggleGroups();
     }
+}
+
+function tableRowAdd(url, auto) {
+    var fc = $('#fcTable');
+    var urlString = '';
+    var linkString = 'link_off';
+    if (url) {
+        urlString = url;
+        linkString = 'link';
+    }
+    var typeString = auto ? 'extension' : 'face';
+    var inputClass = auto ? '' : 'user';
+    var disabled = auto ? ' disabled' : '';
+    fc.append("<tr>" +
+        "<td class='col-10'><input type='text' class='fcInput " + inputClass + "' value='"+urlString+"'"+disabled+"/></td>" +
+        "<td class='col-1 text-center'><span class='material-icons fcType'>" + typeString + "</span></td>" +
+        "<td class='col-1 text-center fcCol'><span class='material-icons fcStatus'>" + linkString + "</span></td></tr>"
+    );
+
+}
+
+function tableRowDel() {
+    var focused = $(':focus');
+    var parent = focused.closest('tr');
+    console.log("I should be deleting", $(parent), focused);
+        if (focused.hasClass('user')) {
+            console.log("Removing");
+            $(parent).remove();
+        }
+    updateFcTable();
 }
 
 function toggleDrawer(expandDrawer, element) {
@@ -1731,7 +1770,34 @@ function setListeners() {
         userScrolled = true;
     });
 
+    $(document).on('click', '#fcTableAdd', function() {tableRowAdd(false, false)});
 
+    $(document).on('mousedown', '#fcTableDel', function(event) {
+        tableRowDel();
+        event.preventDefault();
+    });
+    $(document).on('change', '.fcInput', function() {
+        var val = $(this).val();
+        var result = false;
+        var fcCol = $(this).parents().siblings('.fcCol');
+        fcLink = fcCol.find('span');
+        console.log("ELE? ", fcLink);
+        $.get("./api.php?testFc&uri=" + val + "&apiToken=" + apiToken, function(data){
+            var statIcon = $(this).closest('.fcStatus');
+            console.log("Data: ", data, statIcon);
+            result = ('Success' === data);
+        }).always(function(){
+            console.log("Result: ", result, fcLink);
+            if (result) {
+                $.snackbar({content: "Connection Successful!"});
+                fcLink.html("link");
+                updateFcTable();
+            } else {
+                $.snackbar({content: "Connection FAILED."});
+                fcLink.html("link_off");
+            }
+        });
+    });
 
     $(document).on('click', '.JSONPop', function() {
         var jsonData = decodeURIComponent($(this).data('json'));
@@ -2341,6 +2407,8 @@ function addAppButton(app) {
 
 }
 
+
+
 function reloadAppGroups(appList) {
     console.log("Reloading app groups.");
     if (firstLoad) {
@@ -2609,6 +2677,24 @@ function reloadServiceLists() {
 
 }
 
+
+function updateFcTable() {
+    var table = $('#fcTable');
+    var uris = [];
+    $.each(table.find('input.user'), function(){
+        console.log("ELEM: ", $(this));
+        var uri = $(this).val();
+        if (uri !== "") {
+            uris.push(uri);
+        }
+    });
+
+    var url = './api.php?setFc=' + JSON.stringify(uris) + "&apiToken=" + apiToken;
+    $.get(url, function(data){
+        console.log("Result: " + data);
+    });
+
+}
 
 
 function updateFetchers(userData) {

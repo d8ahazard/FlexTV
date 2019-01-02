@@ -405,7 +405,7 @@
 	"uiNoCastPlugin": "The Cast plugin was not found on any of your servers. Click here to find out how to get it.",
 	"uiPlayerSelectPrompt": "Select a player to control.",
 	"uiRescanDevices": "Rescan devices",
-	"uiSettingAccountLinking": "Account Linking",
+	"uiSettingAccountLinking": "Connectivity",
 	"uiSettingApiKey": "API Key:",
 	"uiSettingAutoUpdate": "Automatically Install Updates",
 	"uiSettingNotifyUpdate": "Notify when updates are available",

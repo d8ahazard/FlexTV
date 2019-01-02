@@ -1,18 +1,18 @@
 <?php
-require_once dirname(__FILE__) . '/../php/vendor/autoload.php';
-require_once dirname(__FILE__) . "/../php/webApp.php";
-require_once dirname(__FILE__) . '/../php/util.php';
 require_once dirname(__FILE__) . '/MultiTail.php';
 use digitalhigh\MultiTail;
 
-error_reporting(0);
+error_reporting(1);
+ini_set("display_errors", 1);
+ini_set("display_startup_errors", 1);
+
+error_reporting(E_ERROR);
 if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) {
 	if(!ob_start("ob_gzhandler")) ob_start();
 } else ob_start();
 if (session_status() === PHP_SESSION_NONE) {
 	$ok = @session_start();
 	if (!$ok) {
-		write_log("REGENERATING SESSION ID.", "WARN", false, true, true);
 		session_regenerate_id(true);
 		session_start();
 	}
@@ -24,16 +24,20 @@ if (isset($_GET['test'])) {
 	echo php_ini_loaded_file().PHP_EOL;
 }
 
-$logPath = realpath(ini_get("error_log"));
-$output['PHP Error'] = $logPath;
+$logPath = validLog(realpath(ini_get("error_log")));
+if ($logPath) $output['PHP Error'] = $logPath;
 
 $config = parse_ini_file("./config.ini", true);
 
-$files = $config['files'] ?? false;
-$directories = $config['directories']['path'] ?? false;
+$files = $config['files_default'] ?? false;
+$userFiles = $config['files_user'] ?? false;
+$directories = $config['dirs_user'] ?? false;
+$expressions = $config['regex'] ?? false;
+$formats = $config['date'] ?? false;
+$options = $config['options'] ?? false;
 
-
-if ($files) {
+if (is_array($files)) {
+    if (is_array($userFiles)) $files = array_merge($files, $userFiles);
     foreach($files as $key => $fileCheck) {
 	    if (isset($_GET['test'])) echo "$key for $fileCheck" . PHP_EOL;
 
@@ -82,19 +86,10 @@ $noHeader = $_GET['noHeader'] ?? false;
  * We're getting an AJAX call
  */
 if(isset($_GET['fetch']))  {
-//	if (!isset($_GET['apiToken']) || isWebApp()) {
-//		die("Unauthorize access detected.");
-//	} else {
-//		$apiToken = $_GET['apiToken'];
-//		if (!verifyApiToken($apiToken)) {
-//			write_log("Invalid API Token used for logfile access.");
-//			die("Invalid API Token");
-//		}
-//	}
     $refresh = isset($_GET['refresh']);
 
     if ($refresh && isset($_SESSION['logs'])) $logs = $_SESSION['logs'];
-	$tail = new MultiTail($logs, $noHeader);
+	$tail = new MultiTail($logs, $noHeader, $expressions, $formats);
 	header("Content-Type: application/json");
 	echo json_encode($tail->fetch(), JSON_PRETTY_PRINT);
 	$_SESSION['logs'] = $tail->logs;
@@ -187,15 +182,15 @@ if (isset($_GET['test'])) die;
         </div>
     </div>
 </nav>
-<div class="contents table-responsive-md">
-    <table class="table table-striped table-dark table-bordered table-hover table-sm" id="log">
+<div class="contents">
+    <table class="table table-striped table-dark table-bordered table-hover table-sm table-responsive-md" id="log">
         <thead>
             <tr id="headerRow">
-                <th scope="col">#</th>
-                <th scope="col">Doc</th>
-                <th scope="col">Level</th>
-                <th scope="col">Stamp</th>
-                <th scope="col">User</th>
+                <th scope="col" class="lineCol">#</th>
+                <th scope="col" class="docCol">Doc</th>
+                <th scope="col" class="badgeCol">Level</th>
+                <th scope="col" class="stampCol">Stamp</th>
+                <th scope="col" class="userCol">User</th>
                 <th scope="col" class="funcCol">Function</th>
                 <th scope="col">Body</th>
             </tr>
@@ -208,6 +203,7 @@ if (isset($_GET['test'])) die;
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script type="text/javascript">

@@ -11,6 +11,7 @@ class MultiTail {
 	public $logs;
 	private $maxLines;
 	private $noHeader;
+	private $expressions;
 
 
 	function __construct($logs, $noHeader, $expressions, $formats, $maxLines = 5000) {

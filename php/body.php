@@ -29,6 +29,8 @@ function deferredContent($user) {
 	write_log("SENDING DEFERRED CONTENT.", "PINK", false, true);
 	$hidden = $hide ? " remove" : "";
 	$webAddress = serverAddress();
+	$flexConnectUri = $user['flexConnectUri'] ?? '';
+	$fcEnable = (($user['flexConnectEnabled'] ?? false) ? ' checked' : '');
 	$apiToken = $user['apiToken'];
 
 	$useGit = $hide ? false : checkGit();
@@ -329,19 +331,41 @@ function deferredContent($user) {
                                 ' . $gitDiv . '
                                 <div class="col-12 col-lg-6 mb-4">
                                     <div class="appContainer card h-100">
-                                        <div class="card-body text-center">
-                                            <h4 class="card-title">' . $lang['uiSettingAccountLinking'] . '</h4>
-                                            <div class="pt-4">
+                                        <div class="card-body">
+                                            <h4 class="card-title text-center">' . $lang['uiSettingAccountLinking'] . '</h4>
+                                            <div class="pt-4 text-center">
                                                 <button class="btn btn-raised linkBtn btn-primary testServer' . $hidden . '" id="testServer" data-action="test">' . $lang['uiSettingTestServer'] . '</button><br>
                                             </div>
-                                            <div class="pt-4 mb-3">
+                                            <div class="pt-4 mb-3 text-center">
                                                 <button id="linkAccountv2" data-action="googlev2" class="btn btn-raised linkBtn btn-google">' . $lang['uiSettingLinkGoogle'] . '</button>
                                                 <button id="linkAmazonAccount" data-action="amazon" class="btn btn-raised linkBtn btn-amazon">' . $lang['uiSettingLinkAmazon'] . '</button>
                                             </div>
-                                            <div class="pt-4">
+                                            <div class="pt-4 text-center">
                                                 <label for="sel1">' . $lang['uiSettingCopyIFTTT'] . '</label><br>
                                                 <button id="sayURL" class="copyInput btn btn-raised btn-dark btn-70" type="button"><i class="material-icons">assignment</i></button>
                                             </div>
+                                            <br><br>
+                                            <div class="form-group bmd-form-group pt-0">
+	                                            <div class="switch togglebutton">
+	                                                <label for="flexConnectEnable" class="appLabel checkLabel">Enable Flex Connect
+	                                                    <input id="flexConnectEnable" type="checkbox" class="appInput" ' . (($_SESSION["flexConnectEnable"] ?? false) ? "checked" : "") . '/>
+	                                                </label>
+	                                            </div>
+                                            </div>
+                                            <div id="fcWrap">
+	                                            <table id="fcTable">
+	                                            	<tr><th class="col-10">URI</th><th class="col-1">Type</th><th class="col-1">Status</th></tr>
+												 </table>
+												 <div class="btn-group" id="fcGroup">
+												 	<div class="btn btn-sm btn-green" id="fcTableAdd">
+												 		<span class="material-icons">add_circle</span>
+													</div>
+													<div class="btn btn-sm btn-warning" id="fcTableDel">
+												 		<span class="material-icons">remove_circle</span>
+													</div>
+											     </div>                                            
+											 </div>
+											
                                         </div>
                                     </div>
                                 </div>

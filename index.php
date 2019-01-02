@@ -23,7 +23,7 @@ if ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off") && $forceSSL) {
 }
 
 header('Cache-Control: max-age=86400');
-header('Access-Control-Allow-Origin:*');
+header("Access-Control-Allow-Origin: *");
 
 if (!session_started()) {
 	session_start();
@@ -276,7 +276,7 @@ function showError() {
     <!-- Snakbar, sort table, swipe to close, cache pfill for service worker -->
     <script defer type="text/javascript" src="js/lib/snackbar.min.js"></script>
     <script defer type="text/javascript" src="js/lib/swiped.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js" integrity="sha256-ncVUo40HSaxFORNNlffKfkkhbsUHNLAzQ2SFlRUw7gA=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.0-rc1/Sortable.min.js" integrity="sha256-38Rua9juy4KAOXEOQyMytSVNJZQa2rL0MqaVt8yGXHE=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/lib/cache-polyfill.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/js/bootstrap-select.min.js" integrity="sha256-APwNt/Yju1ZD+yBddFqLhJsk21FXdiNGUuISL4EkUs4=" crossorigin="anonymous"></script>

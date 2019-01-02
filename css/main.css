@@ -41,6 +41,20 @@ body {
     top: 25%;
 }
 
+#fcTableWrap {
+    height: 100%;
+    overflow: hidden;
+}
+
+#fcTable {
+    height: calc(100% - 40px);
+    overflow-y: scroll;
+}
+
+.fcInput {
+    width: 100%;
+}
+
 
 .backgrounds {
     z-index: 0;
@@ -526,6 +540,15 @@ a.dropdown-item:hover {
     display: none;
 }
 
+#fcGroup {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    margin: 0 auto;
+}
+
 .dd-selected i {
     color: var(--theme-primary-inverse) !important;
 }
@@ -599,6 +622,12 @@ a.dropdown-item:hover {
 .barBtn > i {
     font-size: 1.5em;
     vertical-align: -0.31em;
+}
+
+.btn-green {
+    color: #37ca00;
+    background-color: transparent;
+    border-color: #ccc;
 }
 
 .searchWrap {

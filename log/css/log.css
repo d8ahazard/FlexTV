@@ -18,6 +18,11 @@ td{
     margin-top: 56px;
 }
 
+.badgeCol, .lineCol {
+    max-width: 50px;
+    width: 50px;
+}
+
 .jsonPop {
     color: white;
     background: black;
@@ -26,6 +31,11 @@ td{
     width: 500px;
     height: 500px !important;
     
+}
+
+.docCol, .userCol {
+    max-width: 100px;
+    width: 100px;
 }
 
 .language-json, .lang-json {
@@ -65,12 +75,6 @@ td{
 .level-badge {
     width: 100%;
     text-align: center;
-}
-
-.tCell {
-    display: table-cell;
-    vertical-align: middle;
-    border: 1px solid #32383e;
 }
 
 .jsonParse {
@@ -135,46 +139,11 @@ td{
     color: #cecece;
 }
 
-.numSpan {
-    width: 45px;
-    text-align: center;
-}
-
-.stampSpan {
-    width: 185px;
-}
-
-.levelSpan {
-    width: 50px;
-    text-align: center;
-}
-
-.docSpan {
-    width: 90px;
-    text-align: center;
-}
-
-.funcSpan {
-    width: 150px;
-    word-wrap: break-word;
-    text-align: center;
-}
-
-.userSpan {
-    width: 90px;
-    text-align: center;
-}
-
-#results > div:nth-of-type(odd) {
-    background-color: rgba(255,255,255,.05);
-}
-
-
-#results > div.error:nth-of-type(odd) {
+.table-dark.table-striped tbody tr.error:nth-of-type(odd) {
     background-color: rgba(255,0,0,.05);
 }
 
-#results > div.error:nth-of-type(even) {
+.table-dark.table-striped tbody tr.error:nth-of-type(even) {
     background-color: rgba(255,0,0,.1);
 }
 
@@ -206,6 +175,15 @@ td{
     text-align: center;
 }
 
+.funcCol {
+    max-width: 150px;
+    width: 150px;
+    word-wrap: break-word;
+}
+
+.stampCol {
+    width: 200px;
+}
 
 .load-div div {
     display: inline-block;
