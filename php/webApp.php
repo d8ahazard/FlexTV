@@ -297,7 +297,7 @@ function migrateSettings($jsonFile) {
 function checkDefaultsDb($configFile) {
     $configData = file_get_contents($configFile);
     $configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
-    $config = parse_ini_string($configData);
+    $config = parse_ini_string(trim($configData));
 	$db = $config['dbname'];
 	$host = $config['dburi'];
 	$username = $config['username'];
