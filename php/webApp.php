@@ -297,7 +297,7 @@ function migrateSettings($jsonFile) {
 function checkDefaultsDb($config) {
 	$config = parse_ini_file($config);
 	$db = $config['dbname'];
-	$host = $config['dburi'] ?? 'localhost';
+	$host = $config['dburi'];
 	$username = $config['username'];
 	$head = '<!DOCTYPE html>
         <html lang="en">
@@ -320,8 +320,8 @@ function checkDefaultsDb($config) {
 		echo "<span>Creating database at $host, username is $username...</span><br>" . PHP_EOL;
 		write_log("No database exists, creating.", "ALERT");
 		if (!$mysqli->query("CREATE DATABASE $db")) {
-			write_log("Error creating database!", "ERROR");
-			echo "<span>Error creating database, please check credentials!!</span><br>";
+			write_log("Error creating database '$db'!", "ERROR");
+			echo "<span>Error creating database $db, please check credentials!!</span><br>";
 			echo $tail;
 			die();
 		} else {
