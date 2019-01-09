@@ -317,7 +317,7 @@ function checkDefaultsDb($configFile) {
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
 		echo $head;
-		echo "<span>Creating database from $configFile at $host, username is $username...</span><br>" . PHP_EOL;
+		echo "<span>Creating database from $configFile at $host, username is $username...".json_encode($config)."</span><br>" . PHP_EOL;
 		write_log("No database exists, creating.", "ALERT");
 		if (!$mysqli->query("CREATE DATABASE $db")) {
 			write_log("Error creating database '$db'!", "ERROR");
