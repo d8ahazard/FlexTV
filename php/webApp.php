@@ -294,8 +294,8 @@ function migrateSettings($jsonFile) {
 	}
 }
 
-function checkDefaultsDb($config) {
-	$config = parse_ini_file($config);
+function checkDefaultsDb($configFile) {
+	$config = parse_ini_file($configFile);
 	$db = $config['dbname'];
 	$host = $config['dburi'];
 	$username = $config['username'];
@@ -317,7 +317,7 @@ function checkDefaultsDb($config) {
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
 		echo $head;
-		echo "<span>Creating database at $host, username is $username...</span><br>" . PHP_EOL;
+		echo "<span>Creating database from $configFile at $host, username is $username...</span><br>" . PHP_EOL;
 		write_log("No database exists, creating.", "ALERT");
 		if (!$mysqli->query("CREATE DATABASE $db")) {
 			write_log("Error creating database '$db'!", "ERROR");
