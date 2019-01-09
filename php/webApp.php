@@ -297,6 +297,7 @@ function migrateSettings($jsonFile) {
 function checkDefaultsDb($config) {
 	$config = parse_ini_file($config);
 	$db = $config['dbname'];
+	$host = $config['dburi'] ?? 'localhost';
 	$head = '<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -310,7 +311,7 @@ function checkDefaultsDb($config) {
                 </body>
                 </html>';
 
-	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
+	$mysqli = new mysqli($host, $config['username'], $config['password']);
 	$noDb = false;
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
