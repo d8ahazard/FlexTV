@@ -297,7 +297,6 @@ function migrateSettings($jsonFile) {
 function checkDefaultsDb($config) {
 	$config = parse_ini_file($config);
 	$db = $config['dbname'];
-	$uri = $config['dburi'] ?? 'localhost';
 	$head = '<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -311,7 +310,7 @@ function checkDefaultsDb($config) {
                 </body>
                 </html>';
 
-	$mysqli = new mysqli($uri, $config['username'], $config['password']);
+	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
 	$noDb = false;
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
@@ -480,138 +479,41 @@ function upgradeDbTable($config) {
 		$results = $mysqli->query($checkQuery);
 		if ($results) {
 			while ($row = $results->fetch_assoc()) {
-				$columns[$row['Field']] = $row['Type'];
+				$columns[] = $row['Field'];
 			}
 		}
 
-		$dbData = '
-		[
-		    "alertPlugin":"tinyint(1)",
-		    "apiToken":"varchar(42)",
-		    "appArray":"json",
-		    "appLanguage":"tinytext(2)",
-		    "autoUpdate":"bool",
-		    "commands":"json",
-		    "couchEnabled":"bool",
-		    "couchList":"longtext",
-		    "couchProfile":"tinytext",
-		    "couchToken":"tinytext",
-		    "couchUri":"tinytext",
-		    "created":"timestamp",
-		    "darkTheme":"bool",
-		    "fcArray":"json",
-		    "flexConnectEnable":"bool",
-		    "flexConnectUri":"text",
-		    "hasPlugin":"bool",
-		    "headphonesEnabled":"bool",
-		    "headphonesToken":"tinytext",
-		    "headphonesUri":"tinytext",
-		    "hookCustomEnabled":"bool",
-		    "hookCustomUrl":"text",
-		    "hookEnabled":"bool",
-		    "hookFetchEnabled":"bool",
-		    "hookFetchUrl":"text",
-		    "hookPausedEnabled":"bool",
-		    "hookPausedUrl":"text",
-		    "hookPlayEnabled":"bool",
-		    "hookPlayUrl":"text",
-		    "hookSplitEnabled":"bool",
-		    "hookStopEnabled":"bool",
-		    "hookUrl":"text",
-		    "jsonAppArray":"json",
-		    "jsonDeviceArray":"json",
-		    "jsonWidgetArray":"json",
-		    "lastScan":"int",
-		    "lidarrEnabled":"bool",
-		    "lidarrList":"longtext",
-		    "lidarrProfile":"tinytext",
-		    "lidarrRoot":"tinytext",
-		    "lidarrToken":"tinytext",
-		    "lidarrUri":"text",
-		    "masterUser":"bool",
-		    "notifyUpdate":"bool",
-		    "ombiEnabled":"bool",
-		    "ombiToken":"tinytext",
-		    "ombiUri":"tinytext",
-		    "plexAvatar":"text",
-		    "plexClientId":"tinytext",
-		    "plexClientId":"text",
-		    "plexClientName":"text",
-		    "plexDvrComskipEnabled":"bool",
-		    "plexDvrEndOffsetMinutes":"tinyint(2)",
-		    "plexDvrId":"tinytext",
-		    "plexDvrKey":"tinytext",
-		    "plexDvrNewAirings":"bool",
-		    "plexDvrReplaceLower":"tinytext",
-		    "plexDvrResolution":"tinytext",
-		    "plexDvrStartOffsetMinutes":"tinyint(2)",
-		    "plexEmail":"tinytext",
-		    "plexPassUser":"bool",
-		    "plexServerId":"tinytext",
-		    "plexToken":"tinytext",
-		    "plexUserName":"tinytext",
-		    "publicAddress":"text",
-		    "quietStart":"time",
-		    "quietStop":"time",
-		    "radarrEnabled":"bool",
-		    "radarrList":"longtext",
-		    "radarrProfile":"tinytext",
-		    "radarrRoot":"tinytext",
-		    "radarrToken":"tinytext",
-		    "radarrUri":"text",
-		    "rescanTime":"tinyint(2)",
-		    "returnItems":"tinyint(2)",
-		    "searchAccuracy":"tinyint(3)",
-		    "shortAnswers":"bool",
-		    "sickEnabled":"bool",
-		    "sickList":"longtext",
-		    "sickProfile":"tinytext",
-		    "sickToken":"tinytext",
-		    "sickUri":"text",
-		    "sonarrEnabled":"tinyint(1)",
-		    "sonarrList":"longtext",
-		    "sonarrProfile":"tinytext",
-		    "sonarrRoot":"tinytext",
-		    "sonarrToken":"tinytext",
-		    "sonarrUri":"text",
-		    "watcherEnabled":"tinyint(1)",
-		    "watcherList":"tinytext",
-		    "watcherProfile":"tinyint(4)",
-		    "watcherToken":"tinytext",
-		    "widgetArray":"longtext"
-	    ]
-		';
-		$addItems = [];
-		$updateItems = [];
-		$dbTypes = json_decode($dbData, true);
-		foreach ($dbTypes as $column => $type) {
-			$existing = $columns[$column] ?? false;
-			if (!$existing) {
-				write_log("Column $column is missing.");
-				$addItems[$column] = $type;
-			}
-			if ($existing !== $type) {
-				write_log("Column type for $column needs to change.");
-				$updateItems[$column] = $type;
+		$addStrings = [];
+		$dbStrings = [
+			'plexClientName',
+			"quietStart",
+			"quietStop"
+		];
+		foreach ($dbStrings as $string) {
+			if (!in_array($string, $columns)) {
+				write_log("String $string is missing.");
+				array_push($addStrings, $string);
 			}
 		}
 
 
-		if (count($addItems) || count($updateItems)) {
+		$addLong = [];
+		$dbLong = ['appArray', 'widgetArray'];
+		foreach ($dbLong as $long) {
+			if (!in_array($long, $columns)) {
+				write_log("Long $long is missing.");
+				array_push($addLong, $long);
+			}
+		}
+		if (count($addStrings) || count($addLong)) {
 			write_log("We've gotta add some stuff here.");
 			$query = "ALTER TABLE userdata" . PHP_EOL;
 			$items = [];
-			foreach ($addItems as $item => $type) {
-				$typeString = ucwords($type);
-				if (preg_match("/text/", $type)) $typeString = ucwords($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
-				if ($type === "bool") $typeString = "BOOLEAN";
-				$items[] = "ADD COLUMN $item $typeString NOT NULL";
+			foreach ($addStrings as $item) {
+				$items[] = "ADD COLUMN $item text NOT NULL";
 			}
-			foreach ($updateItems as $item => $type) {
-				$typeString = ucwords($type);
-				if (preg_match("/text/", $type)) $typeString = ucwords($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
-				if ($type === "bool") $typeString = "BOOLEAN";
-				$items[] = "CHANGE `$item` `$item` $typeString NOT NULL;";
+			foreach ($addLong as $item) {
+				$items[] = "ADD COLUMN $item longtext NOT NULL";
 			}
 			$itemString = join(", " . PHP_EOL, $items);
 			$query .= $itemString . ";";
@@ -620,6 +522,7 @@ function upgradeDbTable($config) {
 		}
 
 		// Convert lists to proper JSON items
+		$query = "ALTER TABLE `userdata` CHANGE `jsonDeviceArray` `jsonDeviceArray` JSON NOT NULL, CHANGE `widgetArray` `widgetArray` JSON NOT NULL, CHANGE `appArray` `appArray` JSON NOT NULL;";
 		$mysqli->query($query);
 	}
 }
