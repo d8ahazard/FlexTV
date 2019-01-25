@@ -604,7 +604,7 @@ function upgradeDbTable($config) {
 				write_log("Column $column is missing.");
 				$addItems[$column] = $type;
 			}
-			if ($existing !== $type) {
+			if ($existing && ($existing !== $type)) {
 				write_log("Column type for $column needs to change.");
 				$updateItems[$column] = $type;
 			}
