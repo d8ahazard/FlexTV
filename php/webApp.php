@@ -613,17 +613,17 @@ function upgradeDbTable($config) {
 
 		if (count($addItems) || count($updateItems)) {
 			write_log("We've gotta add some stuff here.");
-			$query = "ALTER TABLE userdata" . PHP_EOL;
+			$query = "ALTER TABLE userdata ";
 			$items = [];
 			foreach ($addItems as $item => $type) {
-				$typeString = ucwords($type);
-				if (preg_match("/text/", $type)) $typeString = ucwords($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
+				$typeString = strtoupper($type);
+				if (preg_match("/text/", $type)) $typeString = strtoupper($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
 				if ($type === "bool") $typeString = "BOOLEAN";
 				$items[] = "ADD COLUMN $item $typeString NOT NULL";
 			}
 			foreach ($updateItems as $item => $type) {
-				$typeString = ucwords($type);
-				if (preg_match("/text/", $type)) $typeString = ucwords($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
+				$typeString = strtoupper($type);
+				if (preg_match("/text/", $type)) $typeString = strtoupper($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
 				if ($type === "bool") $typeString = "BOOLEAN";
 				$items[] = "CHANGE `$item` `$item` $typeString NOT NULL";
 			}
