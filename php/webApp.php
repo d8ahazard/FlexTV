@@ -683,6 +683,7 @@ function serverAddress() {
 
 function fetchCommands($limit = false) {
 	$commands = getPreference('userdata', ['commands'], [], ['apiToken' => $_SESSION['apiToken']], true);
+	if ($commands === "null") $commands = [];
 	if (is_string($commands)) $commands = json_decode($commands, true);
 	write_log("Fetched commands: ".json_encode($commands));
 	if ($limit) $commands = array_slice($commands, 0, $limit);
