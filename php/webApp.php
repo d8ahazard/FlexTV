@@ -634,7 +634,10 @@ function upgradeDbTable($config) {
 
 		// Convert lists to proper JSON items
 		$mysqli->query($query);
+	} else {
+		write_log("Couldn't connect to DB.", "ERROR");
 	}
+
 }
 
 function checkSetDeviceID() {
