@@ -625,7 +625,7 @@ function upgradeDbTable($config) {
 				$typeString = ucwords($type);
 				if (preg_match("/text/", $type)) $typeString = ucwords($type) . " CHARACTER SET latin1 COLLATE latin1_swedish_ci";
 				if ($type === "bool") $typeString = "BOOLEAN";
-				$items[] = "CHANGE `$item` `$item` $typeString NOT NULL;";
+				$items[] = "CHANGE `$item` `$item` $typeString NOT NULL";
 			}
 			$itemString = join(", " . PHP_EOL, $items);
 			$query .= $itemString . ";";
