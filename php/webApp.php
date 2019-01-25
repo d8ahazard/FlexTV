@@ -627,7 +627,7 @@ function upgradeDbTable($config) {
 				if ($type === "bool") $typeString = "BOOLEAN";
 				$items[] = "CHANGE `$item` `$item` $typeString NOT NULL";
 			}
-			$itemString = join(", " . PHP_EOL, $items);
+			$itemString = join(", ", $items);
 			$query .= $itemString . ";";
 			write_log("Final query is '$query'");
 			$mysqli->query($query);
