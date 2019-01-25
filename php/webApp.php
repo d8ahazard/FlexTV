@@ -503,7 +503,7 @@ function upgradeDbTable($config) {
     "alertPlugin":"tinyint(1)",
     "apiToken":"varchar(42)",
     "appArray":"json",
-    "appLanguage":"tinytext(2)",
+    "appLanguage":"tinytext",
     "autoUpdate":"bool",
     "commands":"json",
     "couchEnabled":"bool",
