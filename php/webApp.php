@@ -294,9 +294,13 @@ function migrateSettings($jsonFile) {
 	}
 }
 
-function checkDefaultsDb($config) {
-	$config = parse_ini_file($config);
+function checkDefaultsDb($configFile) {
+    $configData = file_get_contents($configFile);
+    $configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
+    $config = parse_ini_string(trim($configData));
 	$db = $config['dbname'];
+	$host = $config['dburi'];
+	$username = $config['username'];
 	$head = '<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -310,16 +314,17 @@ function checkDefaultsDb($config) {
                 </body>
                 </html>';
 
-	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
+	$mysqli = new mysqli($host, $username, $config['password']);
 	$noDb = false;
+	echo $configData;
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
 		echo $head;
-		echo "<span>Creating database...</span><br>" . PHP_EOL;
+		echo "<span>Creating database from $configFile at $host, username is $username...".json_encode($config)."</span><br>" . PHP_EOL;
 		write_log("No database exists, creating.", "ALERT");
 		if (!$mysqli->query("CREATE DATABASE $db")) {
-			write_log("Error creating database!", "ERROR");
-			echo "<span>Error creating database, please check credentials!!</span><br>";
+			write_log("Error creating database '$db'!", "ERROR");
+			echo "<span>Error creating database $db, please check credentials!!</span><br>";
 			echo $tail;
 			die();
 		} else {
