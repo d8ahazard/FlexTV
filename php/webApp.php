@@ -295,12 +295,7 @@ function migrateSettings($jsonFile) {
 }
 
 function checkDefaultsDb($configFile) {
-    $configData = file_get_contents($configFile);
-    $configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
-    $config = parse_ini_string(trim($configData));
-	$db = $config['dbname'];
-	$host = $config['dburi'];
-	$username = $config['username'];
+
 	$head = '<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -314,7 +309,15 @@ function checkDefaultsDb($configFile) {
                 </body>
                 </html>';
 
-	$mysqli = new mysqli($host, $username, $config['password']);
+	$configData = file_get_contents($configFile);
+	$configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
+	$config = parse_ini_string(trim($configData));
+	$db = $config['dbname'];
+	$host = $config['dburi'];
+	$username = $config['username'];
+	$pass = $config['password'];
+
+	$mysqli = new mysqli($host, $username, $pass);
 	$noDb = false;
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
@@ -474,9 +477,16 @@ function checkDefaultsDb($configFile) {
 }
 
 function upgradeDbTable($config) {
-	$config = parse_ini_file($config);
+	write_log("TRYING TO UPGRADE DB.");
+	$configData = file_get_contents($config);
+	$configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
+	$config = parse_ini_string(trim($configData));
+	$host = $config['dburi'];
+	$username = $config['username'];
+	$pass = $config['password'];
+	$mysqli = new mysqli($host, $username, $pass);
+
 	$db = $config['dbname'];
-	$mysqli = new mysqli('localhost', $config['username'], $config['password']);
 	if ($mysqli->select_db($db)) {
 		$checkQuery = "DESCRIBE userdata;";
 		$columns = [];
