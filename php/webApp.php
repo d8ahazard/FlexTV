@@ -497,6 +497,8 @@ function upgradeDbTable($config) {
 			}
 		}
 
+		write_log("DB Connected, columns: ".json_encode($columns));
+
 		$dbData = '
 		[
 		    "alertPlugin":"tinyint(1)",
@@ -597,6 +599,7 @@ function upgradeDbTable($config) {
 		$addItems = [];
 		$updateItems = [];
 		$dbTypes = json_decode($dbData, true);
+		write_log("DBTypes: ".json_encode($dbTypes));
 		foreach ($dbTypes as $column => $type) {
 			$existing = $columns[$column] ?? false;
 			if (!$existing) {
@@ -630,6 +633,8 @@ function upgradeDbTable($config) {
 			$query .= $itemString . ";";
 			write_log("Final query is '$query'");
 			$mysqli->query($query);
+		} else {
+			write_log("Nothing to add.");
 		}
 
 		// Convert lists to proper JSON items
