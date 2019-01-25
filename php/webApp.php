@@ -316,7 +316,6 @@ function checkDefaultsDb($configFile) {
 
 	$mysqli = new mysqli($host, $username, $config['password']);
 	$noDb = false;
-	echo $configData;
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
 		echo $head;
