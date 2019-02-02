@@ -196,6 +196,8 @@ function installUpdate() {
 
 function scriptDefaults() {
 	$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Error.log.php');
+	$host = gethostname();
+	if (file_exists("/var/s3bucket/$host.log")) $errorLogPath = "/var/s3bucket/$host.log";
 	ini_set("log_errors", 1);
 	ini_set("display_errors", 0);
 	ini_set("display_startup_errors", 0);
