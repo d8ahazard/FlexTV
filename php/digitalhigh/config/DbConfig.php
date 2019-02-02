@@ -10,9 +10,9 @@ class DbConfig {
      * DbConfig constructor.
      * @param string $configFile
      */
-    public function __construct($configFile)
+    public function __construct($config)
 	{
-		$this->connection = $this->connect($configFile);
+		$this->connection = $this->connect($config);
 		if ($this->connection === false) {
 		   write_log("Error connecting to database!!", "ERROR");
 		}
@@ -29,13 +29,12 @@ class DbConfig {
 
 
     /**
-     * @param $configFile
+     * @param $config
      * @return bool|mysqli
      */
-    protected function connect($configFile) {
-		$config = parse_ini_file($configFile);
-		$host = $config['dburi'] ?? 'localhost';
-		$mysqli = new mysqli($host,$config['username'],$config['password'],$config['dbname']);
+    protected function connect($config) {
+		$host = $config['host'] ?? 'localhost';
+		$mysqli = new mysqli($host,$config['username'],$config['password'],$config['database']);
 		if ($mysqli->connect_errno) {
 		    write_log("ERROR CONNECTING: ".$mysqli->connect_errno, "ERROR");
 		}

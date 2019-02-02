@@ -78,11 +78,15 @@ function scrubBools($scrub, $key = false) {
 function initConfig() {
 	$configObject = false;
 	$error = false;
-	$dbConfig = dirname(__FILE__) . "/../rw/db.conf.php";
+	$dbConfig = dirname(__FILE__) . "/../rw/db.json.php";
 	$dbDir = dirname(__FILE__) . "/../rw/db";
 	$type = file_exists($dbConfig) ? 'db' : 'file';
 	$config = file_exists($dbConfig) ? $dbConfig : $dbDir;
-	if ($type === 'db') checkDefaultsDb($config);
+	if ($type === 'db') {
+		$configData = str_replace("'; <?php die('Access denied'); ?>", "", file_get_contents($config));
+		$configData = json_decode($configData, true);
+		checkDefaultsDb($configData);
+	}
 	try {
 		$config = new appConfig($config, $type);
 	} catch (\digitalhigh\config\ConfigException $e) {
@@ -202,11 +206,14 @@ function scriptDefaults() {
 }
 
 function checkDefaults() {
-	$config = dirname(__FILE__) . "/../rw/db.conf.php";
+	$configFile = "/../rw/db.json.php";
+
 	mapIcons(__DIR__ . '/../css/font/font-muximux.css', '.muximux-');
-	$useDb = file_exists($config);
+	$useDb = file_exists($configFile);
 	$migrated = false;
 	if ($useDb) {
+		$config = str_replace("'; <?php die('Access denied'); ?>", "", file_get_contents($configFile));
+		$config = json_decode($config, true);
 		checkDefaultsDb($config);
 		upgradeDbTable($config);
 	} else {
@@ -294,7 +301,7 @@ function migrateSettings($jsonFile) {
 	}
 }
 
-function checkDefaultsDb($configFile) {
+function checkDefaultsDb($config) {
 
 	$head = '<!DOCTYPE html>
         <html lang="en">
@@ -309,11 +316,8 @@ function checkDefaultsDb($configFile) {
                 </body>
                 </html>';
 
-	$configData = file_get_contents($configFile);
-	$configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
-	$config = parse_ini_string(trim($configData));
-	$db = $config['dbname'];
-	$host = $config['dburi'];
+	$db = $config['database'];
+	$host = $config['host'] ?? "localhost";
 	$username = $config['username'];
 	$pass = $config['password'];
 
@@ -322,7 +326,7 @@ function checkDefaultsDb($configFile) {
 	if (!$mysqli->select_db($db)) {
 		$noDb = true;
 		echo $head;
-		echo "<span>Creating database from $configFile at $host, username is $username...".json_encode($config)."</span><br>" . PHP_EOL;
+		echo "<span>Creating database from at $host, username is $username...".json_encode($config)."</span><br>" . PHP_EOL;
 		write_log("No database exists, creating.", "ALERT");
 		if (!$mysqli->query("CREATE DATABASE $db")) {
 			write_log("Error creating database '$db'!", "ERROR");
@@ -478,14 +482,15 @@ function checkDefaultsDb($configFile) {
 	}
 }
 
-function upgradeDbTable($config) {
+function upgradeDbTable($configFile) {
 	write_log("TRYING TO UPGRADE DB.");
-	$configData = file_get_contents($config);
-	$configData = str_replace("; <?php die('Access denied'); ?>", "", $configData);
-	$config = parse_ini_string(trim($configData));
-	$host = $config['dburi'];
+	$config = str_replace("'; <?php die('Access denied'); ?>", "", file_get_contents($configFile));
+	$config = json_decode($config, true);
+	$db = $config['database'];
+	$host = $config['host'] ?? "localhost";
 	$username = $config['username'];
 	$pass = $config['password'];
+
 	$mysqli = new mysqli($host, $username, $pass);
 
 	$db = $config['dbname'];
@@ -537,7 +542,7 @@ function upgradeDbTable($config) {
     "jsonAppArray":"json",
     "jsonDeviceArray":"json",
     "jsonWidgetArray":"json",
-    "lastScan":"int",
+    "lastScan":"int(11)",
     "lidarrEnabled":"tinyint(1)",
     "lidarrList":"longtext",
     "lidarrProfile":"tinytext",
