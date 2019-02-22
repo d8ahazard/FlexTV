@@ -194,17 +194,19 @@ function installUpdate() {
 	return $result;
 }
 
-function scriptDefaults() {
-	$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Error.log.php');
-	$host = gethostname();
-	if (file_exists("/var/s3bucket/$host.log")) $errorLogPath = "/var/s3bucket/$host.log";
-	ini_set("log_errors", 1);
-	ini_set("display_errors", 0);
-	ini_set("display_startup_errors", 0);
-	ini_set('max_execution_time', 300);
-	ini_set("error_log", $errorLogPath);
-	error_reporting(E_ERROR);
-	date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
+if (!function_exists('scriptDefaults')) {
+	function scriptDefaults() {
+		$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Error.log.php');
+		$host = gethostname();
+		if (file_exists("/var/s3bucket/$host.log")) $errorLogPath = "/var/s3bucket/$host.log";
+		ini_set("log_errors", 1);
+		ini_set("display_errors", 0);
+		ini_set("display_startup_errors", 0);
+		ini_set('max_execution_time', 300);
+		ini_set("error_log", $errorLogPath);
+		error_reporting(E_ERROR);
+		date_default_timezone_set((date_default_timezone_get() ? date_default_timezone_get() : "America/Chicago"));
+	}
 }
 
 function checkDefaults() {
