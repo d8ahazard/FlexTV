@@ -157,7 +157,7 @@ function initialize() {
 
 
 	if (isset($_GET['registerServer'])) {
-		write_log("Registering server with phlexchat.com", "INFO");
+		write_log("Registering server with flextv.us", "INFO");
 		sendServerRegistration();
 		echo "OK";
 		bye();
@@ -642,7 +642,7 @@ function fetchMediaInfo(Array $params) {
 	$result = $meta = $searches = [];
 	$result['params'] = $data;
 	$subType = $data['subType'] ?? false;
-	$searchUrl = "https://search.phlexchat.com/search.php";
+	$searchUrl = "https://search.flextv.media/search.php";
 	$queryParams = ['key' => keyGen()];
 	if ($castMember) {
 		$type = $params['type'][0] ?? 'movie';
@@ -1543,7 +1543,7 @@ function fetchAirings($params) {
 
 	}
 	foreach ($list as &$item) {
-		$data = curlGet("https://search.phlexchat.com/search.php?query=" . urlencode($item['title']) . "&type=show&key=" . keyGen());
+		$data = curlGet("https://search.flextv.media/search.php?query=" . urlencode($item['title']) . "&type=show&key=" . keyGen());
 		if ($data) {
 			$data = json_decode($data, true)[0] ?? false;
 		}
@@ -2890,7 +2890,7 @@ function sendSpeechAlexa($speech, $contextName, $cards, $waitForResponse, $sugge
 
 function sendServerRegistration() {
 	$address = $_SESSION['appAddress'] ?? $_SESSION['publicAddress'];
-	$registerUrl = "https://phlexchat.com/api.php" . "?apiToken=" . $_SESSION['apiToken'] . "&serverAddress=" . htmlentities($address);
+	$registerUrl = "https://api.flextv.us" . "?apiToken=" . $_SESSION['apiToken'] . "&serverAddress=" . htmlentities($address);
 	write_log("Server registration URL: $registerUrl ", 'INFO');
 	$result = curlGet($registerUrl);
 	if ($result == "OK") {

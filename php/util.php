@@ -2308,7 +2308,7 @@ function arrayReplaceRecursive($array, $keys, $replacement) {
 
 function proxyImage($url) {
 	if (empty(trim($url))) return false;
-	return "https://phlexchat.com/imageProxy.php?url=" . urlencode($url);
+	return "https://img.flextv.us/proxy.php?url=" . urlencode($url);
 }
 
 function randomToken($length = 32) {
@@ -2570,11 +2570,11 @@ function transcodeImage($path, $server, $full = false) {
 		$serverAddress = $server['Uri'];
 		$url = "$serverAddress/photo/:/transcode?$size&minSize=1&url=" . urlencode($path) . "&X-Plex-Token=$token";
 		$url = cacheImage($url);
-		if (!preg_match("/https/", $url)) $url = "https://phlexchat.com/imageProxy.php?url=" . urlencode($url);
+		if (!preg_match("/https/", $url)) $url = "https://img.flextv.media/proxy.php?url=" . urlencode($url);
 		return $url;
 	}
 	write_log("Invalid image path, returning generic image.", "WARN");
-	$path = 'https://phlexchat.com/img/avatar.png';
+	$path = 'https://cdn.flextv.media/img/avatar.png';
 	return $path;
 }
 

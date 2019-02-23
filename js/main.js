@@ -1962,8 +1962,8 @@ function setListeners() {
 			regUrl = false;
 			action = $(this).data('action');
 			serverAddress = encodeURIComponent(serverAddress);
-			if (action === 'googlev2') regUrl = 'https://phlexchat.com/api.php?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
-			if (action === 'amazon') regUrl = 'https://phlexchat.com/alexaAuth.php?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
+			if (action === 'googlev2') regUrl = 'https://api.flextv.us?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
+			if (action === 'amazon') regUrl = 'https://api.flextv.us/auth/alexa/auth.php?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
 			if (typeof(regUrl) === "string") {
 				var newWindow = window.open(regUrl, '');
 				if (window.focus) {
@@ -1973,7 +1973,7 @@ function setListeners() {
 				if (action === 'test') {
 					apiToken = $('#apiTokenData').data('token');
 
-					regUrl = 'https://phlexchat.com/api.php?apiToken=' + apiToken + "&serverAddress=" + serverAddress + "&test=true";
+					regUrl = 'https://api.flextv.us?apiToken=' + apiToken + "&serverAddress=" + serverAddress + "&test=true";
 					$.get(regUrl, function (dataReg) {
 						var msg = false;
 						 if (dataReg.hasOwnProperty('success')) {

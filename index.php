@@ -94,7 +94,7 @@ function showLogin() {
 										<div id="loginForm">
 											<button class="btn btn-primary btn-wd" id="plexAuth">DO IT!</button>
 											<br><br>
-											<a href="http://phlexchat.com/Privacy.html" class="card-link">Privacy Policy</a>
+											<a href="http://flextv.us/Privacy.html" class="card-link">Privacy Policy</a>
 										</div>
 									</div>
 								</div>
@@ -347,7 +347,7 @@ function showError() {
         function setBackground(last) {
             var cv="";
             $('#bgwrap').append("<div class='bg hidden'></div>");
-            var imgUrl = "https://img.phlexchat.com?new=true"+(last ? "&last" : "")+"&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
+            var imgUrl = "https://img.flextv.media?new=true"+(last ? "&last" : "")+"&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
 
             var newDiv = $('.bg').last();
 
