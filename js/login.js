@@ -105,7 +105,7 @@ $(function ($) {
 		staticCount++;
 		if (staticCount >= 42 && !ov) {
 			ov=true;
-			var url = "https://img.phlexchat.com?cage=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
+			var url = "https://img.flextv.media?cage=true&height=" + $(window).height() + "&width=" + $(window).width() + "&v=" + (Math.floor(Math.random() * (1084))) + cv;
 			$('#ov').attr('src', url);
 		}
 	});

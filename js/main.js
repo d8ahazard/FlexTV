@@ -1965,6 +1965,7 @@ function setListeners() {
 			if (action === 'googlev2') regUrl = 'https://api.flextv.us?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
 			if (action === 'amazon') regUrl = 'https://api.flextv.us/auth/alexa/auth.php?apiToken=' + apiToken + "&serverAddress=" + serverAddress;
 			if (typeof(regUrl) === "string") {
+			    console.log("Opening window to " + regUrl);
 				var newWindow = window.open(regUrl, '');
 				if (window.focus) {
 					newWindow.focus();
