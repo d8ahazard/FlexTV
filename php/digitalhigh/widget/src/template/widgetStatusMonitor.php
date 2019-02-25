@@ -9,14 +9,14 @@ class widgetStatusMonitor {
 	// Data store for other values
 	private $data;
 	// Required values in order for other things to work
-	const required = ['target', 'color', 'icon', 'label', 'url'];
+	const required = [];
 	// Set these accordingly
 	const maxWidth = 8;
 	const maxHeight = 3;
 	const minWidth = 3;
 	const minHeight = 1;
 	const refreshInterval = 5;
-	const type = "statusMonitor";
+	const type = "StatusMonitor";
 	/**
 	 * widgetStatusMonitor constructor.
 	 * @param $data

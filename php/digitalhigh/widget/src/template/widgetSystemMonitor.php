@@ -17,7 +17,7 @@ class widgetSystemMonitor {
 	const minWidth = 2;
 	const minHeight = 3;
 	const refreshInterval = 5;
-	const type = "systemMonitor";
+	const type = "SystemMonitor";
 	/**
 	 * widgetSystemMonitor constructor.
 	 * @param $data

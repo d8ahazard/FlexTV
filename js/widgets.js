@@ -52,6 +52,14 @@ function FlexWidget(data) {
 
             wl.gridstack(gridOptions);
 
+            wl.on('added', function(event, items) {
+                for (var i = 0; i < items.length; i++) {
+                    console.log('item added');
+                    console.log(items[i]);
+                    //initWidget($(items[i].el).info());
+                }
+            });
+
             wl.on('dragstop', function () {
                 console.log('Drag stop');
                 returnFunc(serialize());
@@ -98,12 +106,14 @@ function FlexWidget(data) {
         $(document).on('click', '.widgetEdit', function() {
             console.log("Widget edit button clicked.");
             var parent = $(this).closest('.widgetCard');
-            parent.find('.card-settings').slideToggle();
+            var cs = parent.find('.card-settings');
+            cs.slideToggle();
+
+            parent.find('.slideContent').slideToggle();
             parent.toggleClass('editCard');
-            if (! parent.hasClass('editCard')) {
+            if (!parent.hasClass('editCard')) {
                 $('.clickJack').show();
             }
-
         });
 
         $(window).on('click', '.widgetRefresh', function() {
@@ -149,11 +159,14 @@ function FlexWidget(data) {
     }
 
     function serialize() {
+        console.log("Serializing data...");
         var wl = $('#widgetList');
         var widgets = wl.find('.widgetCard');
+        console.log("Widgets: ", widgets);
         var widgetData = [];
         $.each(widgets, function() {
             var elemData = $(this).info();
+            console.log("Element data: ", elemData);
             var id = false;
             if (!elemData.hasOwnProperty('gs-id') && !elemData.hasOwnProperty('id')) {
                 id = Math.floor((Math.random() * 100000) + 1000);
@@ -161,6 +174,7 @@ function FlexWidget(data) {
             }
             widgetData.push(elemData);
         });
+        console.log("Returning widget data: ", widgetData);
         return widgetData;
     }
 
@@ -194,15 +208,47 @@ function FlexWidget(data) {
                 var widget = $('#widget' + widgetId);
 
                 switch(type) {
-                    case 'generic':
+                    case 'Generic':
                         console.log('No init function defined for generic');
                         break;
-
-                    case 'nowPlaying':
+                    case 'NowPlaying':
                         widget.find('#currentActivity').removeClass('list-group-item-danger');
                         break;
-
-                    case 'systemMonitor':
+                    case 'URL':
+                        widget.find('.card-header').hide();
+                        $(document).on('change', '.linkInput', function() {
+                            console.log("Link input changed.");
+                            var target = $(this).closest('.widgetCard');
+                            var linkVal = $(this).val();
+                            var attr = $(this).data('for');
+                            target.attr('data-' + attr, linkVal);
+                            target.data(attr,linkVal);
+                            var updElem = target.find('.url' + ucFirst(attr));
+                            if (attr === "title" || attr === "subtitle") {
+                                updElem.text(linkVal);
+                            }
+                            if (attr === 'img') updElem.attr('src', linkVal);
+                            if (attr === 'url') updElem.attr('href', linkVal);
+                        });
+                        var widgetUrl = "";
+                        var img = "";
+                        var title = "";
+                        var subtitle = "";
+                        if (widgetData.hasOwnProperty('url')) widgetUrl = widgetData.url;
+                        if (widgetData.hasOwnProperty('img')) img = widgetData.img;
+                        if (widgetData.hasOwnProperty('title')) title = widgetData.title;
+                        if (widgetData.hasOwnProperty('subtitle')) subtitle = widgetData.subtitle;
+                        console.log("Updating data: ", widgetData);
+                        widget.find('.urlLink').attr('href', widgetUrl);
+                        widget.find('.urlImg').attr('src',img);
+                        widget.find('.urlTitle').text(title);
+                        widget.find('.urlSubtitle').text(subtitle);
+                        widget.find('.imgInput').val(img);
+                        widget.find('.titleInput').val(title);
+                        widget.find('.urlInput').val(widgetUrl);
+                        widget.find('.subtitleInput').val(subtitle);
+                        break;
+                    case 'SystemMonitor':
                         var devOutput = "";
                         console.log("We have a device list.", devices);
                         var deviceList = devices;
@@ -215,13 +261,13 @@ function FlexWidget(data) {
                                     console.log("Selecting");
                                     selected = " selected";
                                 }
-                                var id = device["Id"];
+                                var devId = device["Id"];
                                 var name = device["Name"];
                                 if (device['HasPlugin']) {
-                                    devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                                    devOutput += "<option data-type='Server' value='" + devId + "'" + selected + ">" + name + "</option>";
                                     if (selected !== "") {
                                         console.log("Setting attributes...");
-                                        widget.attr('data-target', id);
+                                        widget.attr('data-target', devId);
                                         widget.attr('data-uri', device['Uri']);
                                         widget.attr('data-token', device['Token']);
                                     }
@@ -293,19 +339,22 @@ function FlexWidget(data) {
                         });
                         break;
 
-                    case 'statusMonitor':
+                    case 'StatusMonitor':
+                        console.log("Adding status monitor.");
                         if (widget.hasOwnProperty('data-target')) {
                             console.log("Data is set for widget??");
                         } else {
                             console.log("NO TARGET");
                         }
                         if (widget.data('target') === undefined || widget.data('target') === 0) {
+                            console.log("No target, setting from drawer...");
                             var drawer = $('#AppzDrawer');
                             var drawerItems = drawer.find('.drawer-item');
                             if (drawerItems.length) {
                                 id = drawer.find('.drawer-item').attr('id').replace('Btn','');
                                 console.log('No defined target, using' + id);
                             } else {
+                                console.log("No drawer Item!!");
                                 id = false;
                             }
                         } else {
@@ -373,21 +422,43 @@ function FlexWidget(data) {
 
     // Update a widget in the UI using fetched data
     function updateWidget(widgetData) {
+        console.log("Widget update fired for " + type);
         var widgetId = widgetData['gs-id'];
         var widget = $('#widget' + widgetId);
         var type = widgetData['type'];
 
 
         switch(type) {
-            case 'generic':
+            case 'Generic':
                 console.log('No update function defined for generic');
                 break;
 
-            case 'nowPlaying':
+            case 'NowPlaying':
                 console.log('No update function defined for nowPlaying');
                 break;
 
-            case 'systemMonitor':
+            case 'URL':
+                console.log("URL Widget.");
+                var url = "";
+                var img = "";
+                var title = "";
+                var subtitle = "";
+                if (widgetData.hasOwnProperty('url')) url = widgetData.url;
+                if (widgetData.hasOwnProperty('img')) img = widgetData.img;
+                if (widgetData.hasOwnProperty('title')) title = widgetData.title;
+                if (widgetData.hasOwnProperty('subtitle')) subtitle = widgetData.subtitle;
+                console.log("Updating data: ", widgetData);
+                widget.find('.urlLink').attr('href', url);
+                widget.find('.urlImg').attr('src',img);
+                widget.find('.urlTitle').text(title);
+                widget.find('.urlSubtitle').text(subtitle);
+                widget.find('.imgInput').val(img);
+                widget.find('.titleInput').val(title);
+                widget.find('.urlInput').val(url);
+                widget.find('.subtitleInput').val(subtitle);
+                break;
+
+            case 'SystemMonitor':
                 var devOutput = "";
                 console.log("We have a device list.");
                 var deviceList = devices;
@@ -401,11 +472,11 @@ function FlexWidget(data) {
                     $.each(serverList, function (key, device) {
                         var selected = "";
                         if (widgetTarget) {
-                            if (widgetTarget = device['Id']) {
+                            if (widgetTarget === device['Id']) {
                                 selected = " selected";
                             }
                         } else {
-                            if (i = 0) {
+                            if (i === 0) {
                                 selected = " selected";
                             }
                         }
@@ -450,7 +521,8 @@ function FlexWidget(data) {
                 console.log('No update function defined for serverStatus');
                 break;
 
-            case 'statusMonitor':
+            case 'StatusMonitor':
+                console.log("Initializing status monitor??");
                 var targetId = widgetData['target'];
                 var targetDiv = $('#AppzDrawer').find('#' + targetId + 'Btn');
                 var dataSet = targetDiv.info();

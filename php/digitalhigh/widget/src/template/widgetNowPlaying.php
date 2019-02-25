@@ -9,7 +9,7 @@ class widgetNowPlaying {
 	public $type;
 
 	public function __construct($data) {
-		$this->type = 'nowPlaying';
+		$this->type = 'NowPlaying';
 		$this->data = $data;
 	}
 

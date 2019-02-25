@@ -3,8 +3,7 @@
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/JsonXmlElement.php';
 require_once dirname(__FILE__) . '/multiCurl.php';
-if (file_exists('/var/www/shared/serverUtil.php')) require_once '/var/www/shared/serverUtil.php';
-scriptDefaults();
+if (@file_exists('/var/www/shared/serverUtil.php')) @require_once '/var/www/shared/serverUtil.php';
 
 function array_diff_assoc_recursive($array1, $array2) {
 	foreach ($array1 as $key => $value) {

@@ -295,6 +295,7 @@ a.dropdown-item:hover {
 }
 
 #widgetList {
+    height: calc(100% - 60px) !important;
     top: 60px;
     left: 20px;
     right: 20px;

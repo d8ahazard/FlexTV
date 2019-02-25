@@ -9,14 +9,14 @@ class widgetGeneric {
 	// Data store for other values
 	private $data;
 	// Required values in order for other things to work
-	const required = ['target', 'color', 'icon', 'label', 'url'];
+	const required = [];
 	// Set these accordingly
 	const maxWidth = 3;
 	const maxHeight = 3;
 	const minWidth = 1;
 	const minHeight = 1;
 	const refreshInterval = 30;
-	const type = "generic";
+	const type = "Generic";
 	/**
 	 * widgetStatusMonitor constructor.
 	 * @param $data

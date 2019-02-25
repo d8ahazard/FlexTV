@@ -1907,7 +1907,7 @@ function setListeners() {
 
 
         if (!editingWidgets) {
-            saveWidgetContainers();
+            saveWidgetContainers(flexWidget.serialize());
         }
     });
 
@@ -2601,12 +2601,12 @@ function loadWidgetContainers(data) {
 
     for (var key in data) {
         console.log("Widget action is " + action + ": ", data[key]);
-        if (data.hasOwnProperty('status')) console.log("Data Item has status here: " + data['status']);
+        if (data.hasOwnProperty('service-status')) console.log("Data Item has status here: " + data['service-status']);
         if (data.hasOwnProperty(key)) {
             if (firstLoad) {
                 flexWidget.addWidget(data[key]);
             } else {
-                flexWidget.updateWidget(data[key]);
+                if (!$('#homeEditBtn').hasClass('open')) flexWidget.updateWidget(data[key]);
             }
 
         }

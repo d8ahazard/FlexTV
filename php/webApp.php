@@ -3,7 +3,6 @@ require_once dirname(__FILE__) . '/util.php';
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/digitalhigh/gitUpdate/GitUpdate.php';
 require_once dirname(__FILE__) . '/digitalhigh/config/appConfig.php';
-scriptDefaults();
 checkFiles();
 
 use digitalhigh\gitUpdate\gitUpdate;
@@ -197,8 +196,6 @@ function installUpdate() {
 if (!function_exists('scriptDefaults')) {
 	function scriptDefaults() {
 		$errorLogPath = file_build_path(dirname(__FILE__), '..', 'logs', 'Error.log.php');
-		$host = gethostname();
-		if (file_exists("/var/s3bucket/$host.log")) $errorLogPath = "/var/s3bucket/$host.log";
 		ini_set("log_errors", 1);
 		ini_set("display_errors", 0);
 		ini_set("display_startup_errors", 0);

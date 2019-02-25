@@ -16,12 +16,13 @@ use digitalhigh\parser\cssParser;
 class widget {
 	public $type;
 	private $widgetObject;
+
 	/**
 	 * widget constructor.
-	 * @param $type
-	 * @param $data
-	 * @throws widgetException
+	 * @param bool $data
+	 * @throws exception\widgetException
 	 */
+
 	function __construct($data=false) {
 		$files = array_slice(scandir(dirname(__FILE__) . "/template"), 2);
 		$classes = array_map(function($file){
@@ -58,7 +59,7 @@ class widget {
 				$class = "digitalhigh\\widget\\template\\$className";
 			if ($type === 'CSS') {
 				$markup = $class::widgetCSS();
-				$last = lcfirst(str_replace("widget", "", array_pop(explode("\\", $class))));
+				$last = str_replace("widget", "", array_pop(explode("\\", $class)));
 				$templates[] = (new cssParser($markup))->glue(".$last ");
 
 			} else if ($type === 'JS') {
