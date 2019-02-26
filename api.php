@@ -483,7 +483,7 @@ function getUiData($force = false) {
 			$oldValue = $_SESSION['settings'][$key] ?? "<NODATA>..";
 			if ($oldValue !== $value) {
 				if ($key === 'widgets') {
-					write_log("Pushing widgets because updated: $value", "ALERT", false, true);
+					write_log("Pushing widgets because value for $key updated: $value", "ALERT", false, true);
 				}
 				$updated[$key] = $ogVal;
 				$_SESSION['settings'][$key] = $value;

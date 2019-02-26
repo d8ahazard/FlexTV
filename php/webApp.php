@@ -793,6 +793,7 @@ function logCommand($resultObject) {
 	];
 
 	write_log("Final response for request of '$initial' is '$speech': ".json_encode($logItem), "ALERT");
+
 	if (isset($_GET['say'])) echo json_encode(['commands' => $logItem]);
 
 	$apiToken = $_SESSION['apiToken'];

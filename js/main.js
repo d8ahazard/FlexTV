@@ -31,6 +31,8 @@
     var scaling = false;
     var backgroundTimer = false;
 
+    var commandList = [];
+
     var widgetList;
     var addDrawerCount;
 
@@ -1309,6 +1311,10 @@
             var value = data[i];
             console.log("Looping commands.");
             if (value === []) return true;
+            if ($.inArray(JSON.stringify(value), commandList) > -1) {
+                console.log("Command already exists, we should NOT add it.");
+                return true;
+            }
             try {
                 var timeStamp = (value.hasOwnProperty('stamp') ? $.trim(value.stamp) : '');
                 itemJSON = value;
@@ -1334,7 +1340,9 @@
                 } else {
                     $('#resultsInner').append(outLine);
                 }
-                //$('#loadbar').hide();
+
+                commandList.push(JSON.stringify(value));
+
                 setTimeout(function(){
                     var nh = $('.noHeight');
                     nh.slideDown();
@@ -1356,7 +1364,6 @@
             });
         }
         cmdLoad = false;
-        console.info("CmdLoad is ", cmdLoad);
     }
 
     function scaleSlider() {
@@ -1817,6 +1824,11 @@
             });
             apiToken = $('#apiTokenData').data('token');
             console.log("Removing card: ",stamp);
+            // # TODO: Make this check 'commandarray' for card with stamp and remove it.
+            // if ($.inArray(JSON.stringify(value), commandList) > -1) {
+            //     console.log("Command already exists, we should NOT add it.");
+            //     return true;
+            // }
             $.get('api.php?apiToken=' + apiToken + '&card=' + stamp, function (data) {
                 lastUpdate = data;
             });
