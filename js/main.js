@@ -273,11 +273,13 @@ function parseData(data) {
                         updateCommands(dataItem);
                         break;
                     case "fcArray":
-                        $.each(dataItem, function(key, value){
-                            console.log("Value: ", value);
-                            tableRowAdd(value, false);
-                        });
-
+                        if (dataItem !== null) {
+                            $.each(dataItem, function (key, value) {
+                                console.log("Value: ", value);
+                                tableRowAdd(value, false);
+                            });
+                        }
+                        break;
                 }
                 var checkVal2 = dataItem;
                 if ($.isArray(dataItem)) checkVal2 = JSON.stringify(dataItem);

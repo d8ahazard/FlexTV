@@ -125,7 +125,7 @@ function getPreference($table, $what = false, $default = false, $where = false, 
 
 	if ($table === 'general') {
 		$tmp = [];
-		foreach($data as $row) $tmp[$row['name']] = $row['value'];
+		foreach($data as $row) if (isset($row['name'])) $tmp[$row['name']] = $row['value'];
 		$data = [$tmp];
 		if ($single && is_array($where)) $what = [$where['name']];
 	}
