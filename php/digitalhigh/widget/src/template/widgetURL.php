@@ -74,32 +74,36 @@ class widgetUrl {
 		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
 		$attributeString = join(" ", $attributeStrings);
 		return '
-		<div class="widgetCard card m-0 grid-stack-item '.self::type.'" '.$attributeString.'>
+		<div class="widgetCard card m-0 grid-stack-item widget-no-header '.self::type.'" '.$attributeString.'>
 			<div class="grid-stack-item-content">
+				
+				<div class="no-header">
+	                <span class="d-flex align-items-center">
+						<i class="material-icons dragHandle editItem">drag_indicator</i>
+					</span>
+				
+		            <button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="material-icons">more_vert</i>
+					</button>
+					<div class="dropdown-menu dropdown-menu-right">
+						<button class="dropdown-item widgetEdit" type="button">Edit</button>
+						<button class="dropdown-item widgetRefresh" type="button">Refresh</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item widgetDelete" type="button">Delete</button>
+					</div>
+				</div>
 				
 				<!-- Card body goes here -->
 				<div class="card-content slideContent">
 					<div class="urlWidget">
 						<a href="" target="_blank" class="urlURL">
 							<img src="" width="40" alt="" class="urlImg">
-							<h4 class="urlTitle"></h4>
+							<h4 class="urlTitle">URL Widget</h4>
 							<p class="urlSubtitle"></p>
 						</a>	
 					</div>			
 	            </div>
-                <span class="d-flex align-items-center">
-					<i class="material-icons dragHandle editItem">drag_indicator</i>
-				</span>
-			
-	            <button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					<i class="material-icons">more_vert</i>
-				</button>
-				<div class="dropdown-menu dropdown-menu-right">
-					<button class="dropdown-item widgetEdit" type="button">Edit</button>
-					<button class="dropdown-item widgetRefresh" type="button">Refresh</button>
-					<div class="dropdown-divider"></div>
-					<button class="dropdown-item widgetDelete" type="button">Delete</button>
-				</div>
+	            
 	            <div class="card-settings">
                     <!-- Card setting markup goes here -->
                     <div class="bmd-form-group-sm">
@@ -114,7 +118,7 @@ class widgetUrl {
                         </div>
                         <div class="bmd-form-group-sm">
                         <label class="bmd-label-floating" for="title'.$randId.'">Title</label>
-                        <input type="text" class="form-control linkInput titleInput" id="title'.$randId.'" data-for="title" title="Title">
+                        <input type="text" class="form-control linkInput titleInput" id="title'.$randId.'" data-for="title" title="Title">URL Widget
                         </text>
                         </div>
                         <div class="bmd-form-group-sm">
@@ -165,6 +169,15 @@ class widgetUrl {
                 height: 40px;
                 corner-radius: 20px;
 			}
+					
+			
+			.urlWidget * {			
+				color: var(--theme-accent) !important;
+			}
+			
+			.urlWidget:hover * {
+				color: var(--theme-accent-light) !important;
+			}
 			
 			.widgetMenu {
 				position: absolute;
@@ -175,14 +188,6 @@ class widgetUrl {
 			.dragHandle {
 				position: absolute;
 	            top: 10px;
-			}
-			
-			.urlWidget * {			
-				color: var(--theme-accent) !important;
-			}
-			
-			.urlWidget:hover * {
-				color: var(--theme-accent-light) !important;
 			}
 			
 			.card-settings {

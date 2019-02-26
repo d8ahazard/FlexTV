@@ -33,7 +33,7 @@ function FlexWidget(data) {
             disableResize: false,
             disableDrag: false,
             cellHeight: 70,
-            removable: '',
+            removable: false,
             removeTimeout: 100,
             verticalMargin: vmargin,
             horizontalMargin: hmargin,
@@ -44,8 +44,19 @@ function FlexWidget(data) {
         };
 
         if (data.hasOwnProperty('main')) {
+            var dl = false;
+            var toggleDeleteList = false;
             if (data.hasOwnProperty('delete')) {
-                options['removable'] = data['delete'];
+                console.log("Setting remove target to " + data['delete']);
+                dl = $(data['delete']);
+                dl.gridstack(options);
+                toggleDeleteList = true;
+                dl.on('added', function() {
+                    console.log("Item added.");
+                    flipFab(false, dl);
+                    $(this).html("");
+                });
+                //gridOptions['removable'] = data['delete'];
             }
             var mainTarget = data['main'];
             var wl = $(mainTarget);
@@ -60,8 +71,18 @@ function FlexWidget(data) {
                 }
             });
 
+            wl.on('dragstart', function() {
+                console.log("Drag start.");
+                if (toggleDeleteList) {
+                    flipFab(true, dl);
+                }
+            });
+
             wl.on('dragstop', function () {
                 console.log('Drag stop');
+                if (toggleDeleteList) {
+                    flipFab(false, dl);
+                }
                 returnFunc(serialize());
             });
 
@@ -122,6 +143,7 @@ function FlexWidget(data) {
 
         $(window).on('click', '.widgetDelete', function() {
             var parent = $(this).closest('.widgetCard');
+            parent.remove();
         });
 
         // Set the value of the setting thinger to the widget data, refresh
@@ -155,6 +177,25 @@ function FlexWidget(data) {
             //         drawer.slideUp();
             //     }
             // });
+        }
+    }
+
+    function flipFab(red, dl) {
+        var wf = $('#widgetFab');
+        if (wf.length) {
+            console.log("Widget fab found to flip, foo.");
+            var icon = wf.find('i');
+            if (red) {
+                wf.addClass("delete");
+                icon.removeClass('addIcon');
+                icon.text("delete");
+                dl.show();
+            } else {
+                wf.removeClass("delete");
+                icon.addClass('addIcon');
+                icon.text("add");
+                dl.hide();
+            }
         }
     }
 

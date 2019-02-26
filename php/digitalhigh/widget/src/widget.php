@@ -57,17 +57,19 @@ class widget {
 		$templates = [];
 		foreach ($classes as $className) {
 				$class = "digitalhigh\\widget\\template\\$className";
-			if ($type === 'CSS') {
-				$markup = $class::widgetCSS();
-				$last = str_replace("widget", "", array_pop(explode("\\", $class)));
-				$templates[] = (new cssParser($markup))->glue(".$last ");
+				if ($className !== "widgetGeneric") {
+					if ($type === 'CSS') {
+						$markup = $class::widgetCSS();
+						$last = str_replace("widget", "", array_pop(explode("\\", $class)));
+						$templates[] = (new cssParser($markup))->glue(".$last ");
 
-			} else if ($type === 'JS') {
-				$templates[$className] = $class::widgetJS();
+					} else if ($type === 'JS') {
+						$templates[$className] = $class::widgetJS();
 
-			} else {
-				$templates[] = $class::widgetHTML();
-			}
+					} else {
+						$templates[] = $class::widgetHTML();
+					}
+				}
 		}
 
 
@@ -256,6 +258,37 @@ class widget {
 			.form-group {
 				z-index: 8;
 			}
+					
+			
+			.dragHandle.no-header {
+				position: absolute;
+	            top: 10px;
+			}
+			
+			.card-settings {
+				padding: 20px;
+			    margin: 10px;
+			    width: 104%;
+			    left: -19px;
+			    top: 35px;
+			}
+			
+			.widgetMenu.no-header {
+				position: absolute;
+			    top: 10px;
+			    right: 0px;
+			}
+			
+			.no-header {
+				position: absolute;
+				width: 100%;
+				height: 20px;
+			}
+			
+			.no-header {
+				display: none !important;
+			}
+			
 		";
 
 		$noPrepend = "
@@ -265,6 +298,14 @@ class widget {
 				z-index: 10;
 				height: 100% !important;
 				box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+			}
+			
+			.widgetCard.widget-no-header .card-header {
+				display: none !important;
+			}						
+			
+			.widgetCard.widget-no-header .no-header {
+				display: block !important;
 			}
 		";
 

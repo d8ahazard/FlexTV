@@ -71,10 +71,14 @@ class widgetGeneric {
 		$attributeStrings = [];
 		foreach($attributes as $key => $value) $attributeStrings[] ="data-${key}='${value}'";
 		$attributeString = join(" ", $attributeStrings);
+
+		// Add widget-header to display a header/title
+		// Use widget-no-header to only show drag handle and menu dots
+
 		return '
 		<div class="widgetCard card m-0 grid-stack-item '.self::type.'" '.$attributeString.'>
 			<div class="grid-stack-item-content">
-				<!-- Optional header to show buttons, drag handle, and a title -->
+				<!-- Optional header to show buttons, drag handle, and a title, add .widget-no-header to the widgetCard class to disable -->
 				<h4 class="card-header d-flex justify-content-between align-items-center text-white px-3">
 					<span class="d-flex align-items-center">
 						<i class="material-icons dragHandle editItem">drag_indicator</i></span>Server Status
@@ -91,8 +95,25 @@ class widgetGeneric {
 					</span>
 				</h4>
 				
+				<!-- Only visible if .widget-no-header is present in the class list of the widget card -->
+				<div class="no-header">
+					<span class="d-flex align-items-center">
+						<i class="material-icons dragHandle editItem">drag_indicator</i>
+					</span>
+				
+		            <button type="button" class="btn btn-settings editItem widgetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="material-icons">more_vert</i>
+					</button>
+					<div class="dropdown-menu dropdown-menu-right">
+						<button class="dropdown-item widgetEdit" type="button">Edit</button>
+						<button class="dropdown-item widgetRefresh" type="button">Refresh</button>
+						<div class="dropdown-divider"></div>
+						<button class="dropdown-item widgetDelete" type="button">Delete</button>
+					</div>
+				</div>
+				
 				<!-- Card body goes here -->
-				<div class="card-content">
+				<div class="card-content slideContent">
 				
 				</div>
 				
@@ -113,6 +134,7 @@ class widgetGeneric {
 	 * CSS Defined here will be prepended with the className of the widget, whis is
 	 * determined by the class name. So, it's safe to re-use selectors within the cards, and not define
 	 * additional classes. I'm lazy, so be sure classes have a newline before and between them...
+	 * You can manipulate card-settings as needed to get it to move around.
 	 * @return string
 	 */
 	public static function widgetCSS() {
@@ -126,6 +148,7 @@ class widgetGeneric {
 			.anotherSelector {
 				width: 50%;
 			}
+			
 		';
 	}
 

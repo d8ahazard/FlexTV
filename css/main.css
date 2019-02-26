@@ -265,6 +265,10 @@ a.dropdown-item:hover {
     width: 3.5rem;
 }
 
+#widgetFab.delete {
+    background-color: red;
+}
+
 .card [class*="header-"], .card[class*="bg-"] {
     color: #fff;
     z-index: 6;
@@ -404,14 +408,15 @@ a.dropdown-item:hover {
 
 #widgetDeleteList {
     position: fixed;
-    bottom: 20px;
+    bottom: -475px;
     margin: 0 auto;
-    left: calc(50% - 50px);
+    left: calc(50% - 250px);
     transition: .3s;
     z-index: 11;
-    width: 100px;
-    height: 75px !important;
+    width: 500px;
+    height: 500px !important;
     display: none;
+    border: 1px white dashed;
 }
 
 #appDeleteList.elevate {
