@@ -646,7 +646,7 @@ function FlexWidget(data) {
             var nicName = "";
             var hddName = "";
             var hddArray = [];
-            if (widgetData) {
+            if (widgetData && widgetData.hasOwnProperty('Cpu') && widgetData.hasOwnProperty('Mem') && widgetData.hasOwnProperty('Net') && widgetData.hasOwnProperty('Hdd')) {
                 cpuPct = widgetData['Cpu'][0]['cpu_pct_used'];
                 memPct = widgetData["Mem"][0]['mem_pct_used'];
                 netTx = widgetData['Net'][0]['Interface'][0]['net_tx'];
