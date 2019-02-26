@@ -279,6 +279,30 @@ function FlexWidget(data) {
                         var list = widget.find('.serverList');
                         console.log("Setting serverList to " + devOutput, list);
                         list.html(devOutput);
+                        var selVal = "";
+                        list.on('click change', function(){
+                            selVal = $(this).val();
+                            var parent = $(this).closest('.widgetCard');
+                            console.log("Selected: " + selVal);
+                            if (devices.hasOwnProperty('Server')) {
+                                var serverList = devices['Server'];
+                                var i = 0;
+                                $.each(serverList, function (key, device) {
+                                    var devId = device["Id"];
+                                    console.log("Comparing " + selVal + " to " + devId);
+
+                                    if (devId === selVal) {
+                                        console.log("Okay, device updated.");
+                                        var uri = device['Uri'];
+                                        var token = device['Token'];
+                                        parent.attr('data-target', selVal);
+                                        parent.attr('data-uri', uri);
+                                        parent.attr('data-token',token);
+                                        return false;
+                                    }
+                                });
+                            }
+                        });
                         var bars = widget.find('.serverOverviewBars');
                         var chartData = buildChart('systemMonitor', widgetData['stats']);
                         console.log("Chart data from widgetData", widgetData, chartData);

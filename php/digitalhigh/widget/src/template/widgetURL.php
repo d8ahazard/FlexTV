@@ -60,8 +60,8 @@ class widgetUrl {
 		$attributes = [
 			'gs-x' => 7,
 			'gs-y' => 0,
-			'gs-width' =>4,
-			'gs-height' => 4,
+			'gs-width' =>2,
+			'gs-height' => 2,
 			'type' => self::type,
 			'gs-min-width' => self::minWidth,
 			'gs-min-height' => self::minHeight,

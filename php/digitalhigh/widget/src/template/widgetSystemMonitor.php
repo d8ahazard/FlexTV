@@ -10,7 +10,7 @@ class widgetSystemMonitor {
 	// Data store for other values
 	private $data;
 	// Required values in order for other things to work
-	const required = ['uri','token'];
+	const required = [];
 	// Set these accordingly
 	const maxWidth = 6;
 	const maxHeight = 6;
@@ -104,7 +104,7 @@ class widgetSystemMonitor {
 					</span>
 				</h4>
 				
-			<div class="card-body">
+			<div class="card-body card-content slideContent">
 				<div class="serverOverviewBars" style="width: 100%;height: 100%;"></div>
 			</div>
 		
@@ -137,6 +137,15 @@ class widgetSystemMonitor {
 			.anotherSelector {
 				width: 50%;
 			}
+			
+			.card-settings {
+				padding: 20px;
+			    margin: 10px;
+			    width: 104%;
+			    left: -19px;
+			    top: 35px;
+			}
+			
 		';
 	}
 
