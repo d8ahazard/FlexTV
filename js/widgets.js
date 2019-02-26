@@ -399,8 +399,35 @@ function FlexWidget(data) {
                             console.log("Service list changed, we need to do some magic...");
                             var target = $(this).closest('.widgetCard');
                             var selection = $(this).find(":selected").val();
+                            target.attr('data-target', selection);
                             target.data('target', selection);
                             console.log("Current value " + selection, target);
+                            var targetDiv = $('#AppzDrawer').find('#' + selection + 'Btn');
+                            var dataSet = targetDiv.info();
+                            if (dataSet !== undefined) {
+                                widgetData['icon'] = dataSet['icon'];
+                                widgetData['label'] = dataSet['label'];
+                                widgetData['color'] = dataSet['color'];
+                                widgetData['url'] = dataSet['url'];
+                            }
+                            target.find('.service-icon').attr('class', 'service-icon ' + widgetData['icon']);
+                            target.find('.statTitle').text(widgetData['label']);
+                            console.log("Widget service status is " + widgetData['service-status']);
+                            var shade = -100;
+                            if (widgetData['service-status'] === "online") {
+                                console.log("OI: ", widget.find('.offline-indicator'));
+                                target.find('.offline-indicator').hide();
+                                target.find('.online-indicator').show();
+                            } else {
+                                target.find('.offline-indicator').show();
+                                target.find('.online-indicator').hide();
+                                shade = 100;
+                            }
+                            var color2 = shadeColor(widgetData['color'], shade);
+                            var colString = "background: linear-gradient(60deg, "+widgetData['color']+", "+color2+");";
+                            var ss = target.find(".card.m-0.service-status");
+                            ss.attr('style', colString);
+                            target.attr('style', colString);
                             initWidget(target);
                             returnFunc(serialize());
                         });

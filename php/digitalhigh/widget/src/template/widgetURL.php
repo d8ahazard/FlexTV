@@ -161,6 +161,9 @@ class widgetUrl {
 			.urlWidget img {
 				top: -15px;
                 position: relative;
+                width: 40px;
+                height: 40px;
+                corner-radius: 20px;
 			}
 			
 			.widgetMenu {
