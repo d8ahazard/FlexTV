@@ -224,7 +224,7 @@ function formatLine(line) {
     if (line.json) {
         console.log("Line has json.");
         var jsonString = JSON.stringify(line.json,null,2);
-        var jsonLink = '<a href="" class="jsonParse" onmouseenter="showJson(this)" onmouseleave="hideJson(this)">[JSON]</a>' +
+        var jsonLink = '<a href="" class="jsonParse" data-json="' + encodeURIComponent(jsonString) + '" onmouseenter="showJson(this)" onmouseleave="hideJson(this)">[JSON]</a>' +
             '<div class="jsonPop" onmouseleave="$(this).hide();"><pre class="prettyprint"><code class="lang-json">' + htmlentities(jsonString) + '</code></pre></div>';
         body = body.replace("[JSON]",jsonLink);
     }

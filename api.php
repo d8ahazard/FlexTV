@@ -431,6 +431,7 @@ function getUiData($force = false) {
 	if ($force) {
 		$widgetData = fetchWidgetArray();
 		$fcArray = getPreference('userdata', ['fcArray'],[],['apiToken'=>$_SESSION['apiToken']], true);
+		$fetchers = getPreference('userdata', ['jsonFetcherArray'],[],['apiToken'=>$_SESSION['apiToken']], true);
 		write_log("Sending forced data.","ALERT",false,true);
 		$lang = checkSetLanguage();
 		$result = [
@@ -438,7 +439,8 @@ function getUiData($force = false) {
 			'strings' => $lang['javaStrings'] ?? [],
 			'widgets' => $widgetData,
 			'apps' => $apps,
-			'fcArray' => $fcArray
+			'fcArray' => $fcArray,
+			'fetchers' => $fetchers
 		];
 		$_SESSION['settings'] = [];
 		return $result;
@@ -4360,7 +4362,7 @@ function updateWidgets() {
 	$widgetData = [];
 	$widgetSettings = [];
 	$count = count($widgets);
-	//if ($count) write_log("Updating $count widgets.","INFO",false,true);
+	if ($count) write_log("Updating $count widgets.","INFO",false,true);
 	foreach ($widgets as $widget) {
 		$widgetObject = false;
 		try {

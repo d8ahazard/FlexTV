@@ -28,7 +28,7 @@ class widget {
 		$classes = array_map(function($file){
 			return str_replace('.php', '', $file);
 		}, $files);
-		$type = ucfirst($data['type'] ?? 'generic');
+		$type = ucfirst($data['type'] ?? 'Generic');
 
 		$typeCheck = "widget$type";
 		if (in_array($typeCheck, $classes)) {

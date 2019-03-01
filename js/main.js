@@ -1539,7 +1539,7 @@
         }, 5000);
 
         setInterval(function () {
-            fetchWeather();
+            //fetchWeather();
             checkUpdate();
         }, 10 * 1000 * 60);
 
@@ -2614,15 +2614,19 @@
         }
 
         for (var key in data) {
-            console.log("Widget action is " + action + ": ", data[key]);
-            if (data.hasOwnProperty('service-status')) console.log("Data Item has status here: " + data['service-status']);
-            if (data.hasOwnProperty(key)) {
-                if (firstLoad) {
-                    flexWidget.addWidget(data[key]);
-                } else {
-                    if (!$('#homeEditBtn').hasClass('open')) flexWidget.updateWidget(data[key]);
-                }
+            try {
+                console.log("Widget action is " + action + ": ", data[key]);
+                if (data.hasOwnProperty('service-status')) console.log("Data Item has status here: " + data['service-status']);
+                if (data.hasOwnProperty(key)) {
+                    if (firstLoad) {
+                        flexWidget.addWidget(data[key]);
+                    } else {
+                        if (!$('#homeEditBtn').hasClass('open')) flexWidget.updateWidget(data[key]);
+                    }
 
+                }
+            } catch (err) {
+                console.log("ERROR: ", err.message);
             }
         }
         if (firstLoad) $('#widgetList').data('gridstack').disable();

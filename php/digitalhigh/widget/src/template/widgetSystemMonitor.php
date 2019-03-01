@@ -40,7 +40,7 @@ class widgetSystemMonitor {
 
 
 	public function update($force=false) {
-		$lastUpdate = $this->data['lastUpdate'];
+		$lastUpdate = $this->data['lastUpdate'] ?? 0;
 		$int = self::refreshInterval;
 		$total = $lastUpdate + $int;
 		$now = time();

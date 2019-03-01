@@ -253,7 +253,10 @@ function FlexWidget(data) {
                         console.log('No init function defined for generic');
                         break;
                     case 'NowPlaying':
+                        console.log("Nowplaying init.");
                         widget.find('#currentActivity').removeClass('list-group-item-danger');
+                        loadWidgetTarget(widget, widgetData, false, true);
+                        
                         break;
                     case 'URL':
                         widget.find('.card-header').hide();
@@ -290,60 +293,8 @@ function FlexWidget(data) {
                         widget.find('.subtitleInput').val(subtitle);
                         break;
                     case 'SystemMonitor':
-                        var devOutput = "";
-                        console.log("We have a device list.", devices);
-                        var deviceList = devices;
-                        if (deviceList.hasOwnProperty('Server')) {
-                            var serverList = deviceList['Server'];
-                            var i = 0;
-                            $.each(serverList, function (key, device) {
-                                var selected = "";
-                                if (i === 0) {
-                                    console.log("Selecting");
-                                    selected = " selected";
-                                }
-                                var devId = device["Id"];
-                                var name = device["Name"];
-                                if (device['HasPlugin']) {
-                                    devOutput += "<option data-type='Server' value='" + devId + "'" + selected + ">" + name + "</option>";
-                                    if (selected !== "") {
-                                        console.log("Setting attributes...");
-                                        widget.attr('data-target', devId);
-                                        widget.attr('data-uri', device['Uri']);
-                                        widget.attr('data-token', device['Token']);
-                                    }
-                                }
-                                i++;
-                            });
-                        }
+                        loadWidgetTarget(widget, widgetData, true, true);
 
-                        var list = widget.find('.serverList');
-                        console.log("Setting serverList to " + devOutput, list);
-                        list.html(devOutput);
-                        var selVal = "";
-                        list.on('click change', function(){
-                            selVal = $(this).val();
-                            var parent = $(this).closest('.widgetCard');
-                            console.log("Selected: " + selVal);
-                            if (devices.hasOwnProperty('Server')) {
-                                var serverList = devices['Server'];
-                                var i = 0;
-                                $.each(serverList, function (key, device) {
-                                    var devId = device["Id"];
-                                    console.log("Comparing " + selVal + " to " + devId);
-
-                                    if (devId === selVal) {
-                                        console.log("Okay, device updated.");
-                                        var uri = device['Uri'];
-                                        var token = device['Token'];
-                                        parent.attr('data-target', selVal);
-                                        parent.attr('data-uri', uri);
-                                        parent.attr('data-token',token);
-                                        return false;
-                                    }
-                                });
-                            }
-                        });
                         var bars = widget.find('.serverOverviewBars');
                         var chartData = buildChart('systemMonitor', widgetData['stats']);
                         console.log("Chart data from widgetData", widgetData, chartData);
@@ -527,6 +478,94 @@ function FlexWidget(data) {
 
             case 'NowPlaying':
                 console.log('No update function defined for nowPlaying');
+                loadWidgetTarget(widget, widgetData, false, false);
+                if (widgetData.hasOwnProperty('sessions')) {
+                    var sessions = widgetData.sessions;
+                    var carousel = widget.find('.carousel-inner');
+                    var indicatorContainer = widget.find('.carousel-indicators');
+                    var indicators = widget.find('.carousel.indicator');
+                    var currentWidgets = carousel.find('.carousel-item');
+                    var npTemplate = widget.find('.carousel-template-item');
+                    var empty = true;
+                    var sessionIds = [];
+                    $.each(sessions, function(key, session) {
+                        var sessionId = session['id'];
+                        sessionIds.push(sessionId);
+                        var targetSession = false;
+                        var data = session;
+                        $.each(currentWidgets, function(){
+                            console.log("Current widget: ", $(this));
+                            if ($(this).data('sessionid') === sessionId) {
+                                console.log("This session is already set up, update it.");
+                                targetSession = $(this);
+                                empty = false;
+                                return false;
+                            }
+                        });
+
+                        if (!targetSession) {
+                            console.log("Specified session doesn't exist, appending.");
+                            targetSession = npTemplate.clone();
+                            targetSession.attr('id', "currentActivity" + sessionId);
+                            var indicatorCount = indicators.length;
+                            var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="'+indicatorCount+'"></li>');
+                            carousel.append(targetSession);
+                            indicatorContainer.append(targetIndicator);
+                            targetSession.removeClass('carousel-template-item');
+                            if (empty) {
+                                targetSession.addClass('active');
+                                targetIndicator.addClass('active');
+                            }
+                            targetSession.attr('data-sessionid', sessionId);
+                            targetSession.data('sessionid', sessionId);
+                            empty = false;
+                        }
+
+                        console.log("Okay, now we should be updating values within " + targetSession);
+                        var streamLink = ' <a data-toggle="collapse" href="#streamInfo'+targetSession+'" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a>';
+                        var titleText = "";
+                        if (data['type'] === 'episode') {
+                            titleText += data['grandparentTitle'] + "<br>";
+                            titleText += "S" + data['parentIndex'] + "E" + data['index'] + " - " + data['title'];
+                        }
+
+                        if (data['type'] === 'track') {
+                            titleText += data['grandparentTitle'] + "<br>";
+                            titleText += data['title'] + " " + data['parentTitle'];
+                        }
+
+                        if (data['type'] === "movie") titleText = data['title'] + " (" + data['year'] + ")";
+                        
+                        targetSession.find('.card-body').css('background','url(' + data['art'] + ')');
+                        targetSession.find('.card-poster').attr('src',data['poster']);
+                        targetSession.find('.npStatusText').text(data['state']);
+                        targetSession.find('.npStatusQuality').text(data['quality']);
+                        targetSession.find('.npStatusBandwidth').text(data['bandwidth']);
+                        targetSession.find('.npStreamType').html(data['direct'] + streamLink);
+                        targetSession.find('.npPlayerName').text(data['player']);
+                        targetSession.find('.npUserName').text(data['user']);
+                        targetSession.find('.npMediaTitle').html(titleText);
+                        targetSession.find('.progress-bar').text(data['percent'] + "%");
+                        targetSession.find('.progress-bar').attr('aria-valuenow', data['percent']);
+                        targetSession.find('.progress-bar').css('width', data['percent'] + "%");
+
+
+                    });
+
+                    $.each(currentWidgets, function(){
+                        var sessId = $(this).data('sessionid');
+                        var remove = true;
+                        $.each(sessionIds, function(key,value) {
+                            console.log("Comparing ", value, sessId);
+                            if (value == sessId) remove = false;
+                        });
+                        if (remove) {
+                            console.log("This session card doesn't exist, deleting...", $.inArray(sessId, sessionIds));
+                            $(this).remove();
+                            widget.find('#indicator' + sessId).remove();
+                        }
+                    });
+                }
                 break;
 
             case 'URL':
@@ -551,43 +590,7 @@ function FlexWidget(data) {
                 break;
 
             case 'SystemMonitor':
-                var devOutput = "";
-                console.log("We have a device list.");
-                var deviceList = devices;
-                if (deviceList.hasOwnProperty('Server')) {
-                    var serverList = deviceList['Server'];
-                    var i = 0;
-                    var widgetTarget = false;
-                    if (widgetData.hasOwnProperty('target')) {
-                        widgetTarget = widgetData['target'];
-                    }
-                    $.each(serverList, function (key, device) {
-                        var selected = "";
-                        if (widgetTarget) {
-                            if (widgetTarget === device['Id']) {
-                                selected = " selected";
-                            }
-                        } else {
-                            if (i === 0) {
-                                selected = " selected";
-                            }
-                        }
-                        var id = device["Id"];
-                        var name = device["Name"];
-                        if (device['HasPlugin']) {
-                            devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
-                            if (selected !== "") {
-                                widgetData['target'] = id;
-                                widgetData['uri'] = device['Uri'];
-                                widgetData['token'] = device['Token'];
-                            }
-                        }
-                    });
-                }
-
-                var list = widget.find('.serverList');
-                console.log("Setting serverList to " + devOutput, list);
-                list.html(devOutput);
+                loadWidgetTarget(widget, widgetData, true);
 
                 if (widgetData.hasOwnProperty('stats')) {
                     var statData = widgetData['stats'];
@@ -671,6 +674,78 @@ function FlexWidget(data) {
 
         lastHeight = height;
         gridObj.cellHeight(parseInt(height / rows) + 'px');
+    }
+
+    function loadWidgetTarget(widget, widgetData, usePlugin, setListener) {
+        var devOutput = "";
+        console.log("Loading widget target for widget: ", widget);
+        var deviceList = devices;
+        if (deviceList.hasOwnProperty('Server')) {
+            var serverList = deviceList['Server'];
+            console.log("We have a server list: ", serverList);
+
+            var widgetTarget = (widgetData.hasOwnProperty('target') ? widgetData['target'] : false);
+            var i = 0;
+
+            $.each(serverList, function (key, device) {
+                var selected = "";
+                if (widgetTarget) {
+                    if (widgetTarget === device['Id']) {
+                        selected = " selected";
+                    }
+                } else {
+                    if (i === 0) {
+                        selected = " selected";
+                    }
+                }
+                var id = device["Id"];
+                var name = device["Name"];
+                if ((device['HasPlugin'] && usePlugin) || !usePlugin) {
+                    devOutput += "<option data-type='Server' value='" + id + "'" + selected + ">" + name + "</option>";
+                    if (selected !== "") {
+                        widgetData['target'] = id;
+                        widgetData['uri'] = device['Uri'];
+                        widgetData['token'] = device['Token'];
+                    }
+                }
+                i++;
+            });
+        }
+
+        var list = widget.find('.serverList');
+        console.log("Setting serverList to " + devOutput, list);
+        list.html(devOutput);
+
+        if (setListener) {
+            var selVal = "";
+            list.on('click change', function(){
+                selVal = $(this).val();
+                var parent = widget;
+                console.log("Selected: " + selVal);
+                if (devices.hasOwnProperty('Server')) {
+                    console.log("We've got a server list");
+                    var serverList = devices['Server'];
+                    var i = 0;
+                    $.each(serverList, function (key, device) {
+                        var devId = device["Id"];
+                        console.log("Comparing " + selVal + " to " + devId);
+
+                        if (devId === selVal) {
+                            console.log("Okay, device updated.");
+                            var uri = device['Uri'];
+                            var token = device['Token'];
+                            parent.attr('data-target', selVal);
+                            parent.attr('data-uri', uri);
+                            parent.attr('data-token',token);
+                            parent.data('target, selVal');
+                            parent.data('token', token);
+                            parent.data('uri', uri);
+                            return false;
+                        }
+                    });
+                }
+            });
+        }
     }
 
     function buildChart(chartType, widgetData) {
