@@ -39,7 +39,7 @@ function FlexWidget(data) {
             horizontalMargin: hmargin,
             acceptWidgets: '.grid-stack-item',
             handle: '.dragHandle',
-            resizable: { handles: 'se, sw' },
+            resizable: {handles: 'se, sw'},
             alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         };
 
@@ -51,7 +51,7 @@ function FlexWidget(data) {
                 dl = $(data['delete']);
                 dl.gridstack(options);
                 toggleDeleteList = true;
-                dl.on('added', function() {
+                dl.on('added', function () {
                     console.log("Item added.");
                     flipFab(false, dl);
                     $(this).html("");
@@ -63,7 +63,7 @@ function FlexWidget(data) {
 
             wl.gridstack(gridOptions);
 
-            wl.on('added', function(event, items) {
+            wl.on('added', function (event, items) {
                 for (var i = 0; i < items.length; i++) {
                     console.log('item added');
                     console.log(items[i]);
@@ -71,7 +71,7 @@ function FlexWidget(data) {
                 }
             });
 
-            wl.on('dragstart', function() {
+            wl.on('dragstart', function () {
                 console.log("Drag start.");
                 if (toggleDeleteList) {
                     flipFab(true, dl);
@@ -91,7 +91,9 @@ function FlexWidget(data) {
                 returnFunc(serialize());
             });
             widgetList = wl.data('gridstack');
-            widgetList._updateHeightsOnResize = function() { resize(); };
+            widgetList._updateHeightsOnResize = function () {
+                resize();
+            };
             widgetList.onResizeHandler();
             returns['list'] = widgetList;
         }
@@ -115,7 +117,7 @@ function FlexWidget(data) {
 
             wt.gridstack(addOptions);
 
-            widgetDrawer.on('removed', function() {
+            widgetDrawer.on('removed', function () {
                 initGrid({'templates': templateTarget, 'drawer': drawerTarget})
             });
         }
@@ -124,7 +126,7 @@ function FlexWidget(data) {
     function initListeners(data) {
         console.log("Initializing listeners.");
 
-        $(document).on('click', '.widgetEdit', function() {
+        $(document).on('click', '.widgetEdit', function () {
             console.log("Widget edit button clicked.");
             var parent = $(this).closest('.widgetCard');
             var cs = parent.find('.card-settings');
@@ -137,23 +139,23 @@ function FlexWidget(data) {
             }
         });
 
-        $(window).on('click', '.widgetRefresh', function() {
+        $(window).on('click', '.widgetRefresh', function () {
             var parent = $(this).closest('.widgetCard');
         });
 
-        $(window).on('click', '.widgetDelete', function() {
+        $(window).on('click', '.widgetDelete', function () {
             var parent = $(this).closest('.widgetCard');
             parent.remove();
         });
 
         // Set the value of the setting thinger to the widget data, refresh
-        $(window).on('change', '.widgetSetting', function() {
+        $(window).on('change', '.widgetSetting', function () {
             var parent = $(this).closest('.widgetCard');
             console.log("Got a change for ", parent);
         });
 
         if (data.hasOwnProperty('main')) {
-            $(data['main']).on('added', function(evt, items) {
+            $(data['main']).on('added', function (evt, items) {
                 for (var i = 0; i < items.length; i++) {
                     var item = $(items[i]['el'][0]);
                     initWidget(item, false);
@@ -162,7 +164,7 @@ function FlexWidget(data) {
         }
 
         if (data.hasOwnProperty('delete')) {
-            $(data['delete']).on('added', function() {
+            $(data['delete']).on('added', function () {
                 $(this).html("");
             });
         }
@@ -205,7 +207,7 @@ function FlexWidget(data) {
         var widgets = wl.find('.widgetCard');
         console.log("Widgets: ", widgets);
         var widgetData = [];
-        $.each(widgets, function() {
+        $.each(widgets, function () {
             var elemData = $(this).info();
             console.log("Element data: ", elemData);
             var id = false;
@@ -227,7 +229,7 @@ function FlexWidget(data) {
         var addAppList = $('#widgetAddList');
         if (widgetData.hasOwnProperty('type')) {
             var type = widgetData['type'];
-            var source = addAppList.find('[data-type="'+type+'"]');
+            var source = addAppList.find('[data-type="' + type + '"]');
             if (source.length) {
                 var clone = source.clone();
                 for (var key in widgetData) if (widgetData.hasOwnProperty(key)) {
@@ -239,16 +241,16 @@ function FlexWidget(data) {
 
                 result = true;
                 var id = (widgetData.hasOwnProperty('gs-id')) ? widgetData['gs-id'] : Math.floor((Math.random() * 100000) + 1000);
-                clone.attr('id','widget' + id);
-                clone.attr('data-gs-id',id);
+                clone.attr('id', 'widget' + id);
+                clone.attr('data-gs-id', id);
                 clone.attr('data-gs-auto-position', "0");
-                widgetList.addWidget(clone,widgetData['gs-x'], widgetData['gs-y'], widgetData['gs-width'], widgetData['gs-height'], 0, widgetData['gs-min-width'], widgetData['gs-max-width'], widgetData['gs-min-height'], widgetData['gs-max-height'], widgetData['gs-id']);
+                widgetList.addWidget(clone, widgetData['gs-x'], widgetData['gs-y'], widgetData['gs-width'], widgetData['gs-height'], 0, widgetData['gs-min-width'], widgetData['gs-max-width'], widgetData['gs-min-height'], widgetData['gs-max-height'], widgetData['gs-id']);
 
                 console.log("About to init widget here: ", widgetData);
                 var widgetId = widgetData['gs-id'];
                 var widget = $('#widget' + widgetId);
 
-                switch(type) {
+                switch (type) {
                     case 'Generic':
                         console.log('No init function defined for generic');
                         break;
@@ -256,17 +258,17 @@ function FlexWidget(data) {
                         console.log("Nowplaying init.");
                         widget.find('#currentActivity').removeClass('list-group-item-danger');
                         loadWidgetTarget(widget, widgetData, false, true);
-                        
+
                         break;
                     case 'URL':
                         widget.find('.card-header').hide();
-                        $(document).on('change', '.linkInput', function() {
+                        $(document).on('change', '.linkInput', function () {
                             console.log("Link input changed.");
                             var target = $(this).closest('.widgetCard');
                             var linkVal = $(this).val();
                             var attr = $(this).data('for');
                             target.attr('data-' + attr, linkVal);
-                            target.data(attr,linkVal);
+                            target.data(attr, linkVal);
                             var updElem = target.find('.url' + ucFirst(attr));
                             if (attr === "title" || attr === "subtitle") {
                                 updElem.text(linkVal);
@@ -284,7 +286,7 @@ function FlexWidget(data) {
                         if (widgetData.hasOwnProperty('subtitle')) subtitle = widgetData.subtitle;
                         console.log("Updating data: ", widgetData);
                         widget.find('.urlLink').attr('href', widgetUrl);
-                        widget.find('.urlImg').attr('src',img);
+                        widget.find('.urlImg').attr('src', img);
                         widget.find('.urlTitle').text(title);
                         widget.find('.urlSubtitle').text(subtitle);
                         widget.find('.imgInput').val(img);
@@ -349,7 +351,7 @@ function FlexWidget(data) {
                         console.log("Chart options: ", chartOpts);
                         var serverOverviewBars = Highcharts.chart(bars[0], chartOpts);
 
-                        $(document).on('gsresizestop', widget, function() {
+                        $(document).on('gsresizestop', widget, function () {
                             console.log("REFLOW TRIGGERED.");
                             serverOverviewBars.reflow();
                         });
@@ -367,7 +369,7 @@ function FlexWidget(data) {
                             var drawer = $('#AppzDrawer');
                             var drawerItems = drawer.find('.drawer-item');
                             if (drawerItems.length) {
-                                id = drawer.find('.drawer-item').attr('id').replace('Btn','');
+                                id = drawer.find('.drawer-item').attr('id').replace('Btn', '');
                                 console.log('No defined target, using' + id);
                             } else {
                                 console.log("No drawer Item!!");
@@ -407,11 +409,11 @@ function FlexWidget(data) {
                             shade = 100;
                         }
                         var color2 = shadeColor(color, shade);
-                        var colString = 'background: linear-gradient(60deg, '+color+', '+color2+');';
+                        var colString = 'background: linear-gradient(60deg, ' + color + ', ' + color2 + ');';
 
                         widget.attr('style', colString);
 
-                        $(document).on('change', '.serviceList', function() {
+                        $(document).on('change', '.serviceList', function () {
                             console.log("Service list changed, we need to do some magic...");
                             var target = $(this).closest('.widgetCard');
                             var selection = $(this).find(":selected").val();
@@ -440,7 +442,7 @@ function FlexWidget(data) {
                                 shade = 100;
                             }
                             var color2 = shadeColor(widgetData['color'], shade);
-                            var colString = "background: linear-gradient(60deg, "+widgetData['color']+", "+color2+");";
+                            var colString = "background: linear-gradient(60deg, " + widgetData['color'] + ", " + color2 + ");";
                             var ss = target.find(".card.m-0.service-status");
                             ss.attr('style', colString);
                             target.attr('style', colString);
@@ -471,7 +473,7 @@ function FlexWidget(data) {
         var type = widgetData['type'];
 
 
-        switch(type) {
+        switch (type) {
             case 'Generic':
                 console.log('No update function defined for generic');
                 break;
@@ -488,12 +490,12 @@ function FlexWidget(data) {
                     var npTemplate = widget.find('.carousel-template-item');
                     var empty = true;
                     var sessionIds = [];
-                    $.each(sessions, function(key, session) {
+                    $.each(sessions, function (key, session) {
                         var sessionId = session['id'];
                         sessionIds.push(sessionId);
                         var targetSession = false;
                         var data = session;
-                        $.each(currentWidgets, function(){
+                        $.each(currentWidgets, function () {
                             console.log("Current widget: ", $(this));
                             if ($(this).data('sessionid') === sessionId) {
                                 console.log("This session is already set up, update it.");
@@ -508,7 +510,7 @@ function FlexWidget(data) {
                             targetSession = npTemplate.clone();
                             targetSession.attr('id', "currentActivity" + sessionId);
                             var indicatorCount = indicators.length;
-                            var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="'+indicatorCount+'"></li>');
+                            var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="' + indicatorCount + '"></li>');
                             carousel.append(targetSession);
                             indicatorContainer.append(targetIndicator);
                             targetSession.removeClass('carousel-template-item');
@@ -522,7 +524,7 @@ function FlexWidget(data) {
                         }
 
                         console.log("Okay, now we should be updating values within " + targetSession);
-                        var streamLink = ' <a data-toggle="collapse" href="#streamInfo'+targetSession+'" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a>';
+                        var streamLink = ' <a data-toggle="collapse" href="#streamInfo' + targetSession + '" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a>';
                         var titleText = "";
                         if (data['type'] === 'episode') {
                             titleText += data['grandparentTitle'] + "<br>";
@@ -535,9 +537,9 @@ function FlexWidget(data) {
                         }
 
                         if (data['type'] === "movie") titleText = data['title'] + " (" + data['year'] + ")";
-                        
-                        targetSession.find('.card-body').css('background','url(' + data['art'] + ')');
-                        targetSession.find('.card-poster').attr('src',data['poster']);
+
+                        targetSession.find('.card-body').css('background-image', 'url(' + data['art'] + ')');
+                        targetSession.find('.media-image').css('background-image', 'url(' + data['poster'] + ')');
                         targetSession.find('.npStatusText').text(data['state']);
                         targetSession.find('.npStatusQuality').text(data['quality']);
                         targetSession.find('.npStatusBandwidth').text(data['bandwidth']);
@@ -552,10 +554,10 @@ function FlexWidget(data) {
 
                     });
 
-                    $.each(currentWidgets, function(){
+                    $.each(currentWidgets, function () {
                         var sessId = $(this).data('sessionid');
                         var remove = true;
-                        $.each(sessionIds, function(key,value) {
+                        $.each(sessionIds, function (key, value) {
                             console.log("Comparing ", value, sessId);
                             if (value == sessId) remove = false;
                         });
@@ -580,7 +582,7 @@ function FlexWidget(data) {
                 if (widgetData.hasOwnProperty('subtitle')) subtitle = widgetData.subtitle;
                 console.log("Updating data: ", widgetData);
                 widget.find('.urlLink').attr('href', url);
-                widget.find('.urlImg').attr('src',img);
+                widget.find('.urlImg').attr('src', img);
                 widget.find('.urlTitle').text(title);
                 widget.find('.urlSubtitle').text(subtitle);
                 widget.find('.imgInput').val(img);
@@ -641,7 +643,7 @@ function FlexWidget(data) {
                     shade = 100;
                 }
                 var color2 = shadeColor(widgetData['color'], shade);
-                var colString = "background: linear-gradient(60deg, "+widgetData['color']+", "+color2+");";
+                var colString = "background: linear-gradient(60deg, " + widgetData['color'] + ", " + color2 + ");";
                 var ss = widget.find(".card.m-0.service-status");
                 ss.attr('style', colString);
                 break;
@@ -663,8 +665,7 @@ function FlexWidget(data) {
         width = $(id).parent().width();
         height = $(id).parent().height() - ((rows - 1) * vmargin);
 
-        if (0 >= height)
-        {
+        if (0 >= height) {
             setTimeout(gridObj.onResizeHandler, 1000);
             return;
         }
@@ -718,7 +719,7 @@ function FlexWidget(data) {
 
         if (setListener) {
             var selVal = "";
-            list.on('click change', function(){
+            list.on('click change', function () {
                 selVal = $(this).val();
                 var parent = widget;
                 console.log("Selected: " + selVal);
@@ -736,7 +737,7 @@ function FlexWidget(data) {
                             var token = device['Token'];
                             parent.attr('data-target', selVal);
                             parent.attr('data-uri', uri);
-                            parent.attr('data-token',token);
+                            parent.attr('data-token', token);
                             parent.data('target, selVal');
                             parent.data('token', token);
                             parent.data('uri', uri);
@@ -774,7 +775,7 @@ function FlexWidget(data) {
                     "TB/s"
                 ];
                 var tag = "B/s";
-                $.each(steps, function(i){
+                $.each(steps, function (i) {
                     if (netRx < 1024) {
                         tag = steps[i];
                         return false;
@@ -786,11 +787,11 @@ function FlexWidget(data) {
                 hddPct = widgetData['Hdd'][0]['Disk'][0]['hdd_pct_used'];
                 hddName = widgetData['Hdd'][0]['Disk'][0]['hdd_path'];
                 var hddData = widgetData['Hdd'][0]['Disk'];
-                $.each(hddData, function(key, data) {
+                $.each(hddData, function (key, data) {
                     hddArray.push([data['hdd_name'], data['hdd_pct_used']]);
                 });
                 var netData = widgetData['Net'][0]['Interface'];
-                $.each(netData, function(key, data) {
+                $.each(netData, function (key, data) {
                     nicRxArray.push([data['nic_name'], data['nix_rx']]);
                     nicTxArray.push([data['nic_name'], data['nic_tx']]);
                 });
@@ -872,7 +873,5 @@ function FlexWidget(data) {
     initListeners(data);
     this.addWidget = addWidget;
     this.updateWidget = updateWidget;
-    this.removeWidget = removeWidget;
-    this.serialize = serialize;
-
+    this.removeWidget;
 }

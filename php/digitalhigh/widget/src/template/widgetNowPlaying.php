@@ -8,9 +8,9 @@ class widgetNowPlaying {
 	// Set these accordingly
 	const maxWidth = 8;
 	const maxHeight = 8;
-	const minWidth = 2;
+	const minWidth = 3;
 	const minHeight = 2;
-	const refreshInterval = 5;
+	const refreshInterval = 2;
 	const type = "NowPlaying";
 	public function __construct($data) {
 		$data['type'] = self::type;
@@ -99,8 +99,8 @@ class widgetNowPlaying {
 		$attributes = [
 			'gs-x' => 1,
 			'gs-y' => 0,
-			'gs-width' =>4,
-			'gs-height' => 5,
+			'gs-width' => 3,
+			'gs-height' => 1,
 			'type' => self::type,
 			'gs-min-width' => self::minWidth,
 			'gs-min-height' => self::minHeight,
@@ -155,35 +155,35 @@ class widgetNowPlaying {
                 <div class="carousel-item carousel-template-item">			
                     <div class="card-body">
                         <div class="row mediaDiv text-white">
-                        	<div class="media-image col-5">
-                        		<img class="mr-3 card-poster" src="https://image.tmdb.org/t/p/original/7htwyZzjIUFIIkGQ6HhMgv2kVmM.jpg" alt="Poster" width="100">
+                        	<div class="media-image col-5">                        		
                         	</div>
                             <div class="media-text col-7">
-	                            <dl class="row mb-0">
-	                                <dt class="col-sm-4 text-sm-right">Status</dt>
-	                                <dd class="col-sm-8 npStatusText"></dd>
-	                                <dt class="col-sm-4 text-sm-right">Quality</dt>
-	                                <dd class="col-sm-8 npStatusQuality"></dd>
-	                                <dt class="col-sm-4 text-sm-right">Bandwidth</dt>
-	                                <dd class="col-sm-8 npStatusBandwidth"></dd>
-	                                <dt class="col-sm-4 text-sm-right">Stream</dt>
-	                                <dd class="col-sm-8 npStreamType"><a data-toggle="collapse" href="#streamInfo1" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a></dd>
+	                            <dl class="row mb-0 textInner">
+	                                <dt class="col-sm-5 text-sm-right">Status</dt>
+	                                <dt class="col-sm-7 npStatusText text-truncate"></dt>
+	                                <dt class="col-sm-5 text-sm-right">Quality</dt>
+	                                <dt class="col-sm-7 npStatusQuality text-truncate"></dt>
+	                                <dt class="col-sm-5 text-sm-right">Bandwidth</dt>
+	                                <dt class="col-sm-7 npStatusBandwidth text-truncate"></dt>
+	                                <dt class="col-sm-5 text-sm-right">Stream</dt>
+	                                <dt class="col-sm-7 npStreamType text-truncate">
+	                                <a data-toggle="collapse" href="#streamInfo1" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a></dt>
 	
-	                                <dl class="collapse col-sm-8 offset-sm-4" id="streamInfo1">
+	                                <dl class="collapse col-sm-5 offset-sm-4" id="streamInfo1">
 	                                    <dt>Container</dt>
-	                                    <dd class="npStreamContainer"></dd>
+	                                    <dt class="npStreamContainer text-truncate"></dt>
 	                                    <dt>Video</dt>
-	                                    <dd class="npTranscodeVideo"></dd>
+	                                    <dt class="npTranscodeVideo text-truncate"></dt>
 	                                    <dt>Audio</dt>
-	                                    <dd class="npTranscodeAudio"></dd>
+	                                    <dt class="npTranscodeAudio text-truncate"></dt>
 	                                    <dt>Subtitle</dt>
-	                                    <dd class="npTranscodeSubtitle"></dd>
+	                                    <dt class="npTranscodeSubtitle text-truncate"></dt>
 	                                </dl>
 	
-	                                <dt class="col-sm-4 text-sm-right">Player</dt>
-	                                <dd class="col-sm-8 npPlayerName"></dd>
-	                                <dt class="col-sm-4 text-sm-right">User</dt>
-	                                <dd class="col-sm-8 npUserName"></dd>
+	                                <dt class="col-sm-5 text-sm-right">Player</dt>
+	                                <dt class="col-sm-7 npPlayerName text-truncate"></dt>
+	                                <dt class="col-sm-5 text-sm-right">User</dt>
+	                                <dt class="col-sm-7 npUserName text-truncate"></dt>
 	                            </dl>
                             </div>
                         </div>
@@ -213,14 +213,6 @@ class widgetNowPlaying {
 	public static function widgetCSS() {
 		return '
 		
-		.card-body {
-			background-image: url(\'https://image.tmdb.org/t/p/original/ilKE2RPD8tkynAOHefX9ZclG1yq.jpg\');
-			background-position: center;
-			background-repeat: no-repeat;
-			background-size: cover;
-			background-color: #333;
-			background-blend-mode: overlay;
-		}
 		
 		.carousel {
 			height: calc(100% - 70px);
@@ -234,12 +226,42 @@ class widgetNowPlaying {
 			display: none;
 		}
 		
+		.textInner {
+			position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+		}
+		
+		.text-truncate {
+			
+		}
+		
 		.card-body {
+			background-image: url(\'https://image.tmdb.org/t/p/original/ilKE2RPD8tkynAOHefX9ZclG1yq.jpg\');
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-color: #333;
+			background-blend-mode: overlay;
+			height: calc(100% - 52px) !important;
+			padding-top: 0;
+            padding-right: 1.25rem;
+            padding-bottom: 0;
+            padding-left: 1.25rem;
+		}
+		
+		.media-image {
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: contain;
+		}
+		
+		.mediaDiv, .media-image, .media-text {
 			height: 100%;
 		}
 		
 		.mediaDiv {
-			height: 100%;
+			margin: 0 !important;
 		}
 		
 		.media-image img {
@@ -252,6 +274,12 @@ class widgetNowPlaying {
 		    background: #474747;
 		    position: absolute;
 		    bottom: 0;
+		    height: 52px;
+		}
+		
+		.npMediaTitle {
+			position: absolute;
+			bottom: 5px;	
 		}
 		
 		.progress {
@@ -261,6 +289,8 @@ class widgetNowPlaying {
 		    left: 0;
 		    width: 100%;
 		}
+		
+		
 		
 		';
 	}

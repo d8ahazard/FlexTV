@@ -2330,8 +2330,9 @@ function serverProtocol() {
 	return (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://');
 }
 
+
 function session_started() {
-	return session_status() === PHP_SESSION_NONE ? false : true;
+	return session_status() === PHP_SESSION_NONE ? false : true;	
 }
 
 function setStartUrl() {
