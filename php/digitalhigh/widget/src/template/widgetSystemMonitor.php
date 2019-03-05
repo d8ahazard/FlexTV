@@ -146,6 +146,20 @@ class widgetSystemMonitor {
 			    top: 35px;
 			}
 			
+			.card-header {
+				height: 33px;
+			}
+			
+			.card-body {
+				width: 100% !important;
+				height: calc(100% - 33px) !important;
+			}
+			
+			.highcharts-root, .highcharts-container, .serverOverviewBars {
+				width: 100% !important;
+				height: 100% !important;
+			}
+			
 		';
 	}
 
