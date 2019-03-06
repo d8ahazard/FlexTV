@@ -136,10 +136,11 @@ class widgetNowPlaying {
 	                <div class="carousel-inner slideContent">
 	                    
 	                </div>
+	                <ol class="carousel-indicators">                
+	            	</ol>
 	            </div>
 	            
-	            <ol class="carousel-indicators">                
-	            </ol>
+	            
 	            
 	            <div class="card-settings">
 					<!-- Card setting markup goes here -->

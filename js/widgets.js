@@ -139,6 +139,12 @@ function FlexWidget(data) {
             }
         });
 
+        $(document).on('click','.carousel-indicator', function () {
+            var parent = $(this).closest('.widgetCard');
+            var carousel = parent.find('.carousel');
+            if (!$(this).hasClass('active')) carousel.carousel($(this).data('slide-to'));
+        });
+
         $(window).on('click', '.widgetRefresh', function () {
             var parent = $(this).closest('.widgetCard');
         });
@@ -490,6 +496,8 @@ function FlexWidget(data) {
                     var npTemplate = widget.find('.carousel-template-item');
                     var empty = true;
                     var sessionIds = [];
+                    var indicatorCount = indicators.length;
+                    console.log("We have " + indicatorContainer + " indicators.");
                     $.each(sessions, function (key, session) {
                         var sessionId = session['id'];
                         sessionIds.push(sessionId);
@@ -509,10 +517,10 @@ function FlexWidget(data) {
                             console.log("Specified session doesn't exist, appending.");
                             targetSession = npTemplate.clone();
                             targetSession.attr('id', "currentActivity" + sessionId);
-                            var indicatorCount = indicators.length;
                             var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="' + indicatorCount + '"></li>');
                             carousel.append(targetSession);
                             indicatorContainer.append(targetIndicator);
+                            indicatorCount++;
                             targetSession.removeClass('carousel-template-item');
                             if (empty) {
                                 targetSession.addClass('active');
@@ -559,7 +567,7 @@ function FlexWidget(data) {
                         var remove = true;
                         $.each(sessionIds, function (key, value) {
                             console.log("Comparing ", value, sessId);
-                            if (value == sessId) remove = false;
+                            if (value === sessId) remove = false;
                         });
                         if (remove) {
                             console.log("This session card doesn't exist, deleting...", $.inArray(sessId, sessionIds));
@@ -873,5 +881,7 @@ function FlexWidget(data) {
     initListeners(data);
     this.addWidget = addWidget;
     this.updateWidget = updateWidget;
-    this.removeWidget;
+    this.removeWidget = removeWidget;
+    this.serialize = serialize;
+
 }
