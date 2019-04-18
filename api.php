@@ -241,6 +241,21 @@ function initialize() {
 		bye();
 	}
 
+	if (isset($_GET['suggestions'])) {
+		write_log("Fetching suggestions!");
+		$type=$_GET['suggestions'];
+		$data = fetchSuggestedMedia(['type'=> strtolower($type)]);
+		$count = count($data);
+		$key = rand(0, ($count - 1));
+
+		write_log("Final suggestion array out $key of $count items: ".json_encode($data));
+		$rand = $data[$key];
+		write_log("Rand: ".json_encode($rand));
+		header('Content-Type: Application/JSON');
+		echo(json_encode($rand));
+		bye();
+	}
+
 	if (isset($_GET['jsonWidgetArray'])) {
 		$widgetData = json_decode($_GET['jsonWidgetArray'], true);
 		write_log("JSON WIDGET ARRAY: ".json_encode($widgetData), "ALERT", false, true, true);
@@ -542,7 +557,7 @@ function getUiData($force = false) {
 
 function fetchMediaInfo(Array $params) {
 	write_log("Function fired with params: " . json_encode($params));
-	$track = $album = $subtype = $season = $mod = $episode = $title = $media = false;
+	$suggestion = $track = $album = $subtype = $season = $mod = $episode = $title = $media = false;
 	$action = $params['control'] ?? false;
 	$shuffle = false;
 	if ($action) {
@@ -552,6 +567,11 @@ function fetchMediaInfo(Array $params) {
 		if ($type == 'shuffle') {
 			$type = false;
 			$shuffle = true;
+		}
+
+		if ($type === 'recommended') {
+			$suggestion = true;
+			$type = false;
 		}
 	}
 
@@ -628,6 +648,7 @@ function fetchMediaInfo(Array $params) {
 		'action'  => $action,
 		'intent'  => $action,
 		'shuffle' => $shuffle,
+		'suggestion' => $suggestion,
 		'request' => $request,
 		'type'    => $type,
 		'season'  => $season,
@@ -690,8 +711,6 @@ function fetchMediaInfo(Array $params) {
 			$request = $newRequest;
 			$data['request'] = $newRequest;
 		}
-
-
 	}
 
 	$queryParams['query'] = $request;
@@ -735,6 +754,11 @@ function fetchMediaInfo(Array $params) {
 				}
 			}
 		}
+	}
+
+	if ($suggestion) {
+		$data['media'] = fetchSuggestedMedia($data);
+
 	}
 
 	$ep = $key = $parent = false;
@@ -2333,6 +2357,80 @@ function fetchServerData($server = false) {
 	return ['Sections' => $sections, 'Stations' => $stations];
 
 }
+
+
+function fetchSuggestedMedia($data) {
+	$results = $topMedia = $userId = false;
+	$types = [
+		'movie' => 1,
+		'episode' => 2,
+		'track' => 8
+	];
+
+	write_log("Fetching suggested media: ".json_encode($data));
+	$type = $data['type'] ?? 'movie';
+	$typeInt = $types[$type] ?? 1;
+	$server = findDevice(false, false, "Server");
+	$uri = $server['Uri'];
+	$token = $server['Token'];
+	$userData = curlGet("$uri/accounts?X-Plex-Token=$token");
+	$currentUser = fetchUserData();
+	if ($userData) {
+		$users = $userData['MediaContainer']['Account'];
+		foreach($users as $user) {
+			if ($user['name'] === $currentUser['plexUserName']) {
+				$userId = $user['id'];
+			}
+		}
+	}
+
+	if ($userId) {
+		$int = strtotime("-1 week");
+		$topUrl = "$uri/library/all/top?accountID=$userId&type=$typeInt&viewedAt%3E=$int&limit=10&X-Plex-Token=$token";
+		$topMedia = curlGet($topUrl);
+	}
+	$ids = [];
+	if ($topMedia) {
+		write_log("We have top media: ".json_encode($topMedia));
+		$mc = $topMedia['MediaContainer'];
+		$topMedia = $mc['Video'] ?? $mc['Directory'] ?? $mc['Audio'];
+		foreach($topMedia as $media) {
+			$title = $media['title'];
+			$key = $media['ratingKey'];
+			$url = "$uri/hubs/metadata/$key/related?includeExternalMetadata=1&asyncAugmentMetadata=1&X-Plex-Token=$token";
+			write_log("URL: $url");
+			$ids[$title] = $url;
+		}
+	}
+
+	if (count($ids)) {
+		write_log("We have url's, getting some recommendations: ".json_encode($ids));
+		$mc = (new multiCurl($ids))->process();
+		write_log("MC Result: ".json_encode($mc));
+		foreach($mc as $mTitle => $data) {
+			$top = false;
+			$hubs = $data['MediaContainer']['Hub'];
+			foreach($hubs as $hub) {
+				if ($hub['hubIdentifier'] === 'external.movie.similar') {
+					$top = $hub;
+				}
+			}
+
+			if ($top) {
+				foreach($top as $cat => $items) {
+					foreach($items as $item) {
+						$item['reason'] = $mTitle;
+						write_log("Pushing item: ".json_encode($item));
+						$results[] = $item;
+					}
+				}
+			}
+		}
+	}
+
+	return $results;
+}
+
 
 function fetchTransientToken($host = false, $type = false) {
 	$host = $host ? $host : findDevice(false, false, "Server");

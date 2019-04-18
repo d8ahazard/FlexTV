@@ -131,6 +131,7 @@ class widgetNowPlaying {
 				</h4>
 				
 				<!-- Now start putting actual content -->
+				<div class="noItems">Nothing is currently being played.</div>
 			    <div class="carousel slide card m-0 bg-dark transparent shadow" data-ride="carousel">            
 		            
 	                <div class="carousel-inner slideContent">
@@ -276,6 +277,17 @@ class widgetNowPlaying {
 		    position: absolute;
 		    bottom: 0;
 		    height: 52px;
+		}
+		
+		.noItems {
+			text-align: center;
+		    background: gray;
+		    display: inline-block;
+		    position: absolute;
+		    left: 50%;
+		    transform: translateX(-50%);
+		    border-radius: 10px;
+		    padding: 5px;
 		}
 		
 		.npMediaTitle {

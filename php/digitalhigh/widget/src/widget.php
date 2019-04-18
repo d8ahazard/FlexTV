@@ -260,7 +260,7 @@ class widget {
 			}
 					
 			
-			.dragHandle.no-header {
+			.no-header .dragHandle {
 				position: absolute;
 	            top: 10px;
 			}
@@ -273,7 +273,7 @@ class widget {
 			    top: 35px;
 			}
 			
-			.widgetMenu.no-header {
+			.no-header .widgetMenu {
 				position: absolute;
 			    top: 10px;
 			    right: 0px;

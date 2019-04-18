@@ -260,11 +260,50 @@ function FlexWidget(data) {
                     case 'Generic':
                         console.log('No init function defined for generic');
                         break;
+
+                    case 'TopPlayed':
+                        console.log("Top played widget init.");
+                        loadWidgetTarget(widget, widgetData, true, true);
+                        var typeSel = widget.find('.typeInput');
+                        var intSel = widget.find('.intInput');
+                        if (widgetData.hasOwnProperty('mediatype')) {
+                            typeSel.val(widgetData['mediatype']);
+                        } else {
+                            typeSel.val('movie');
+                            widget.attr('data-mediatype','movie');
+                            widget.data('mediatype','movie');
+                            widgetData['mediatype'] = 'movie';
+                        }
+                        if (widgetData.hasOwnProperty('interval')) {
+                            intSel.val(widgetData['interval']);
+                        } else {
+                            typeSel.val('0');
+                            widget.attr('data-interval','0');
+                            widget.data('interval','0');
+                            widgetData['interval'] = '0';
+                        }
+                        typeSel.on('click', function(){
+                            var val = $(this).val();
+                            console.log("Updating type for topPlayed widget to " + val);
+                            widget.attr('data-mediatype',val);
+                            widget.data('mediatype', val);
+                        });
+
+                        intSel.on('click', function(){
+                            var val = $(this).val();
+                            console.log("Updating interval for topPlayed widget to " + val);
+                            widget.attr('data-interval',val);
+                            widget.data('interval', val);
+                        });
+
+                        loadTopPlayed(widget, widgetData);
+                        break;
+
                     case 'NowPlaying':
                         console.log("Nowplaying init.");
                         widget.find('#currentActivity').removeClass('list-group-item-danger');
                         loadWidgetTarget(widget, widgetData, false, true);
-
+                        loadNowPlaying(widget, widgetData);
                         break;
                     case 'URL':
                         widget.find('.card-header').hide();
@@ -484,98 +523,16 @@ function FlexWidget(data) {
                 console.log('No update function defined for generic');
                 break;
 
+            case 'TopPlayed':
+                console.log("Top played widget init.");
+                loadWidgetTarget(widget, widgetData, true, false);
+                loadTopPlayed(widget, widgetData);
+                break;
+
             case 'NowPlaying':
                 console.log('No update function defined for nowPlaying');
                 loadWidgetTarget(widget, widgetData, false, false);
-                if (widgetData.hasOwnProperty('sessions')) {
-                    var sessions = widgetData.sessions;
-                    var carousel = widget.find('.carousel-inner');
-                    var indicatorContainer = widget.find('.carousel-indicators');
-                    var indicators = widget.find('.carousel.indicator');
-                    var currentWidgets = carousel.find('.carousel-item');
-                    var npTemplate = widget.find('.carousel-template-item');
-                    var empty = true;
-                    var sessionIds = [];
-                    var indicatorCount = indicators.length;
-                    console.log("We have " + indicatorContainer + " indicators.");
-                    $.each(sessions, function (key, session) {
-                        var sessionId = session['id'];
-                        sessionIds.push(sessionId);
-                        var targetSession = false;
-                        var data = session;
-                        $.each(currentWidgets, function () {
-                            console.log("Current widget: ", $(this));
-                            if ($(this).data('sessionid') === sessionId) {
-                                console.log("This session is already set up, update it.");
-                                targetSession = $(this);
-                                empty = false;
-                                return false;
-                            }
-                        });
-
-                        if (!targetSession) {
-                            console.log("Specified session doesn't exist, appending.");
-                            targetSession = npTemplate.clone();
-                            targetSession.attr('id', "currentActivity" + sessionId);
-                            var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="' + indicatorCount + '"></li>');
-                            carousel.append(targetSession);
-                            indicatorContainer.append(targetIndicator);
-                            indicatorCount++;
-                            targetSession.removeClass('carousel-template-item');
-                            if (empty) {
-                                targetSession.addClass('active');
-                                targetIndicator.addClass('active');
-                            }
-                            targetSession.attr('data-sessionid', sessionId);
-                            targetSession.data('sessionid', sessionId);
-                            empty = false;
-                        }
-
-                        console.log("Okay, now we should be updating values within " + targetSession);
-                        var streamLink = ' <a data-toggle="collapse" href="#streamInfo' + targetSession + '" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a>';
-                        var titleText = "";
-                        if (data['type'] === 'episode') {
-                            titleText += data['grandparentTitle'] + "<br>";
-                            titleText += "S" + data['parentIndex'] + "E" + data['index'] + " - " + data['title'];
-                        }
-
-                        if (data['type'] === 'track') {
-                            titleText += data['grandparentTitle'] + "<br>";
-                            titleText += data['title'] + " " + data['parentTitle'];
-                        }
-
-                        if (data['type'] === "movie") titleText = data['title'] + " (" + data['year'] + ")";
-
-                        targetSession.find('.card-body').css('background-image', 'url(' + data['art'] + ')');
-                        targetSession.find('.media-image').css('background-image', 'url(' + data['poster'] + ')');
-                        targetSession.find('.npStatusText').text(data['state']);
-                        targetSession.find('.npStatusQuality').text(data['quality']);
-                        targetSession.find('.npStatusBandwidth').text(data['bandwidth']);
-                        targetSession.find('.npStreamType').html(data['direct'] + streamLink);
-                        targetSession.find('.npPlayerName').text(data['player']);
-                        targetSession.find('.npUserName').text(data['user']);
-                        targetSession.find('.npMediaTitle').html(titleText);
-                        targetSession.find('.progress-bar').text(data['percent'] + "%");
-                        targetSession.find('.progress-bar').attr('aria-valuenow', data['percent']);
-                        targetSession.find('.progress-bar').css('width', data['percent'] + "%");
-
-
-                    });
-
-                    $.each(currentWidgets, function () {
-                        var sessId = $(this).data('sessionid');
-                        var remove = true;
-                        $.each(sessionIds, function (key, value) {
-                            console.log("Comparing ", value, sessId);
-                            if (value === sessId) remove = false;
-                        });
-                        if (remove) {
-                            console.log("This session card doesn't exist, deleting...", $.inArray(sessId, sessionIds));
-                            $(this).remove();
-                            widget.find('#indicator' + sessId).remove();
-                        }
-                    });
-                }
+                loadNowPlaying(widget, widgetData);
                 break;
 
             case 'URL':
@@ -685,18 +642,173 @@ function FlexWidget(data) {
         gridObj.cellHeight(parseInt(height / rows) + 'px');
     }
 
+
+    function loadNowPlaying(widget, widgetData) {
+        if (widgetData.hasOwnProperty('sessions')) {
+            var sessions = widgetData.sessions;
+            var carouselContainer = widget.find('.carousel');
+            var carousel = widget.find('.carousel-inner');
+            var indicatorContainer = widget.find('.carousel-indicators');
+            var indicators = widget.find('.carousel.indicator');
+            var currentWidgets = carousel.find('.carousel-item');
+            var npTemplate = widget.find('.carousel-template-item');
+            var noItems = widget.find('.noItems');
+            var empty = true;
+            if (sessions.length === 0) {
+                noItems.show();
+                carouselContainer.hide();
+            } else {
+                noItems.hide();
+                carouselContainer.show();
+            }
+            var sessionIds = [];
+            var indicatorCount = indicators.length;
+            console.log("We have " + indicatorContainer + " indicators.");
+            $.each(sessions, function (key, session) {
+                var sessionId = session['id'];
+                sessionIds.push(sessionId);
+                var targetSession = false;
+                var data = session;
+                $.each(currentWidgets, function () {
+                    console.log("Current widget: ", $(this));
+                    if ($(this).data('sessionid') === sessionId) {
+                        console.log("This session is already set up, update it.");
+                        targetSession = $(this);
+                        empty = false;
+                        return false;
+                    }
+                });
+
+                if (!targetSession) {
+                    console.log("Specified session doesn't exist, appending.");
+                    targetSession = npTemplate.clone();
+                    targetSession.attr('id', "currentActivity" + sessionId);
+                    var targetIndicator = $('<li class="carousel-indicator" id="indicator' + sessionId + '" data-target="#currentActivity' + sessionId + '" data-slide-to="' + indicatorCount + '"></li>');
+                    carousel.append(targetSession);
+                    indicatorContainer.append(targetIndicator);
+                    indicatorCount++;
+                    targetSession.removeClass('carousel-template-item');
+                    if (empty) {
+                        targetSession.addClass('active');
+                        targetIndicator.addClass('active');
+                    }
+                    targetSession.attr('data-sessionid', sessionId);
+                    targetSession.data('sessionid', sessionId);
+                    empty = false;
+                }
+
+                console.log("Okay, now we should be updating values within " + targetSession);
+                var streamLink = ' <a data-toggle="collapse" href="#streamInfo' + targetSession + '" role="button" aria-expanded="false" aria-controls="streamInfo1">+</a>';
+                var titleText = "";
+                if (data['type'] === 'episode') {
+                    titleText += data['grandparentTitle'] + "<br>";
+                    titleText += "S" + data['parentIndex'] + "E" + data['index'] + " - " + data['title'];
+                }
+
+                if (data['type'] === 'track') {
+                    titleText += data['grandparentTitle'] + "<br>";
+                    titleText += data['title'] + " " + data['parentTitle'];
+                }
+
+                if (data['type'] === "movie") titleText = data['title'] + " (" + data['year'] + ")";
+
+                targetSession.find('.card-body').css('background-image', 'url(' + data['art'] + ')');
+                targetSession.find('.media-image').css('background-image', 'url(' + data['poster'] + ')');
+                targetSession.find('.npStatusText').text(data['state']);
+                targetSession.find('.npStatusQuality').text(data['quality']);
+                targetSession.find('.npStatusBandwidth').text(data['bandwidth']);
+                targetSession.find('.npStreamType').html(data['direct'] + streamLink);
+                targetSession.find('.npPlayerName').text(data['player']);
+                targetSession.find('.npUserName').text(data['user']);
+                targetSession.find('.npMediaTitle').html(titleText);
+                targetSession.find('.progress-bar').text(data['percent'] + "%");
+                targetSession.find('.progress-bar').attr('aria-valuenow', data['percent']);
+                targetSession.find('.progress-bar').css('width', data['percent'] + "%");
+
+
+            });
+
+            $.each(currentWidgets, function () {
+                var sessId = $(this).data('sessionid');
+                var remove = true;
+                $.each(sessionIds, function (key, value) {
+                    console.log("Comparing ", value, sessId);
+                    if (value === sessId) remove = false;
+                });
+                if (remove) {
+                    console.log("This session card doesn't exist, deleting...", $.inArray(sessId, sessionIds));
+                    $(this).remove();
+                    widget.find('#indicator' + sessId).remove();
+                }
+            });
+        }
+    }
+
+    function loadTopPlayed(widget, widgetData) {
+        console.log("Loading some data for top played!");
+        var server = widgetData['target'];
+        var headerDiv = widget.find(".catHeader");
+        var itemsDiv = widget.find('.catItems');
+        var interval = widgetData['interval'];
+        var mediaType = widgetData['mediatype'];
+        var mediaString = "Top ";
+        if (mediaType === "movie") mediaString += "Movies";
+        if (mediaType === "episode") mediaString += "Episodes";
+        if (mediaType === "track") mediaString += "Tracks";
+        var subString = "(All Time)";
+        if (interval !== "0") subString = "(Past " + interval + " days)";
+        itemsDiv.html("");
+        headerDiv.html("<div class='headerText'><h3>" + mediaString + "</h3>" + subString + "</div>");
+        //https://app.plex.tv/desktop#!/server/ed3792e30b792ce736e46b3751167ba613a4acc4/details?key=%2Flibrary%2Fmetadata%2F22391
+        if (widgetData.hasOwnProperty('target')) {
+            var baseUrl = "https://app.plex.tv/desktop#!/server/" + server + "/details?key=";
+            if (widgetData.hasOwnProperty('stats')) {
+                console.log("We have stats!");
+                var colVal = 0.7;
+                $.each(widgetData['stats'], function(key, value) {
+                    console.log("Key " + key + " value - ", value);
+                    if (key === 0) {
+                        headerDiv.css('background-image','url("' + value['art'] + '")');
+                    }
+                    var itemKey = value['key'];
+                    var itemTitle = value['title'];
+                    var itemPoster = value['poster'];
+                    var playCount = value['playCount'];
+                    var userCount = value['userCount'];
+                    if (userCount === 1) userCount += " user"; else userCount += " users";
+                    var itemUrl = baseUrl + '%2Flibrary%2Fmetadata%2F'+ itemKey;
+                    var cardHtml = '' +
+                        '<div class="mediaRow" style="background-color: rgba(0, 0, 0, ' + colVal + ');" onClick="window.open(\''+itemUrl+'\', \'_blank\')">' +
+                                '<img class="itemPoster" src="' + itemPoster + '" alt="'+itemTitle+'"/>' +
+                                '<div class="mediaDescription">' +
+                                    '<div class="mediaInner">' +
+                                        '<div class="topRow">' + itemTitle + '</div>' +
+                                        '<div class="countSpan">' + playCount + ' plays</div>' +
+                                        '<div class="countSpan">' + userCount + ' user</div>' +
+                                    '</div>' +
+                            '</div>' +
+                        '</div>';
+
+                    colVal -= 0.1;
+                    itemsDiv.append(cardHtml);
+                });
+
+            }
+        }
+    }
+
     function loadWidgetTarget(widget, widgetData, usePlugin, setListener) {
         var devOutput = "";
-        console.log("Loading widget target for widget: ", widget);
+        console.log("Loading server list for widget: ", widget);
         var deviceList = devices;
         if (deviceList.hasOwnProperty('Server')) {
             var serverList = deviceList['Server'];
             console.log("We have a server list: ", serverList);
-
             var widgetTarget = (widgetData.hasOwnProperty('target') ? widgetData['target'] : false);
             var i = 0;
 
             $.each(serverList, function (key, device) {
+                console.log("Adding device to server list ", device);
                 var selected = "";
                 if (widgetTarget) {
                     if (widgetTarget === device['Id']) {
@@ -722,7 +834,7 @@ function FlexWidget(data) {
         }
 
         var list = widget.find('.serverList');
-        console.log("Setting serverList to " + devOutput, list);
+        console.log("Setting server list to " + devOutput, list);
         list.html(devOutput);
 
         if (setListener) {
