@@ -102,10 +102,10 @@ class DbConfig {
 	    if ($selector) $value = reset($selector);
 	    if ($selector) $key = key($selector);
 	    if ($selector && $value && $key) $query .= " WHERE $key LIKE ".$this->quote($value);
-	    write_log("Select query is '$query'");
+	    //write_log("Select query is '$query'");
         $data = $this->select($query);
         if (empty($data)) write_log("Error, no data fetched for query '$query'", "ERROR", false, false, true);
-        write_log("Returning: ".json_encode($data));
+//        write_log("Returning: ".json_encode($data));
         return $data;
     }
 

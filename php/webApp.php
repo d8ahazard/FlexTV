@@ -149,20 +149,22 @@ function deletePreference($table, $selector) {
 	return $result;
 }
 
-function checkUpdate() {
-	if (isWebApp()) return false;
-	$updates = [];
-	$git = new GitUpdate();
-	if ($git->hasGit) {
-		$updates = $git->checkMissing();
-		$refs = $updates['refs'];
-		writeSession('neededUpdates', $refs);
-		$revision = $git->revision;
-		$updates['last'] = $git->fetchCommits([$revision]);
-		$updates['revision'] = $revision;
-	}
+if (!function_exists('checkUpdate')) {
+	function checkUpdate() {
+		if (isWebApp()) return false;
+		$updates = [];
+		$git = new GitUpdate();
+		if ($git->hasGit) {
+			$updates = $git->checkMissing();
+			$refs = $updates['refs'];
+			writeSession('neededUpdates', $refs);
+			$revision = $git->revision;
+			$updates['last'] = $git->fetchCommits([$revision]);
+			$updates['revision'] = $revision;
+		}
 
-	return $updates;
+		return $updates;
+	}
 }
 
 function checkRevision($short = false) {

@@ -3038,12 +3038,16 @@ function mapApiRequest($request) {
 	$contexts = $request['contexts'] ?? [];
 	$resolvedQuery = $request['resolvedQuery'];
 	foreach ($contexts as $context) if ($context['name'] == 'actions_intent_option') {
-		$resolvedQuery = $context['parameters']['OPTION'];
-		$strings = explode(" ", $resolvedQuery);
+		$resolvedQuery = $context['parameters']['text'];
+		$intentOption = $context['parameters']['OPTION'];
+		$strings = explode(" ", $intentOption);
 		if ($strings[0] == 'play' || $strings[0] == 'fetch') {
-			$intent = 'Media.multipleResults';
-			unset($strings[0]);
-			$params['request'] = implode(" ", $strings);
+			$intent = $strings[0] . 'Media';
+			if (preg_match('!\(([^\)]+)\)!', $resolvedQuery, $match)) {
+				$text = $match[1];
+				$resolvedQuery = trim(str_replace("($text)", "", $resolvedQuery));
+			}
+			$params['request'] = $resolvedQuery;
 		}
 	}
 	$params['resolved'] = $resolvedQuery;
