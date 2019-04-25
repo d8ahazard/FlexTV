@@ -3037,23 +3037,33 @@ function mapApiRequest($request) {
 	$params = $request['parameters'] ?? [];
 	$contexts = $request['contexts'] ?? [];
 	$resolvedQuery = $request['resolvedQuery'];
+	$yearVal = false;
 	foreach ($contexts as $context) if ($context['name'] == 'actions_intent_option') {
-		$resolvedQuery = $context['parameters']['text'];
-		$intentOption = $context['parameters']['OPTION'];
-		$strings = explode(" ", $intentOption);
-		if ($strings[0] == 'play' || $strings[0] == 'fetch') {
-			$intent = $strings[0] . 'Media';
-			if (preg_match('!\(([^\)]+)\)!', $resolvedQuery, $match)) {
-				$text = $match[1];
-				$resolvedQuery = trim(str_replace("($text)", "", $resolvedQuery));
-			}
-			$params['request'] = $resolvedQuery;
+		$resolvedQuery = $context['parameters']['OPTION'];
+		$strings = explode(" ", $resolvedQuery);
+		if (preg_match("/metadata/", $resolvedQuery) && isset($context['parameters']['text'])) {
+			$resolved = $context['parameters']['text'];
+			preg_match('#\((.*?)\)#', $resolved, $match);
+			$yearVal = intval($match[1]);
+			if ($yearVal > 1900 && $yearVal < 2050) $resolved = str_replace(" ($yearVal)", "", $resolved);
+			$check = explode(" ", $resolved)[0];
+			if ($check === 'play' || $check === 'fetch') $resolved = str_replace("$check ", "", $resolved);
+			$resolvedQuery = $resolved;
+
 		}
+
+		$params['request'] = $resolvedQuery;
+
+		if ($strings[0] === 'play') $intent = 'playMedia';
+		if ($strings[0] === 'fetch') $intent = 'fetchMedia';
+		if ($strings[0] === 'play' || $strings[0] === 'fetch') $resolvedQuery = $strings[0] . " " . $resolvedQuery;
+
 	}
 	$params['resolved'] = $resolvedQuery;
 	$params['intent'] = $intent;
 	$params['contexts'] = $contexts;
 	$year = $params['year']['amount'] ?? false;
+	if (!$year && $yearVal) $year = $yearVal;
 	if ($year) {
 		$req = $params['request'];
 		// I'm going to take a risk here, and guess that if you're requesting music made before 1900,
@@ -3144,6 +3154,7 @@ function mapApiRequest($request) {
 		case 'playMedia':
 			$result = buildQueryMedia($params);
 			$params = array_merge($params, $result['params']);
+			$params['control'] = $params['control'] ?? 'play';
 			break;
 		case 'controlMedia':
 			write_log("Control command!", "INFO");

@@ -492,11 +492,14 @@ function decodeResult($result, $contentType = false, $log = true) {
 		if ($log) write_log("Returning result(JSON): " . json_encode($array));
 		return $array;
 	}
-
-	$array = (@new JsonXmlElement($result))->asArray();
-	if (!empty($array)) {
-		if ($log) write_log("Returning result(XML): " . json_encode($array));
-		return $array;
+	try {
+		$array = (@new JsonXmlElement($result))->asArray();
+		if (!empty($array)) {
+			if ($log) write_log("Returning result(XML): " . json_encode($array));
+			return $array;
+		}
+	} catch (Exception $e) {
+		write_log("Error: $e", "ERROR");
 	}
 
 	if ($log) write_log("Returning result(RAW): $result");
