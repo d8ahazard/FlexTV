@@ -123,7 +123,7 @@ if (isset($_GET['test'])) die;
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css"/>
-	<link rel="stylesheet" href="./css/log.css" />
+    <link rel="stylesheet" href="https://cdn.flextv.media/css/log.css" />
 
 	<script type="text/javascript">
 
@@ -139,23 +139,11 @@ if (isset($_GET['test'])) die;
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Files
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <div class="form-group">
-                        <label for="docSelect" class="dd-label btn btn-info selectAll">Select All</label>
-                        <select multiple class="form-control tableFilter" id="docSelect">
+                <a class="nav-link dropdown-toggle" href="#" id="levelDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
-                        </select>
-                    </div>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Level
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <div class="dropdown-menu" aria-labelledby="levelDropdown">
                     <div class="form-group">
                         <label for="levelSelect" class="dd-label btn btn-info selectAll">Select All</label>
                         <select multiple class="form-control tableFilter" id="levelSelect">
@@ -172,6 +160,30 @@ if (isset($_GET['test'])) die;
                     </div>
                 </div>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="appDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    App
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="form-group">
+                        <label for="appSelect" class="dd-label btn btn-info selectAll">Select All</label>
+                        <select multiple class="form-control tableFilter" id="appSelect">
+                        </select>
+                    </div>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="docsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Doc
+                </a>
+                <div class="dropdown-menu" aria-labelledby="docsDropdown">
+                    <div class="form-group">
+                        <label for="docSelect" class="dd-label btn btn-info selectAll">Select All</label>
+                        <select multiple class="form-control tableFilter" id="docSelect">
+                        </select>
+                    </div>
+                </div>
+            </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="text" placeholder="Filter" aria-label="Filter" id="textFilter">
@@ -182,26 +194,32 @@ if (isset($_GET['test'])) die;
         </div>
     </div>
 </nav>
-<div class="contents">
-    <table class="table table-striped table-dark table-bordered table-hover table-sm table-responsive-md" id="log">
+<table class="table table-striped table-dark table-bordered table-hover table-sm table-responsive-md" id="logHead">
         <thead>
             <tr id="headerRow">
                 <th scope="col" class="lineCol">#</th>
-                <th scope="col" class="docCol">Doc</th>
+        <th scope="col" class="stampCol">Stamp</th>
                 <th scope="col" class="badgeCol">Level</th>
-                <th scope="col" class="stampCol">Stamp</th>
-                <th scope="col" class="userCol">User</th>
+        <th scope="col" class="appCol">App</th>
+        <th scope="col" class="docCol">Doc</th>
                 <th scope="col" class="funcCol">Function</th>
+        <th scope="col" class="userCol">User</th>
                 <th scope="col">Body</th>
             </tr>
         </thead>
+</table>
+<div class="contents">
+    <table class="table table-striped table-dark table-bordered table-hover table-sm table-responsive-md" id="log">
         <tbody id="results" class="results">
         </tbody>
     </table>
 </div>
 <div class="load-div"><div></div><div></div><div></div></div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<div id="scrollDown">
+    <i class="fas fa-angle-double-down"></i>
+</div>
+<script src="https://cdn.flextv.media/js/lib/jquery-3.2.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -209,6 +227,6 @@ if (isset($_GET['test'])) die;
 <script type="text/javascript">
     var logData = JSON.parse('<?php echo json_encode($_SESSION['logs']); ?>');
 </script>
-<script src="./js/log.js"></script>
+<script src="https://cdn.flextv.media/js/log.js"></script>
 </body>
 </html>

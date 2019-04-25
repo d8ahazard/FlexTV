@@ -12,6 +12,7 @@ class MultiTail {
 	private $maxLines;
 	private $noHeader;
 	private $expressions;
+	private $formats;
 
 
 	function __construct($logs, $noHeader, $expressions, $formats, $maxLines = 5000) {
@@ -32,8 +33,16 @@ class MultiTail {
 			$lineNumber = $data['line'];
 			if (trim($path) && is_file($path)) {
 				$file = new SplFileObject($path);
-				if (!$file->eof()) {
+				$file->seek(PHP_INT_MAX);
+				$total = $file->key() + 1;
+				debug("Total is $total no is $lineNumber");
+				if ($total < $lineNumber) {
+					$lineNumber = 0;
+					$file->rewind();
+				} else {
 					$file->seek($lineNumber);
+				}
+				if (!$file->eof()) {
 					while ($file->valid()) {
 						$parsed = $this->parseLine($file->fgets(), $name, $lastStamp);
 						if ($parsed && trim($parsed['body'])) {
@@ -53,7 +62,7 @@ class MultiTail {
 		$this->logs = $logs;
 		$stamps = array_column($contents, 'unix');
 		array_multisort($stamps, SORT_ASC, $contents);
-		//if ($this->maxLines) $contents = array_slice($contents, ($this->maxLines) * -1);
+		if ($this->maxLines) $contents = array_slice($contents, ($this->maxLines) * -1);
 		return $contents;
 	}
 
@@ -118,8 +127,9 @@ class MultiTail {
 					if ($ms) $stamp .= ".$ms";
 				}
 			}
-		} catch (Exception $e) {}
-		$keep = ['user', 'stamp', 'level', 'doc', 'body', 'func', 'unix'];
+		} catch (Exception $e) {
+		}
+		$keep = ['user', 'stamp', 'level', 'doc', 'body', 'func', 'unix', 'app'];
 		foreach ($matches as $key => $check) if (!in_array($key, $keep)) unset($matches[$key]);
 		unset($matches[0]);
 		$tmp = $matches;
@@ -192,6 +202,7 @@ class MultiTail {
 			'json' => $jsonItem,
 			'url' => $link,
 			'markup' => $markups,
+			'app' => $matches['app'] ?? $file,
 			'user' => $matches['user'] ?? "",
 			'func' => $matches['func'] ?? "",
 			'unix' => $matches['unix'] ?? "",
@@ -208,8 +219,7 @@ function debug($msg) {
 	}
 }
 
-function cmp($a, $b)
-{
+function cmp($a, $b) {
 	if ($a['unix'] == $b['unix']) return 0;
 	if (!isset($a['unix']) | !isset($b['unix'])) return 0;
 	return ($a['unix'] < $b['unix']) ? -1 : 1;
