@@ -1032,9 +1032,9 @@ function scanDevices($force = false) {
 				$message = lang('uiNoCastPlugin');
 				$alert = [
 					[
-						'title'   => 'Cast Plugin Not Found!',
+						'title'   => 'FlexTV Plugin Not Found!',
 						'message' => $message,
-						'url'     => "https://github.com/d8ahazard/Cast.bundle"
+						'url'     => "https://github.com/d8ahazard/FlexTV.bundle"
 					]
 				];
 				writeSession('messages', $alert);
