@@ -1032,9 +1032,9 @@ function scanDevices($force = false) {
 				$message = lang('uiNoCastPlugin');
 				$alert = [
 					[
-						'title'   => 'Cast Plugin Not Found!',
+						'title'   => 'FlexTV Plugin Not Found!',
 						'message' => $message,
-						'url'     => "https://github.com/d8ahazard/Cast.bundle"
+						'url'     => "https://github.com/d8ahazard/FlexTV.bundle"
 					]
 				];
 				writeSession('messages', $alert);
@@ -1061,7 +1061,7 @@ function scrapeServers($serverArray) {
 		$serverUri = $device['uri'];
 		$token = $device['Token'];
 		$deviceId = $device['Id'];
-		$urls["${deviceId}_cast"] = ["$serverUri/chromecast/clients?X-Plex-Token=$token", ['Accept: application/json']];
+		$urls["${deviceId}_cast"] = ["$serverUri/chromecast/devices?X-Plex-Token=$token", ['Accept: application/json']];
 		$urls["${deviceId}_dvr"] = ["$serverUri/livetv/dvrs?X-Plex-Token=$token", ['Accept: application/json']];
 	}
 
