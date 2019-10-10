@@ -337,7 +337,7 @@ function initialize() {
 			writeSession('lastRequest', $request['result']['resolvedQuery']);
 		}
 		if ($request) {
-			if (isset($request['result']['resolvedQuery']) || isset($request['type'])) {
+			if (isset($request['queryResult']) || isset($request['type'])) {
 				write_log("Request JSON: " . $json, "INFO");
 				try {
 					$df = new DialogFlow(fetchDirectory(3), $_SESSION['appLanguage']);
@@ -1587,14 +1587,8 @@ function fetchApiAiData($command) {
 	$sessionId = $_SESSION['sessionId'] ?? rand(10000, 100000);
 	writeSession('sessionId', $sessionId);
 	try {
-		$dialogFlow = new dialogFlow($d, getLocale(), 1, "$sessionId");
-		$response = $dialogFlow->query($command, null, $context);
-		$json = json_decode($response, true);
-		if (is_null($json)) {
-			write_log("Error parsing API.ai response.", "ERROR");
-			return false;
-		}
-		$request = $dialogFlow->process($json);
+		$data = curlGet("https://api.flextv.us/?parse=" . urlencode($command) . "&session=$sessionId");
+		$request = array_filter_recursive($data);
 	} catch (Exception $e) {
 		write_log("There was an exception - '$e'", 'ERROR');
 		$request = false;
@@ -2871,12 +2865,9 @@ function sendSpeechAssistant($speech, $contextName, $cards, $waitForResponse, $s
 	$items = $richResponse = $sugs = [];
 	if (!trim($speech)) $speech = "There was an error building this speech response, please inform the developer.";
 	$data["google"]["expectUserResponse"] = boolval($waitForResponse);
-	$data["google"]["isSsml"] = false;
-	$data["google"]["noInputPrompts"] = [];
 	$items[0] = [
 		'simpleResponse' => [
-			'textToSpeech' => $speech,
-			'displayText'  => $speech
+			'textToSpeech' => $speech
 		]
 	];
 	if (is_array($cards)) {
@@ -2928,15 +2919,28 @@ function sendSpeechAssistant($speech, $contextName, $cards, $waitForResponse, $s
 		}
 		if (count($sugs)) $data['google']['richResponse']['suggestions'] = $sugs;
 	}
-	$output["speech"] = $speech;
-	$output['displayText'] = $speech;
-	$output['data'] = $data;
-	$output["contextOut"][0] = [
+	$output["fulfillmentText"] = $speech;
+	$messageTest = '{
+      "card": {
+        "title": "card title",
+        "subtitle": "card text",
+        "imageUri": "https://assistant.google.com/static/images/molecule/Molecule-Formation-stop.png",
+        "buttons": [
+          {
+            "text": "button text",
+            "postback": "https://assistant.google.com/"
+          }
+        ]
+      }
+    }';
+	$messages = json_decode($messageTest, true);
+	$output['fulfillmentMessages'] = $messages;
+	$output['payload'] = $data;
+	$output["outputContexts"][0] = [
 		"name"       => $contextName,
-		"lifespan"   => 2,
+		"lifespanCount"   => 2,
 		"parameters" => []
 	];
-	$output['v2'] = true;
 	$output['source'] = "PhlexChat";
 	ob_end_clean();
 	echo json_encode($output);
@@ -3033,16 +3037,16 @@ function sendWebHook($param = false, $type = false) {
 
 function mapApiRequest($request) {
 	//First, figure out what intent we've fired:
-	$intent = $request['metadata']['intentName'];
-	$params = $request['parameters'] ?? [];
-	$contexts = $request['contexts'] ?? [];
-	$resolvedQuery = $request['resolvedQuery'];
+	$intent = $request["queryResult"]["intent"]["displayName"];
+	$params = $request['queryResult']['parameters'] ?? [];
+	$contexts = $request['outputContexts'] ?? [];
+	$resolvedQuery = $request["queryResult"]["queryText"];
 	$yearVal = false;
 	foreach ($contexts as $context) if ($context['name'] == 'actions_intent_option') {
 		$resolvedQuery = $context['parameters']['OPTION'];
 		$strings = explode(" ", $resolvedQuery);
-		if (preg_match("/metadata/", $resolvedQuery) && isset($context['parameters']['text'])) {
-			$resolved = $context['parameters']['text'];
+		if (preg_match("/metadata/", $resolvedQuery) && isset($context['parameters']['request'])) {
+			$resolved = $context['parameters']['request'];
 			preg_match('#\((.*?)\)#', $resolved, $match);
 			$yearVal = intval($match[1]);
 			if ($yearVal > 1900 && $yearVal < 2050) $resolved = str_replace(" ($yearVal)", "", $resolved);

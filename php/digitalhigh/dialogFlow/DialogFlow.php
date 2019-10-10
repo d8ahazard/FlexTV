@@ -69,7 +69,7 @@ class DialogFlow {
 
 	public function process(array $request, callable $callback=null) {
 		$request = $this->array_filter_recursive($request);
-		$result = $request['result'];
+		$result = $request;
 		return $result;
 	}
 
