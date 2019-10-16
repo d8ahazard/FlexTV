@@ -2919,29 +2919,7 @@ function sendSpeechAssistant($speech, $contextName, $cards, $waitForResponse, $s
 		}
 		if (count($sugs)) $data['google']['richResponse']['suggestions'] = $sugs;
 	}
-	$output["fulfillmentText"] = $speech;
-	$messageTest = '{
-      "card": {
-        "title": "card title",
-        "subtitle": "card text",
-        "imageUri": "https://assistant.google.com/static/images/molecule/Molecule-Formation-stop.png",
-        "buttons": [
-          {
-            "text": "button text",
-            "postback": "https://assistant.google.com/"
-          }
-        ]
-      }
-    }';
-	$messages = json_decode($messageTest, true);
-	$output['fulfillmentMessages'] = $messages;
 	$output['payload'] = $data;
-	$output["outputContexts"][0] = [
-		"name"       => $contextName,
-		"lifespanCount"   => 2,
-		"parameters" => []
-	];
-	$output['source'] = "PhlexChat";
 	ob_end_clean();
 	echo json_encode($output);
 	write_log("JSON out: " . json_encode($output));
@@ -3037,10 +3015,10 @@ function sendWebHook($param = false, $type = false) {
 
 function mapApiRequest($request) {
 	//First, figure out what intent we've fired:
-	$intent = $request["queryResult"]["intent"]["displayName"];
-	$params = $request['queryResult']['parameters'] ?? [];
+	$intent = $request["intent"]["displayName"];
+	$params = $request['parameters'] ?? [];
 	$contexts = $request['outputContexts'] ?? [];
-	$resolvedQuery = $request["queryResult"]["queryText"];
+	$resolvedQuery = $request["queryText"];
 	$yearVal = false;
 	foreach ($contexts as $context) if ($context['name'] == 'actions_intent_option') {
 		$resolvedQuery = $context['parameters']['OPTION'];
