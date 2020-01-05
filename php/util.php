@@ -270,7 +270,7 @@ function cleanUri($url) {
 }
 
 function clientHeaders($server = false, $client = false) {
-	$client = $client ? $client : findDevice(false, false, 'Client');
+	$client = $client ? $client : findDevice('Client', false, false);
 	return array_merge(plexHeaders($server), [
 		'X-Plex-Target-Client-Identifier' => $client['Id']
 	]);
@@ -511,7 +511,7 @@ function doRequest($parts, $timeout = 6) {
 	$type = isset($parts['type']) ? $parts['type'] : 'get';
 	$response = false;
 	$options = [];
-	$server = findDevice(false, false, 'Server');
+	$server = findDevice('Server', false, false);
 
 	if (is_array($parts)) {
 		if (!isset($parts['uri'])) $parts['uri'] = $server['Uri'];
@@ -649,13 +649,13 @@ function file_build_path(...$segments) {
  *
  * Find a device from the list
  *
- * @param string | bool $key - Optional. The key to search device by.
- * @param string | bool $value - Optional. Defaults to currently selected device if none specified.
  * @param string $type - They device type to search for, with one of "Server", "Client", or "Dvr".
  *
+ * @param string | bool $key - Optional. The key to search device by.
+ * @param string | bool $value - Optional. Defaults to currently selected device if none specified.
  * @return array | bool - Device array, or false if none found.
  */
-function findDevice($key = false, $value = false, $type) {
+function findDevice($type, $key = false, $value = false) {
 	if (!$key && !$value) {
 		$key = "Id";
 		$value = $_SESSION["plex" . $type . "Id"] ?? false;
@@ -2194,7 +2194,7 @@ function multiCurl($urls, $timeout = 10) {
 }
 
 function plexHeaders($server = false) {
-	$server = $server ? $server : findDevice(false, false, "Server");
+	$server = $server ? $server : findDevice("Server", false, false);
 	$token = $server['Token'];
 	$name = deviceName();
 	$headers = [

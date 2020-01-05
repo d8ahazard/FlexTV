@@ -803,7 +803,7 @@ html {
 }
 
 .scrollContainer {
-    right: 50px;
+    right: 20px;
     height: 100%;
     width: 40%;
     position: absolute;
@@ -811,6 +811,10 @@ html {
     padding: 10px 10px;
     overflow: hidden;
     margin-bottom: 10px;
+}
+
+.scrollContent {
+    margin-top: 5px;
 }
 
 #textBar {
@@ -823,7 +827,7 @@ html {
     -webkit-line-clamp: 2;
     height: 200%;
     color: var(--theme-primary-shade1);
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 #mediaSummary {
@@ -1066,9 +1070,11 @@ p.card-subtitle {
 
 #volumeWrap {
     position: absolute;
+    display: none;
     height: 58%;
     top: 30px;
     right: 12px;
+    width: 25px;
 }
 
 #controlWrap {
@@ -1336,7 +1342,7 @@ input[type="color"] {
     bottom: 0;
     left: 0;
     display: none;
-    background-color: var(--theme-primary-shade3);
+    background-color: var(--theme-primary-75);
 
 }
 
