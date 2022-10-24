@@ -94,7 +94,7 @@ class DialogFlow {
 		$params = array_merge(['v'=>$this->version],$params);
 
 		if ( $params['type'] == 'get' ) {
-			$url = $this->url . $params['uri'] . '?' . http_build_query($params['data']);
+			$url = $this->url . $params['uri'] . '?v=20150910&' . http_build_query($params['data']);
 			$this->lastUrl=$url;
 			return $client->get($url, $options);
 		}
